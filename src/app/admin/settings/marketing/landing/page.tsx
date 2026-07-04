@@ -1,0 +1,361 @@
+"use client";
+
+import { useEffect, useState, useMemo } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { PageTitle } from "@/components/shared/page-title";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Save, Loader2, Plus, Trash2, ExternalLink } from "lucide-react";
+import { toast } from "sonner";
+import api from "@/lib/api";
+
+interface Feature {
+  title: string;
+  description: string;
+  icon: string;
+}
+
+interface Testimonial {
+  name: string;
+  role: string;
+  quote: string;
+}
+
+interface NavLink {
+  label: string;
+  href: string;
+}
+
+interface Form {
+  hero_title: string;
+  hero_subtitle: string;
+  hero_cta_text: string;
+  hero_cta_link: string;
+  features_title: string;
+  features: string;
+  testimonials_title: string;
+  testimonials: string;
+  footer_text: string;
+  nav_links: string;
+  client_logos: string;
+}
+
+function safeJsonParse<T>(str: string | undefined, fallback: T): T {
+  if (!str) return fallback;
+  try {
+    const parsed = JSON.parse(str);
+    return parsed && typeof parsed === "object" ? parsed : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+export default function LandingPage() {
+  const queryClient = useQueryClient();
+  const [form, setForm] = useState<Form>({
+    hero_title: "",
+    hero_subtitle: "",
+    hero_cta_text: "",
+    hero_cta_link: "/register",
+    features_title: "",
+    features: "[]",
+    testimonials_title: "",
+    testimonials: "[]",
+    footer_text: "",
+    nav_links: "[]",
+    client_logos: "[]",
+  });
+
+  const { data: settings, isLoading } = useQuery({
+    queryKey: ["platform-settings"],
+    queryFn: async () => {
+      const res = await api.get("/admin/platform-settings");
+      return res.data.data as { marketing?: Form; general?: { site_name?: string } };
+    },
+  });
+
+  useEffect(() => {
+    if (settings?.marketing) {
+      setForm((prev) => ({ ...prev, ...settings.marketing }));
+    }
+  }, [settings]);
+
+  const saveMutation = useMutation({
+    mutationFn: (data: Record<string, string>) =>
+      api.put("/admin/platform-settings", { settings: data }),
+    onSuccess: () => {
+      toast.success("Pengaturan landing berhasil disimpan");
+      queryClient.invalidateQueries({ queryKey: ["platform-settings"] });
+    },
+    onError: () => toast.error("Gagal menyimpan pengaturan landing"),
+  });
+
+  const handleSave = (fields: Record<string, string>) => {
+    saveMutation.mutate(fields);
+  };
+
+  const features: Feature[] = useMemo(() => safeJsonParse(form.features, []), [form.features]);
+  const testimonials: Testimonial[] = useMemo(() => safeJsonParse(form.testimonials, []), [form.testimonials]);
+  const navLinks: NavLink[] = useMemo(() => safeJsonParse(form.nav_links, []), [form.nav_links]);
+  const clientLogos: string[] = useMemo(() => safeJsonParse(form.client_logos, []), [form.client_logos]);
+
+  const updateFeature = (idx: number, field: keyof Feature, value: string) => {
+    const updated = features.map((f, i) => (i === idx ? { ...f, [field]: value } : f));
+    setForm({ ...form, features: JSON.stringify(updated) });
+  };
+  const addFeature = () => setForm({ ...form, features: JSON.stringify([...features, { title: "", description: "", icon: "Zap" }]) });
+  const removeFeature = (idx: number) => setForm({ ...form, features: JSON.stringify(features.filter((_, i) => i !== idx)) });
+
+  const updateTestimonial = (idx: number, field: keyof Testimonial, value: string) => {
+    const updated = testimonials.map((t, i) => (i === idx ? { ...t, [field]: value } : t));
+    setForm({ ...form, testimonials: JSON.stringify(updated) });
+  };
+  const addTestimonial = () => setForm({ ...form, testimonials: JSON.stringify([...testimonials, { name: "", role: "", quote: "" }]) });
+  const removeTestimonial = (idx: number) => setForm({ ...form, testimonials: JSON.stringify(testimonials.filter((_, i) => i !== idx)) });
+
+  const updateNavLink = (idx: number, field: keyof NavLink, value: string) => {
+    const updated = navLinks.map((l, i) => (i === idx ? { ...l, [field]: value } : l));
+    setForm({ ...form, nav_links: JSON.stringify(updated) });
+  };
+  const addNavLink = () => setForm({ ...form, nav_links: JSON.stringify([...navLinks, { label: "", href: "/" }]) });
+  const removeNavLink = (idx: number) => setForm({ ...form, nav_links: JSON.stringify(navLinks.filter((_, i) => i !== idx)) });
+
+  const updateClientLogo = (idx: number, value: string) => {
+    const updated = clientLogos.map((l, i) => (i === idx ? value : l));
+    setForm({ ...form, client_logos: JSON.stringify(updated) });
+  };
+  const addClientLogo = () => setForm({ ...form, client_logos: JSON.stringify([...clientLogos, ""]) });
+  const removeClientLogo = (idx: number) => setForm({ ...form, client_logos: JSON.stringify(clientLogos.filter((_, i) => i !== idx)) });
+
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <Skeleton className="h-8 w-64" />
+        <Skeleton className="h-[600px] w-full rounded-xl" />
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <PageTitle title="Landing Page | TeamVora Admin" />
+
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Landing Page</h1>
+          <p className="text-muted-foreground">Edit konten halaman utama marketing.</p>
+        </div>
+        <Button variant="outline" onClick={() => window.open("/", "_blank")} className="rounded-xl">
+          <ExternalLink className="w-4 h-4 mr-2" />
+          Preview
+        </Button>
+      </div>
+
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+        <div className="space-y-6">
+          <Card className="border-border/50 shadow-sm">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Hero Section</CardTitle>
+                  <CardDescription>Bagian utama halaman marketing.</CardDescription>
+                </div>
+                <Button onClick={() => handleSave({ hero_title: form.hero_title, hero_subtitle: form.hero_subtitle, hero_cta_text: form.hero_cta_text, hero_cta_link: form.hero_cta_link })} disabled={saveMutation.isPending} className="rounded-xl">
+                  {saveMutation.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
+                  Simpan
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid gap-2">
+                <Label>Judul Hero</Label>
+                <Input value={form.hero_title} onChange={(e) => setForm({ ...form, hero_title: e.target.value })} placeholder="Manajemen Tim Modern" />
+              </div>
+              <div className="grid gap-2">
+                <Label>Subtitle Hero</Label>
+                <Textarea value={form.hero_subtitle} onChange={(e) => setForm({ ...form, hero_subtitle: e.target.value })} placeholder="Platform kolaborasi untuk tim produktif..." />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-2">
+                  <Label>Teks CTA</Label>
+                  <Input value={form.hero_cta_text} onChange={(e) => setForm({ ...form, hero_cta_text: e.target.value })} placeholder="Mulai Gratis" />
+                </div>
+                <div className="grid gap-2">
+                  <Label>Link CTA</Label>
+                  <Input value={form.hero_cta_link} onChange={(e) => setForm({ ...form, hero_cta_link: e.target.value })} placeholder="/register" />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-border/50 shadow-sm">
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle>Fitur</CardTitle>
+                <CardDescription>Daftar fitur yang ditampilkan.</CardDescription>
+              </div>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" onClick={addFeature} className="rounded-lg"><Plus className="w-4 h-4 mr-1" />Tambah</Button>
+                <Button onClick={() => handleSave({ features_title: form.features_title, features: form.features })} disabled={saveMutation.isPending} className="rounded-xl">
+                  {saveMutation.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
+                  Simpan
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid gap-2">
+                <Label>Judul Section Fitur</Label>
+                <Input value={form.features_title} onChange={(e) => setForm({ ...form, features_title: e.target.value })} placeholder="Mengapa Memilih Kami?" />
+              </div>
+              {features.map((f, idx) => (
+                <div key={idx} className="border rounded-xl p-4 space-y-3 bg-muted/20">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-medium text-muted-foreground">Fitur #{idx + 1}</span>
+                    <Button variant="ghost" size="icon-xs" onClick={() => removeFeature(idx)}><Trash2 className="w-3 h-3" /></Button>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="grid gap-2"><Label className="text-xs">Judul</Label><Input value={f.title} onChange={(e) => updateFeature(idx, "title", e.target.value)} /></div>
+                    <div className="grid gap-2"><Label className="text-xs">Ikon</Label><Input value={f.icon} onChange={(e) => updateFeature(idx, "icon", e.target.value)} /></div>
+                  </div>
+                  <div className="grid gap-2"><Label className="text-xs">Deskripsi</Label><Textarea value={f.description} onChange={(e) => updateFeature(idx, "description", e.target.value)} /></div>
+                </div>
+              ))}
+              {features.length === 0 && <p className="text-sm text-muted-foreground text-center py-4">Belum ada fitur.</p>}
+            </CardContent>
+          </Card>
+
+          <Card className="border-border/50 shadow-sm">
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle>Testimoni</CardTitle>
+                <CardDescription>Ulasan dari pengguna platform.</CardDescription>
+              </div>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" onClick={addTestimonial} className="rounded-lg"><Plus className="w-4 h-4 mr-1" />Tambah</Button>
+                <Button onClick={() => handleSave({ testimonials_title: form.testimonials_title, testimonials: form.testimonials })} disabled={saveMutation.isPending} className="rounded-xl">
+                  {saveMutation.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
+                  Simpan
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid gap-2">
+                <Label>Judul Section Testimoni</Label>
+                <Input value={form.testimonials_title} onChange={(e) => setForm({ ...form, testimonials_title: e.target.value })} placeholder="Apa Kata Mereka?" />
+              </div>
+              {testimonials.map((t, idx) => (
+                <div key={idx} className="border rounded-xl p-4 space-y-3 bg-muted/20">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-medium text-muted-foreground">Testimoni #{idx + 1}</span>
+                    <Button variant="ghost" size="icon-xs" onClick={() => removeTestimonial(idx)}><Trash2 className="w-3 h-3" /></Button>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="grid gap-2"><Label className="text-xs">Nama</Label><Input value={t.name} onChange={(e) => updateTestimonial(idx, "name", e.target.value)} /></div>
+                    <div className="grid gap-2"><Label className="text-xs">Jabatan</Label><Input value={t.role} onChange={(e) => updateTestimonial(idx, "role", e.target.value)} /></div>
+                  </div>
+                  <div className="grid gap-2"><Label className="text-xs">Ulasan</Label><Textarea value={t.quote} onChange={(e) => updateTestimonial(idx, "quote", e.target.value)} /></div>
+                </div>
+              ))}
+              {testimonials.length === 0 && <p className="text-sm text-muted-foreground text-center py-4">Belum ada testimoni.</p>}
+            </CardContent>
+          </Card>
+
+          <Card className="border-border/50 shadow-sm">
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle>Logo Klien</CardTitle>
+                <CardDescription>Logo perusahaan yang mempercayai platform.</CardDescription>
+              </div>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" onClick={addClientLogo} className="rounded-lg"><Plus className="w-4 h-4 mr-1" />Tambah</Button>
+                <Button onClick={() => handleSave({ client_logos: form.client_logos })} disabled={saveMutation.isPending} className="rounded-xl">
+                  {saveMutation.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
+                  Simpan
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {clientLogos.map((logo, idx) => (
+                <div key={idx} className="flex items-center gap-2">
+                  <Input value={logo} onChange={(e) => updateClientLogo(idx, e.target.value)} placeholder="Nama Perusahaan (Teks/Logo)" className="flex-1" />
+                  <Button variant="ghost" size="icon-xs" onClick={() => removeClientLogo(idx)}><Trash2 className="w-3 h-3" /></Button>
+                </div>
+              ))}
+              {clientLogos.length === 0 && <p className="text-sm text-muted-foreground text-center py-4">Belum ada logo klien.</p>}
+            </CardContent>
+          </Card>
+
+          <Card className="border-border/50 shadow-sm">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div><CardTitle>Footer & Navigasi</CardTitle><CardDescription>Tautan navigasi dan teks footer.</CardDescription></div>
+                <Button onClick={() => handleSave({ footer_text: form.footer_text, nav_links: form.nav_links })} disabled={saveMutation.isPending} className="rounded-xl">
+                  {saveMutation.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
+                  Simpan
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid gap-2">
+                <Label>Teks Footer</Label>
+                <Input value={form.footer_text} onChange={(e) => setForm({ ...form, footer_text: e.target.value })} placeholder="© 2026 TeamVora. All rights reserved." />
+              </div>
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <Label>Link Navigasi</Label>
+                  <Button variant="outline" size="sm" onClick={addNavLink} className="rounded-lg"><Plus className="w-3 h-3 mr-1" />Tambah</Button>
+                </div>
+                {navLinks.map((l, idx) => (
+                  <div key={idx} className="flex items-center gap-2">
+                    <Input value={l.label} onChange={(e) => updateNavLink(idx, "label", e.target.value)} placeholder="Label" className="flex-1" />
+                    <Input value={l.href} onChange={(e) => updateNavLink(idx, "href", e.target.value)} placeholder="/path" className="flex-1" />
+                    <Button variant="ghost" size="icon-xs" onClick={() => removeNavLink(idx)}><Trash2 className="w-3 h-3" /></Button>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Preview */}
+        <div className="space-y-6">
+          <Card className="border-border/50 shadow-sm sticky top-24">
+            <CardHeader><CardTitle>Live Preview</CardTitle></CardHeader>
+            <CardContent>
+              <div className="border rounded-xl overflow-hidden bg-white dark:bg-gray-950">
+                <div className="flex items-center justify-between px-6 py-3 border-b bg-muted/30">
+                  <span className="font-bold text-sm">{settings?.general?.site_name || "TeamVora"}</span>
+                  <div className="flex gap-4">{navLinks.map((l, i) => <span key={i} className="text-xs text-muted-foreground">{l.label}</span>)}</div>
+                </div>
+                <div className="px-6 py-12 text-center space-y-4 bg-gradient-to-b from-primary/5 to-transparent">
+                  <h2 className="text-2xl font-bold tracking-tight">{form.hero_title || "Judul Hero"}</h2>
+                  <p className="text-sm text-muted-foreground max-w-md mx-auto">{form.hero_subtitle || "Subtitle..."}</p>
+                  {form.hero_cta_text && <div className="inline-block bg-primary text-primary-foreground px-6 py-2 rounded-lg text-sm font-medium">{form.hero_cta_text}</div>}
+                </div>
+                {features.length > 0 && (
+                  <div className="px-6 py-8 border-t">
+                    <h3 className="text-center font-semibold mb-6">{form.features_title || "Fitur"}</h3>
+                    <div className="grid grid-cols-2 gap-4">
+                      {features.map((f, i) => <div key={i} className="p-3 border rounded-lg"><div className="text-xs font-medium">{f.title || `Fitur ${i + 1}`}</div><div className="text-[10px] text-muted-foreground line-clamp-2">{f.description}</div></div>)}
+                    </div>
+                  </div>
+                )}
+                <div className="px-6 py-4 border-t text-center"><p className="text-[10px] text-muted-foreground">{form.footer_text || "© 2026 TeamVora."}</p></div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </div>
+  );
+}
