@@ -6,8 +6,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { usePlatformSettings } from "@/hooks/use-platform-settings";
 import { PageTitle } from "@/components/shared/page-title";
 
-const iconMap: Record<string, any> = { Book, FileText, Settings, Users, CreditCard, Shield };
-
+import { iconMap } from "@/components/ui/icon-picker";
 const defaultCategories: any[] = [];
 const defaultFaqs: any[] = [];
 

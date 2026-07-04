@@ -11,6 +11,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { IconPicker } from "@/components/ui/icon-picker";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -50,7 +51,7 @@ export default function BantuanPage() {
     queryKey: ["platform-settings"],
     queryFn: async () => {
       const res = await api.get("/admin/platform-settings");
-      return res.data.data as { marketing?: { help_content?: string } };
+      return res.data.data as { general?: { site_name?: string }; marketing?: { help_content?: string } };
     },
   });
 
@@ -114,7 +115,8 @@ export default function BantuanPage() {
         </div>
       </div>
 
-      <div className="space-y-6 max-w-3xl">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+        <div className="space-y-6">
         <Card className="border-border/50 shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between">
             <div><CardTitle>Channel Dukungan</CardTitle><CardDescription>Saluran bantuan di halaman /bantuan.</CardDescription></div>
@@ -129,7 +131,7 @@ export default function BantuanPage() {
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="grid gap-2"><Label className="text-xs">Judul</Label><Input value={a.title} onChange={(e) => updateArticle(idx, "title", e.target.value)} /></div>
-                  <div className="grid gap-2"><Label className="text-xs">Ikon</Label><Input value={a.icon} onChange={(e) => updateArticle(idx, "icon", e.target.value)} /></div>
+                  <div className="grid gap-2"><Label className="text-xs">Ikon</Label><IconPicker value={a.icon} onChange={(val) => updateArticle(idx, "icon", val)} /></div>
                 </div>
                 <div className="grid gap-2"><Label className="text-xs">Deskripsi</Label><Textarea value={a.description} onChange={(e) => updateArticle(idx, "description", e.target.value)} /></div>
                 <div className="grid grid-cols-2 gap-3">
@@ -157,6 +159,54 @@ export default function BantuanPage() {
             {helpContent.popular_articles.length === 0 && <p className="text-sm text-muted-foreground text-center py-4">Belum ada artikel populer.</p>}
           </CardContent>
         </Card>
+        </div>
+
+        {/* Preview */}
+        <div className="space-y-6">
+          <Card className="border-border/50 shadow-sm sticky top-24">
+            <CardHeader><CardTitle>Live Preview</CardTitle></CardHeader>
+            <CardContent>
+              <div className="border rounded-xl overflow-hidden bg-white dark:bg-gray-950">
+                <div className="flex items-center justify-between px-6 py-3 border-b bg-muted/30">
+                  <span className="font-bold text-sm">{settings?.general?.site_name || "TeamVora"} Bantuan</span>
+                </div>
+                
+                {helpContent.articles.length > 0 && (
+                  <div className="px-6 py-8">
+                    <h3 className="text-center font-semibold mb-6">Channel Dukungan</h3>
+                    <div className="grid grid-cols-1 gap-4">
+                      {helpContent.articles.map((a, i) => (
+                        <div key={i} className="p-4 border rounded-xl bg-card text-center">
+                          <div className="w-10 h-10 mx-auto rounded-xl bg-primary/10 flex items-center justify-center text-primary mb-3 text-xs">Ikon</div>
+                          <div className="text-sm font-bold mb-1">{a.title || `Channel ${i + 1}`}</div>
+                          <div className="text-xs text-muted-foreground mb-4">{a.description || "Deskripsi..."}</div>
+                          <div className="text-[10px] font-bold text-primary underline">{a.action || "Aksi"}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {helpContent.popular_articles.length > 0 && (
+                  <div className="px-6 py-8 border-t bg-muted/10">
+                    <h3 className="text-center font-semibold mb-6">Artikel Populer</h3>
+                    <div className="space-y-2">
+                      {helpContent.popular_articles.map((a, i) => (
+                        <div key={i} className="px-3 py-2 border rounded-lg bg-background text-[10px]">
+                          {a || `Artikel ${i + 1}`}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
+                {helpContent.articles.length === 0 && helpContent.popular_articles.length === 0 && (
+                  <div className="p-8 text-center text-sm text-muted-foreground">Belum ada konten bantuan</div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );

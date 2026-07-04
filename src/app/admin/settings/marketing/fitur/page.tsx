@@ -11,6 +11,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { IconPicker } from "@/components/ui/icon-picker";
+import { ColorPicker } from "@/components/ui/color-picker";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -18,6 +20,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Save, Loader2, Plus, Trash2, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 import api from "@/lib/api";
+import { getColorTheme } from "@/lib/colors";
 
 interface FeatureSection {
   id: string;
@@ -50,13 +53,21 @@ export default function FiturPage() {
     queryKey: ["platform-settings"],
     queryFn: async () => {
       const res = await api.get("/admin/platform-settings");
-      return res.data.data as { marketing?: { features_content?: string } };
+      return res.data.data as { general?: { site_name?: string }; marketing?: { features_content?: string } };
     },
   });
 
   useEffect(() => {
     if (settings?.marketing?.features_content) {
-      setFeaturesContent(safeJsonParse(settings.marketing.features_content, { sections: [] }));
+      const parsed = safeJsonParse<FeaturesContent>(settings.marketing.features_content, { sections: [] });
+      const cleaned = {
+        sections: parsed.sections.map((s) => {
+          let col = s.color || "blue";
+          if (col.startsWith("text-")) col = col.replace("text-", "").replace("-500", "");
+          return { ...s, color: col };
+        })
+      };
+      setFeaturesContent(cleaned);
     }
   }, [settings]);
 
@@ -77,7 +88,7 @@ export default function FiturPage() {
   const updateSection = (idx: number, field: keyof FeatureSection, value: any) => {
     setFeaturesContent({ ...featuresContent, sections: featuresContent.sections.map((s, i) => (i === idx ? { ...s, [field]: value } : s)) });
   };
-  const addSection = () => setFeaturesContent({ ...featuresContent, sections: [...featuresContent.sections, { id: "", title: "", description: "", icon: "Zap", color: "bg-blue-500/10 text-blue-500 border-blue-500/20", points: [] }] });
+  const addSection = () => setFeaturesContent({ ...featuresContent, sections: [...featuresContent.sections, { id: "", title: "", description: "", icon: "Zap", color: "blue", points: [] }] });
   const removeSection = (idx: number) => setFeaturesContent({ ...featuresContent, sections: featuresContent.sections.filter((_, i) => i !== idx) });
 
   const addPoint = (sectionIdx: number) => {
@@ -120,7 +131,8 @@ export default function FiturPage() {
         </div>
       </div>
 
-      <div className="space-y-6 max-w-3xl">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+        <div className="space-y-6">
         <Card className="border-border/50 shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between">
             <div><CardTitle>Section Fitur</CardTitle><CardDescription>Semua section detail fitur di halaman /fitur.</CardDescription></div>
@@ -139,8 +151,8 @@ export default function FiturPage() {
                 </div>
                 <div className="grid gap-2"><Label className="text-xs">Deskripsi</Label><Textarea value={s.description} onChange={(e) => updateSection(idx, "description", e.target.value)} /></div>
                 <div className="grid grid-cols-2 gap-3">
-                  <div className="grid gap-2"><Label className="text-xs">Ikon</Label><Input value={s.icon} onChange={(e) => updateSection(idx, "icon", e.target.value)} /></div>
-                  <div className="grid gap-2"><Label className="text-xs">Warna</Label><Input value={s.color} onChange={(e) => updateSection(idx, "color", e.target.value)} /></div>
+                  <div className="grid gap-2"><Label className="text-xs">Ikon</Label><IconPicker value={s.icon} onChange={(val) => updateSection(idx, "icon", val)} /></div>
+                  <div className="grid gap-2"><Label className="text-xs">Warna Tema</Label><ColorPicker value={s.color} onChange={(val) => updateSection(idx, "color", val)} /></div>
                 </div>
                 <div className="space-y-2">
                   <div className="flex items-center justify-between"><Label className="text-xs">Poin Fitur</Label><Button variant="outline" size="sm" onClick={() => addPoint(idx)} className="rounded-lg h-7"><Plus className="w-3 h-3 mr-1" />Tambah</Button></div>
@@ -156,6 +168,51 @@ export default function FiturPage() {
             {featuresContent.sections.length === 0 && <p className="text-sm text-muted-foreground text-center py-4">Belum ada section fitur.</p>}
           </CardContent>
         </Card>
+        </div>
+
+        {/* Preview */}
+        <div className="space-y-6">
+          <Card className="border-border/50 shadow-sm sticky top-24">
+            <CardHeader><CardTitle>Live Preview</CardTitle></CardHeader>
+            <CardContent>
+              <div className="border rounded-xl overflow-hidden bg-white dark:bg-gray-950">
+                <div className="flex items-center justify-between px-6 py-3 border-b bg-muted/30">
+                  <span className="font-bold text-sm">{settings?.general?.site_name || "TeamVora"} Fitur</span>
+                </div>
+                
+                {featuresContent.sections.length > 0 && (
+                  <div className="px-6 py-8">
+                    <div className="space-y-8">
+                      {featuresContent.sections.map((s, i) => (
+                        <div key={i} className={`flex flex-col gap-4 items-center ${i % 2 !== 0 ? "lg:flex-row-reverse" : "lg:flex-row"}`}>
+                          <div className="flex-1 space-y-2">
+                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs ${getColorTheme(s.color).bg} ${getColorTheme(s.color).text}`}>
+                              Ikon
+                            </div>
+                            <h2 className="text-lg font-bold">{s.title || `Fitur ${i + 1}`}</h2>
+                            <p className="text-xs text-muted-foreground line-clamp-2">{s.description || "Deskripsi"}</p>
+                            
+                            <ul className="space-y-1 pt-1">
+                              {s.points.map((p, pi) => (
+                                <li key={pi} className="flex items-center gap-2">
+                                  <div className="w-3 h-3 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                                    <div className="w-1.5 h-1.5 bg-primary rounded-full" />
+                                  </div>
+                                  <span className="text-[10px] text-foreground/90">{p}</span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                {featuresContent.sections.length === 0 && <div className="p-8 text-center text-sm text-muted-foreground">Belum ada fitur</div>}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );

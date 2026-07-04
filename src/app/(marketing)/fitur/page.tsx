@@ -7,6 +7,7 @@ import { PageTitle } from "@/components/shared/page-title";
 import { Button } from "@/components/ui/button";
 import { SEOHead } from "@/components/shared/seo-head";
 import { usePlatformSettings } from "@/hooks/use-platform-settings";
+import { getColorTheme } from "@/lib/colors";
 
 const staggerContainer = {
   hidden: { opacity: 0 },
@@ -27,21 +28,23 @@ export default function FiturPage() {
   const defaultFeatures: any[] = [];
 
   const iconMap: Record<string, any> = { CheckCircle2, ListTodo, Wallet, FolderOpen, Zap, Target, LayoutDashboard, ShieldCheck };
-
   let features = defaultFeatures;
   try {
     const raw = settings?.marketing?.features_content;
     if (raw) {
       const parsed = JSON.parse(raw);
       if (parsed?.sections?.length) {
-        features = parsed.sections.map((s: any) => ({
-          id: s.id || "",
-          title: s.title || "",
-          description: s.description || "",
-          icon: iconMap[s.icon] ? (() => { const Icon = iconMap[s.icon]; return <Icon className="w-8 h-8 text-primary" />; })() : <CheckCircle2 className="w-8 h-8 text-primary" />,
-          color: s.color || "bg-blue-500/10 text-blue-500 border-blue-500/20",
-          points: s.points?.length ? s.points : [""],
-        }));
+        features = parsed.sections.map((s: any) => {
+          const theme = getColorTheme(s.color || "blue");
+          return {
+            id: s.id || "",
+            title: s.title || "",
+            description: s.description || "",
+            icon: iconMap[s.icon] ? (() => { const Icon = iconMap[s.icon]; return <Icon className="w-8 h-8 text-primary" />; })() : <CheckCircle2 className="w-8 h-8 text-primary" />,
+            colorClass: `${theme.bg} ${theme.text}`,
+            points: s.points?.length ? s.points : [""],
+          };
+        });
       }
     }
   } catch {}
@@ -132,7 +135,7 @@ export default function FiturPage() {
                   }`}
                 >
                   <div className="flex-1 space-y-6">
-                    <motion.div variants={fadeUpVariant} className={`w-16 h-16 rounded-2xl flex items-center justify-center ${feature.color}`}>
+                    <motion.div variants={fadeUpVariant} className={`w-16 h-16 rounded-2xl flex items-center justify-center ${feature.colorClass}`}>
                       {feature.icon}
                     </motion.div>
                     <motion.h2 variants={fadeUpVariant} className="text-3xl md:text-4xl font-bold">{feature.title}</motion.h2>
@@ -176,6 +179,7 @@ export default function FiturPage() {
           </div>
         </div>
       </section>
+      )}
       
       {/* CTA Line */}
       <section className="border-t border-border/50 bg-background py-24 relative overflow-hidden">

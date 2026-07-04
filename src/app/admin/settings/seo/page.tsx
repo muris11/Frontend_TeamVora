@@ -15,7 +15,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Save, Loader2, Globe, Link as LinkIcon, ImageIcon } from "lucide-react";
+import { Save, Loader2, Globe, Link as LinkIcon, ImageIcon, Activity, Building2 } from "lucide-react";
 import { toast } from "sonner";
 import api from "@/lib/api";
 
@@ -25,15 +25,18 @@ interface SeoSettings {
   seo_keywords: string;
   og_image_url: string;
   canonical_url: string;
+  twitter_handle: string;
+  theme_color: string;
+  robots_meta: string;
+  ga_id: string;
+  fb_pixel_id: string;
+  org_name: string;
+  org_logo_url: string;
 }
 
 interface PlatformSettings {
   general?: { site_name?: string };
-  seo?: {
-    seo_title?: string;
-    seo_description?: string;
-    seo_keywords?: string;
-  };
+  seo?: Partial<SeoSettings>;
 }
 
 export default function SeoSettingsPage() {
@@ -44,6 +47,13 @@ export default function SeoSettingsPage() {
     seo_keywords: "",
     og_image_url: "",
     canonical_url: "",
+    twitter_handle: "",
+    theme_color: "#ffffff",
+    robots_meta: "index, follow",
+    ga_id: "",
+    fb_pixel_id: "",
+    org_name: "",
+    org_logo_url: "",
   });
 
   const { data: settings, isLoading } = useQuery({
@@ -60,8 +70,15 @@ export default function SeoSettingsPage() {
         seo_title: settings.seo.seo_title ?? "",
         seo_description: settings.seo.seo_description ?? "",
         seo_keywords: settings.seo.seo_keywords ?? "",
-        og_image_url: (settings.seo as any).og_image_url ?? "",
-        canonical_url: (settings.seo as any).canonical_url ?? "",
+        og_image_url: settings.seo.og_image_url ?? "",
+        canonical_url: settings.seo.canonical_url ?? "",
+        twitter_handle: settings.seo.twitter_handle ?? "",
+        theme_color: settings.seo.theme_color ?? "#ffffff",
+        robots_meta: settings.seo.robots_meta ?? "index, follow",
+        ga_id: settings.seo.ga_id ?? "",
+        fb_pixel_id: settings.seo.fb_pixel_id ?? "",
+        org_name: settings.seo.org_name ?? "",
+        org_logo_url: settings.seo.org_logo_url ?? "",
       });
     }
   }, [settings]);
@@ -96,24 +113,24 @@ export default function SeoSettingsPage() {
     <div className="space-y-6">
       <PageTitle title="Pengaturan SEO | TeamVora Admin" />
 
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Pengaturan SEO</h1>
           <p className="text-muted-foreground">
-            Optimasi tampilan di mesin pencari dan media sosial.
+            Optimasi tampilan di mesin pencari, media sosial, dan analitik.
           </p>
         </div>
         <Button
           onClick={handleSave}
           disabled={saveMutation.isPending}
-          className="rounded-xl"
+          className="rounded-xl w-full sm:w-auto"
         >
           {saveMutation.isPending ? (
             <Loader2 className="w-4 h-4 mr-2 animate-spin" />
           ) : (
             <Save className="w-4 h-4 mr-2" />
           )}
-          Simpan
+          Simpan Pengaturan
         </Button>
       </div>
 
@@ -124,10 +141,10 @@ export default function SeoSettingsPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Globe className="w-5 h-5" />
-                Meta Tags
+                Meta Tags (Default)
               </CardTitle>
               <CardDescription>
-                Kontrol judul dan deskripsi yang muncul di hasil pencarian.
+                Kontrol judul dan deskripsi default yang muncul di hasil pencarian. Blog memiliki meta dinamis sendiri.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -183,10 +200,10 @@ export default function SeoSettingsPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <ImageIcon className="w-5 h-5" />
-                Open Graph
+                Open Graph (OG)
               </CardTitle>
               <CardDescription>
-                Gambar dan info yang ditampilkan saat link dibagikan di media
+                Gambar default yang ditampilkan saat link dibagikan di media
                 sosial.
               </CardDescription>
             </CardHeader>
@@ -224,31 +241,144 @@ export default function SeoSettingsPage() {
           <Card className="border-border/50 shadow-sm">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <LinkIcon className="w-5 h-5" />
-                Canonical URL
+                <Building2 className="w-5 h-5" />
+                Schema.org (Organisasi)
               </CardTitle>
               <CardDescription>
-                URL resmi untuk menghindari konten duplikat.
+                Data terstruktur untuk membantu mesin pencari memahami organisasi Anda.
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="grid gap-2">
-                <Label htmlFor="canonical_url">Canonical URL</Label>
-                <Input
-                  id="canonical_url"
-                  value={form.canonical_url}
-                  onChange={(e) =>
-                    setForm({ ...form, canonical_url: e.target.value })
-                  }
-                  placeholder="https://teamvora.com"
-                />
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="org_name">Nama Organisasi</Label>
+                  <Input
+                    id="org_name"
+                    value={form.org_name}
+                    onChange={(e) => setForm({ ...form, org_name: e.target.value })}
+                    placeholder="PT TeamVora Indonesia"
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="org_logo_url">URL Logo Organisasi</Label>
+                  <Input
+                    id="org_logo_url"
+                    value={form.org_logo_url}
+                    onChange={(e) => setForm({ ...form, org_logo_url: e.target.value })}
+                    placeholder="https://example.com/logo.png"
+                  />
+                </div>
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Right: Google Preview */}
+        {/* Right: Analytics & Preview */}
         <div className="space-y-6">
+          <Card className="border-border/50 shadow-sm">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Activity className="w-5 h-5" />
+                Analitik & Tracking
+              </CardTitle>
+              <CardDescription>
+                Integrasikan alat pelacakan eksternal.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid gap-2">
+                <Label htmlFor="ga_id">Google Analytics Measurement ID</Label>
+                <Input
+                  id="ga_id"
+                  value={form.ga_id}
+                  onChange={(e) => setForm({ ...form, ga_id: e.target.value })}
+                  placeholder="G-XXXXXXXXXX"
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="fb_pixel_id">Facebook Pixel ID</Label>
+                <Input
+                  id="fb_pixel_id"
+                  value={form.fb_pixel_id}
+                  onChange={(e) => setForm({ ...form, fb_pixel_id: e.target.value })}
+                  placeholder="123456789012345"
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-border/50 shadow-sm">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <LinkIcon className="w-5 h-5" />
+                Advanced SEO & Twitter
+              </CardTitle>
+              <CardDescription>
+                Pengaturan spesifik bot dan media sosial Twitter.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="canonical_url">Canonical URL</Label>
+                  <Input
+                    id="canonical_url"
+                    value={form.canonical_url}
+                    onChange={(e) =>
+                      setForm({ ...form, canonical_url: e.target.value })
+                    }
+                    placeholder="https://teamvora.com"
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="twitter_handle">Twitter Handle</Label>
+                  <Input
+                    id="twitter_handle"
+                    value={form.twitter_handle}
+                    onChange={(e) =>
+                      setForm({ ...form, twitter_handle: e.target.value })
+                    }
+                    placeholder="@teamvora"
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="theme_color">Theme Color</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      id="theme_color_picker"
+                      type="color"
+                      value={form.theme_color}
+                      onChange={(e) =>
+                        setForm({ ...form, theme_color: e.target.value })
+                      }
+                      className="w-12 h-10 p-1"
+                    />
+                    <Input
+                      id="theme_color"
+                      value={form.theme_color}
+                      onChange={(e) =>
+                        setForm({ ...form, theme_color: e.target.value })
+                      }
+                      placeholder="#ffffff"
+                      className="flex-1"
+                    />
+                  </div>
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="robots_meta">Robots Meta</Label>
+                  <Input
+                    id="robots_meta"
+                    value={form.robots_meta}
+                    onChange={(e) =>
+                      setForm({ ...form, robots_meta: e.target.value })
+                    }
+                    placeholder="index, follow"
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
           <Card className="border-border/50 shadow-sm sticky top-24">
             <CardHeader>
               <CardTitle>Preview Hasil Pencarian Google</CardTitle>
@@ -257,7 +387,7 @@ export default function SeoSettingsPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="border rounded-xl p-5 bg-background space-y-1">
+              <div className="border rounded-xl p-5 bg-background space-y-1 shadow-sm">
                 <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
                   <div className="w-6 h-6 rounded-full bg-muted flex items-center justify-center text-[10px] font-bold">
                     T
@@ -338,15 +468,15 @@ export default function SeoSettingsPage() {
                     </span>
                   </div>
                   <div className="flex items-center justify-between p-2 rounded-lg bg-muted/30">
-                    <span className="text-muted-foreground">Canonical</span>
+                    <span className="text-muted-foreground">Google Analytics</span>
                     <span
                       className={`font-mono ${
-                        form.canonical_url
+                        form.ga_id
                           ? "text-green-600"
                           : "text-muted-foreground"
                       }`}
                     >
-                      {form.canonical_url ? "✓ Terisi" : "✗ Kosong"}
+                      {form.ga_id ? "✓ Terisi" : "✗ Kosong"}
                     </span>
                   </div>
                 </div>

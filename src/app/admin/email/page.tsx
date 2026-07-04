@@ -15,14 +15,17 @@ import {
 } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Save, Mail, ImageIcon, Loader2, Server, Info } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Save, Mail, ImageIcon, Loader2, Server, Info, Send, Palette } from "lucide-react";
 import { toast } from "sonner";
 import api from "@/lib/api";
+import { ColorPicker } from "@/components/ui/color-picker";
 
 interface EmailSettings {
   email_logo_url: string;
   email_sender_name: string;
   email_reply_to: string;
+  email_button_color?: string;
 }
 
 interface PlatformSettings {
@@ -34,6 +37,8 @@ export default function EmailSettingsPage() {
   const [logoUrl, setLogoUrl] = useState("");
   const [senderName, setSenderName] = useState("");
   const [replyTo, setReplyTo] = useState("");
+  const [buttonColor, setButtonColor] = useState("blue");
+  const [testEmail, setTestEmail] = useState("");
 
   const { data: emailSettings, isLoading } = useQuery({
     queryKey: ["platform-settings"],
@@ -48,6 +53,7 @@ export default function EmailSettingsPage() {
       setLogoUrl(emailSettings.general?.logo_url ?? "");
       setSenderName((emailSettings as any).email_sender_name ?? "TeamVora");
       setReplyTo((emailSettings as any).email_reply_to ?? "");
+      setButtonColor((emailSettings as any).email_button_color ?? "blue");
     }
   }, [emailSettings]);
 
@@ -66,8 +72,46 @@ export default function EmailSettingsPage() {
       email_logo_url: logoUrl,
       email_sender_name: senderName,
       email_reply_to: replyTo,
+      email_button_color: buttonColor,
     });
   };
+
+  const testEmailMutation = useMutation({
+    mutationFn: (email: string) =>
+      api.post("/admin/platform-settings/test-email", { email }),
+    onSuccess: () => {
+      toast.success("Email tes berhasil dikirim.");
+      setTestEmail("");
+    },
+    onError: (err: any) => {
+      toast.error(err.response?.data?.message || "Gagal mengirim email tes.");
+    }
+  });
+
+  const handleTestEmail = () => {
+    if (!testEmail) {
+      toast.error("Masukkan alamat email.");
+      return;
+    }
+    testEmailMutation.mutate(testEmail);
+  };
+
+  // Maps tailwind color names to actual hex codes for the email inline styles
+  const buttonColorHex: Record<string, string> = {
+    blue: "#2563eb",
+    red: "#dc2626",
+    green: "#16a34a",
+    yellow: "#ca8a04",
+    purple: "#9333ea",
+    orange: "#ea580c",
+    slate: "#475569",
+    rose: "#e11d48",
+    emerald: "#059669",
+    cyan: "#0891b2",
+    amber: "#d97706",
+  };
+
+  const actualButtonColor = buttonColorHex[buttonColor] || "#2563eb";
 
   if (isLoading) {
     return (
@@ -101,10 +145,10 @@ export default function EmailSettingsPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <ImageIcon className="w-5 h-5" />
-                Logo Email
+                Desain Email
               </CardTitle>
               <CardDescription>
-                Logo yang ditampilkan di header setiap email notifikasi.
+                Logo dan warna aksen yang ditampilkan di setiap email notifikasi.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -115,6 +159,13 @@ export default function EmailSettingsPage() {
                   value={logoUrl}
                   onChange={(e) => setLogoUrl(e.target.value)}
                   placeholder="https://example.com/logo.png"
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label>Warna Tombol Email</Label>
+                <ColorPicker
+                  value={buttonColor}
+                  onChange={setButtonColor}
                 />
               </div>
               {logoUrl && (
@@ -229,47 +280,100 @@ export default function EmailSettingsPage() {
         <div className="space-y-6">
           <Card className="border-border/50 shadow-sm h-full">
             <CardHeader>
-              <CardTitle>Preview Email Header</CardTitle>
+              <CardTitle>Preview Email</CardTitle>
               <CardDescription>
-                Pratinjau tampilan header email yang diterima pengguna.
+                Pratinjau tampilan email asli (berdasarkan template Laravel).
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="border rounded-xl bg-gray-50 dark:bg-gray-900 p-8 flex flex-col items-center justify-center min-h-[400px]">
-                <div className="bg-white dark:bg-gray-800 shadow-md w-full max-w-md rounded-t-xl overflow-hidden border border-gray-200 dark:border-gray-700">
-                  <div className="p-6 text-center border-b border-gray-200 dark:border-gray-700">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={logoUrl || "https://teamvora.coded.my.id/icon.png"}
-                      alt="Logo Preview"
-                      className="mx-auto object-contain max-h-[50px]"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src =
-                          "https://teamvora.coded.my.id/icon.png";
-                      }}
-                    />
-                    <p className="text-xs text-muted-foreground mt-2 font-medium">
-                      {senderName || "TeamVora"}
-                    </p>
-                  </div>
-                  <div className="p-6 space-y-4">
-                    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mx-auto" />
-                    <div className="space-y-2">
-                      <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-full" />
-                      <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-5/6" />
-                      <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-4/5" />
+              <Tabs defaultValue="test" className="w-full">
+                <TabsList className="w-full mb-4">
+                  <TabsTrigger value="test" className="flex-1">Test Email</TabsTrigger>
+                  <TabsTrigger value="reset" className="flex-1">Reset Password</TabsTrigger>
+                </TabsList>
+                
+                <div className="border rounded-xl bg-[#f9fafb] p-4 sm:p-8 flex flex-col items-center justify-center min-h-[500px] overflow-hidden">
+                  {/* Email Wrapper */}
+                  <div className="bg-white shadow-sm w-full max-w-[600px] rounded-xl overflow-hidden border border-[#e5e7eb] font-sans text-[#374151] leading-relaxed">
+                    
+                    {/* Header */}
+                    <div className="p-6 text-center border-b border-[#e5e7eb] bg-white">
+                      {logoUrl ? (
+                        <img
+                          src={logoUrl}
+                          alt="Logo Preview"
+                          className="mx-auto object-contain max-h-[50px]"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src =
+                              "https://teamvora.coded.my.id/icon.png";
+                          }}
+                        />
+                      ) : (
+                        <h2 className="text-[#111827] text-xl font-bold m-0">{senderName || "TeamVora"}</h2>
+                      )}
                     </div>
-                    <div className="flex justify-center pt-4">
-                      <div className="h-10 bg-primary/20 rounded-lg w-36" />
+
+                    {/* Body - Changes per tab */}
+                    <div className="p-8">
+                      <TabsContent value="test" className="m-0 mt-0">
+                        <h1 className="text-xl font-bold text-[#111827] mt-0 mb-4">Email Tes Berhasil!</h1>
+                        <p className="mb-4">Halo,</p>
+                        <p className="mb-4">Ini adalah email tes dari <strong>{emailSettings?.general?.site_name || "TeamVora"}</strong>.</p>
+                        <p className="mb-4">Jika Anda menerima email ini, berarti konfigurasi SMTP Anda telah berfungsi dengan baik dan sistem dapat mengirimkan email notifikasi ke pengguna.</p>
+                        <p className="mb-4">Terima kasih,<br />Tim {emailSettings?.general?.site_name || "TeamVora"}</p>
+                      </TabsContent>
+
+                      <TabsContent value="reset" className="m-0 mt-0">
+                        <h1 className="text-xl font-bold text-[#111827] mt-0 mb-4">Atur Ulang Kata Sandi</h1>
+                        <p className="mb-4">Anda menerima email ini karena kami menerima permintaan pengaturan ulang kata sandi untuk akun Anda.</p>
+                        <div className="my-6">
+                          <a href="#" onClick={e => e.preventDefault()} style={{ backgroundColor: actualButtonColor }} className="inline-block text-white font-semibold py-3 px-6 rounded-lg no-underline shadow-sm hover:opacity-90">
+                            Atur Ulang Kata Sandi
+                          </a>
+                        </div>
+                        <p className="mb-4">Tautan atur ulang kata sandi ini akan kedaluwarsa dalam 60 menit.</p>
+                        <p className="mb-4">Jika Anda tidak meminta pengaturan ulang kata sandi, tidak ada tindakan lebih lanjut yang diperlukan.</p>
+                        <p className="mb-4">Salam,<br />{emailSettings?.general?.site_name || "TeamVora"}</p>
+                      </TabsContent>
                     </div>
-                  </div>
-                  <div className="p-4 text-center border-t border-gray-200 dark:border-gray-700 text-[10px] text-muted-foreground">
-                    Dikirim oleh {senderName || "TeamVora"}
-                    {replyTo && (
-                      <span> &middot; Balas ke {replyTo}</span>
-                    )}
+
+                    {/* Footer */}
+                    <div className="p-6 text-center border-t border-[#e5e7eb] bg-[#f9fafb] text-[12px] text-[#9ca3af]">
+                      <p className="mb-4 mt-0">Dikirim oleh {senderName || "TeamVora"}</p>
+                      {replyTo && (
+                        <p className="mb-4">Balas ke: <a href={`mailto:${replyTo}`} className="text-[#6b7280]">{replyTo}</a></p>
+                      )}
+                      <p className="mb-0">&copy; {new Date().getFullYear()} TeamVora. Hak Cipta Dilindungi.</p>
+                    </div>
+
                   </div>
                 </div>
+              </Tabs>
+            </CardContent>
+          </Card>
+
+          <Card className="border-border/50 shadow-sm mt-6">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Send className="w-5 h-5" />
+                Kirim Email Tes
+              </CardTitle>
+              <CardDescription>
+                Pastikan konfigurasi SMTP Anda sudah benar dengan mengirimkan email tes.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex gap-2">
+                <Input
+                  type="email"
+                  placeholder="admin@example.com"
+                  value={testEmail}
+                  onChange={(e) => setTestEmail(e.target.value)}
+                />
+                <Button onClick={handleTestEmail} disabled={testEmailMutation.isPending} className="whitespace-nowrap">
+                  {testEmailMutation.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Send className="w-4 h-4 mr-2" />}
+                  Kirim
+                </Button>
               </div>
             </CardContent>
           </Card>

@@ -18,11 +18,15 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Save, Loader2, Plus, Trash2, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 import api from "@/lib/api";
+import { IconPicker } from "@/components/ui/icon-picker";
+import { ColorPicker } from "@/components/ui/color-picker";
+import { getColorTheme } from "@/lib/colors";
 
 interface Feature {
   title: string;
   description: string;
   icon: string;
+  color?: string;
 }
 
 interface Testimonial {
@@ -104,7 +108,14 @@ export default function LandingPage() {
     saveMutation.mutate(fields);
   };
 
-  const features: Feature[] = useMemo(() => safeJsonParse(form.features, []), [form.features]);
+  const features: Feature[] = useMemo(() => {
+    const raw = safeJsonParse<Feature[]>(form.features, []);
+    return raw.map(f => {
+      let col = f.color || "blue";
+      if (col.startsWith("text-")) col = col.replace("text-", "").replace("-500", "");
+      return { ...f, color: col };
+    });
+  }, [form.features]);
   const testimonials: Testimonial[] = useMemo(() => safeJsonParse(form.testimonials, []), [form.testimonials]);
   const navLinks: NavLink[] = useMemo(() => safeJsonParse(form.nav_links, []), [form.nav_links]);
   const clientLogos: string[] = useMemo(() => safeJsonParse(form.client_logos, []), [form.client_logos]);
@@ -113,7 +124,7 @@ export default function LandingPage() {
     const updated = features.map((f, i) => (i === idx ? { ...f, [field]: value } : f));
     setForm({ ...form, features: JSON.stringify(updated) });
   };
-  const addFeature = () => setForm({ ...form, features: JSON.stringify([...features, { title: "", description: "", icon: "Zap" }]) });
+  const addFeature = () => setForm({ ...form, features: JSON.stringify([...features, { title: "", description: "", icon: "Zap", color: "blue" }]) });
   const removeFeature = (idx: number) => setForm({ ...form, features: JSON.stringify(features.filter((_, i) => i !== idx)) });
 
   const updateTestimonial = (idx: number, field: keyof Testimonial, value: string) => {
@@ -224,8 +235,20 @@ export default function LandingPage() {
                     <Button variant="ghost" size="icon-xs" onClick={() => removeFeature(idx)}><Trash2 className="w-3 h-3" /></Button>
                   </div>
                   <div className="grid grid-cols-2 gap-3">
-                    <div className="grid gap-2"><Label className="text-xs">Judul</Label><Input value={f.title} onChange={(e) => updateFeature(idx, "title", e.target.value)} /></div>
-                    <div className="grid gap-2"><Label className="text-xs">Ikon</Label><Input value={f.icon} onChange={(e) => updateFeature(idx, "icon", e.target.value)} /></div>
+                    <div className="grid gap-2">
+                      <Label className="text-xs">Judul</Label>
+                      <Input value={f.title} onChange={(e) => updateFeature(idx, "title", e.target.value)} />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label className="text-xs">Ikon</Label>
+                      <IconPicker value={f.icon || "Zap"} onChange={(val) => updateFeature(idx, "icon", val)} />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="grid gap-2">
+                      <Label className="text-xs">Warna Tema</Label>
+                      <ColorPicker value={f.color || "blue"} onChange={(val) => updateFeature(idx, "color", val)} />
+                    </div>
                   </div>
                   <div className="grid gap-2"><Label className="text-xs">Deskripsi</Label><Textarea value={f.description} onChange={(e) => updateFeature(idx, "description", e.target.value)} /></div>
                 </div>
@@ -346,7 +369,16 @@ export default function LandingPage() {
                   <div className="px-6 py-8 border-t">
                     <h3 className="text-center font-semibold mb-6">{form.features_title || "Fitur"}</h3>
                     <div className="grid grid-cols-2 gap-4">
-                      {features.map((f, i) => <div key={i} className="p-3 border rounded-lg"><div className="text-xs font-medium">{f.title || `Fitur ${i + 1}`}</div><div className="text-[10px] text-muted-foreground line-clamp-2">{f.description}</div></div>)}
+                      {features.map((f, i) => {
+                        const theme = getColorTheme(f.color || "blue");
+                        return (
+                          <div key={i} className="p-3 border rounded-lg">
+                            <div className={`w-6 h-6 rounded flex items-center justify-center mb-2 ${theme.bg} ${theme.text}`}>Ikon</div>
+                            <div className="text-xs font-medium">{f.title || `Fitur ${i + 1}`}</div>
+                            <div className="text-[10px] text-muted-foreground line-clamp-2">{f.description}</div>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 )}

@@ -39,6 +39,8 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { useAuthStore } from "@/stores/auth-store";
+import { useQuery } from "@tanstack/react-query";
+import api from "@/lib/api";
 
 const navGroups = [
   {
@@ -93,12 +95,24 @@ export function AdminSidebar() {
   const pathname = usePathname();
   const { user } = useAuthStore();
 
+  const { data: platformSettings } = useQuery({
+    queryKey: ["platform-settings"],
+    queryFn: async () => {
+      const res = await api.get("/platform-settings");
+      return res.data.data || {};
+    },
+    staleTime: 1000 * 60 * 5,
+  });
+
+  const siteName = platformSettings?.general?.site_name || "TeamVora";
+  const logoUrl = platformSettings?.general?.logo_url || "/icon.png";
+
   return (
     <Sidebar className="border-r-0">
       <SidebarHeader className="pb-0">
         <div className="flex flex-col items-center px-3 pt-4 pb-2">
-          <img src="/icon.png" alt="TeamVora" className="w-12 h-12 object-contain mb-2" />
-          <span className="font-bold text-lg tracking-tight mb-1">TeamVora</span>
+          <img src={logoUrl} alt={siteName} className="w-12 h-12 object-contain mb-2" />
+          <span className="font-bold text-lg tracking-tight mb-1">{siteName}</span>
           <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-medium">Super Admin</p>
         </div>
         <div className="mx-3 mb-2">
@@ -183,7 +197,7 @@ export function AdminSidebar() {
       <SidebarFooter className="px-3 pb-3">
         <div className="h-px bg-border/50 mb-2" />
         <p className="text-[10px] text-muted-foreground/40 group-data-[collapsible=icon]:hidden">
-          TeamVora SaaS v1.0 — Admin
+          {siteName} SaaS v1.0 — Admin
         </p>
       </SidebarFooter>
     </Sidebar>

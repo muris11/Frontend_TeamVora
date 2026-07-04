@@ -8,8 +8,7 @@ import Link from "next/link";
 import { usePlatformSettings } from "@/hooks/use-platform-settings";
 import { PageTitle } from "@/components/shared/page-title";
 
-const iconMap: Record<string, any> = { Mail, MessageCircle, Phone };
-
+import { iconMap } from "@/components/ui/icon-picker";
 const defaultChannels: any[] = [];
 const defaultArticles: string[] = [];
 

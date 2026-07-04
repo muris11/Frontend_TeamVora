@@ -23,6 +23,7 @@ import { InfiniteSlider } from "@/components/ui/infinite-slider";
 import { cn } from "@/lib/utils";
 import { usePlatformSettings } from "@/hooks/use-platform-settings";
 import { SEOHead } from "@/components/shared/seo-head";
+import { getColorTheme } from "@/lib/colors";
 
 const fadeUpVariants = {
   hidden: { opacity: 0, y: 30 },
@@ -71,29 +72,25 @@ export default function MarketingPage() {
   })();
 
   const parsedLogos: string[] = (() => {
-    if (!mkt?.client_logos) return [];
-    try { return JSON.parse(mkt.client_logos); } catch { return []; }
+    const anyMkt = mkt as any;
+    if (!anyMkt?.client_logos) return [];
+    try { return JSON.parse(anyMkt.client_logos); } catch { return []; }
   })();
 
   const iconMap: Record<string, any> = { CheckSquare, Wallet, Users, Shield, BarChart3, Zap, ArrowRight };
 
-  const colorVariants = [
-    { col: "md:col-span-2", color: "text-blue-500", bg: "bg-blue-500/10 border-blue-500/20" },
-    { col: "md:col-span-2", color: "text-emerald-500", bg: "bg-emerald-500/10 border-emerald-500/20" },
-    { col: "md:col-span-2", color: "text-amber-500", bg: "bg-amber-500/10 border-amber-500/20" },
-    { col: "md:col-span-2", color: "text-purple-500", bg: "bg-purple-500/10 border-purple-500/20" },
-    { col: "md:col-span-2", color: "text-rose-500", bg: "bg-rose-500/10 border-rose-500/20" },
-    { col: "md:col-span-2", color: "text-cyan-500", bg: "bg-cyan-500/10 border-cyan-500/20" }
-  ];
-
-  const features = parsedFeatures.map((f, i) => ({
-      title: f.title,
-      desc: f.description,
-      icon: iconMap[f.icon] || CheckSquare,
-      col: colorVariants[i % colorVariants.length].col,
-      color: colorVariants[i % colorVariants.length].color,
-      bg: colorVariants[i % colorVariants.length].bg,
-  }));
+  const fallbackColors = ["blue", "emerald", "amber", "purple", "rose", "cyan"];
+  const features = parsedFeatures.map((f: any, i: number) => {
+      const theme = getColorTheme(f.color || fallbackColors[i % fallbackColors.length]);
+      return {
+        title: f.title,
+        desc: f.description,
+        icon: iconMap[f.icon] || CheckSquare,
+        col: "md:col-span-2",
+        color: theme.text,
+        bg: theme.bg,
+      };
+  });
 
   return (
     <div className="flex flex-col min-h-screen bg-background selection:bg-primary/20 selection:text-primary">

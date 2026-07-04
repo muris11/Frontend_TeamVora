@@ -11,6 +11,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { IconPicker } from "@/components/ui/icon-picker";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -65,7 +66,7 @@ export default function TentangPage() {
     queryKey: ["platform-settings"],
     queryFn: async () => {
       const res = await api.get("/admin/platform-settings");
-      return res.data.data as { marketing?: { about_content?: string } };
+      return res.data.data as { general?: { site_name?: string }; marketing?: { about_content?: string } };
     },
   });
 
@@ -137,7 +138,8 @@ export default function TentangPage() {
         </div>
       </div>
 
-      <div className="space-y-6 max-w-3xl">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+        <div className="space-y-6">
         <Card className="border-border/50 shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between">
             <div><CardTitle>Statistik</CardTitle><CardDescription>Angka-angka penting yang ditampilkan.</CardDescription></div>
@@ -153,7 +155,7 @@ export default function TentangPage() {
                 <div className="grid grid-cols-3 gap-3">
                   <div className="grid gap-2"><Label className="text-xs">Nilai</Label><Input value={s.value} onChange={(e) => updateStat(idx, "value", e.target.value)} placeholder="10K+" /></div>
                   <div className="grid gap-2"><Label className="text-xs">Label</Label><Input value={s.label} onChange={(e) => updateStat(idx, "label", e.target.value)} placeholder="Tim Aktif" /></div>
-                  <div className="grid gap-2"><Label className="text-xs">Ikon</Label><Input value={s.icon} onChange={(e) => updateStat(idx, "icon", e.target.value)} placeholder="Users" /></div>
+                  <div className="grid gap-2"><Label className="text-xs">Ikon</Label><IconPicker value={s.icon} onChange={(val) => updateStat(idx, "icon", val)} /></div>
                 </div>
               </div>
             ))}
@@ -175,7 +177,7 @@ export default function TentangPage() {
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="grid gap-2"><Label className="text-xs">Judul</Label><Input value={v.title} onChange={(e) => updateValue(idx, "title", e.target.value)} /></div>
-                  <div className="grid gap-2"><Label className="text-xs">Ikon</Label><Input value={v.icon} onChange={(e) => updateValue(idx, "icon", e.target.value)} /></div>
+                  <div className="grid gap-2"><Label className="text-xs">Ikon</Label><IconPicker value={v.icon} onChange={(val) => updateValue(idx, "icon", val)} /></div>
                 </div>
                 <div className="grid gap-2"><Label className="text-xs">Deskripsi</Label><Textarea value={v.description} onChange={(e) => updateValue(idx, "description", e.target.value)} /></div>
               </div>
@@ -206,6 +208,75 @@ export default function TentangPage() {
             {aboutContent.team.length === 0 && <p className="text-sm text-muted-foreground text-center py-4">Belum ada anggota tim.</p>}
           </CardContent>
         </Card>
+        </div>
+
+        {/* Preview */}
+        <div className="space-y-6">
+          <Card className="border-border/50 shadow-sm sticky top-24">
+            <CardHeader><CardTitle>Live Preview</CardTitle></CardHeader>
+            <CardContent>
+              <div className="border rounded-xl overflow-hidden bg-white dark:bg-gray-950">
+                <div className="flex items-center justify-between px-6 py-3 border-b bg-muted/30">
+                  <span className="font-bold text-sm">{settings?.general?.site_name || "TeamVora"}</span>
+                </div>
+                <div className="px-6 py-12 text-center space-y-4 bg-gradient-to-b from-primary/5 to-transparent">
+                  <h2 className="text-2xl font-bold tracking-tight">Membangun Masa Depan Kolaborasi Kerja</h2>
+                </div>
+                
+                {aboutContent.stats.length > 0 && (
+                  <div className="px-6 py-8 border-t bg-muted/10">
+                    <div className="grid grid-cols-2 gap-4">
+                      {aboutContent.stats.map((s, i) => (
+                        <div key={i} className="text-center space-y-1">
+                          <div className="w-8 h-8 mx-auto rounded-lg bg-primary/10 flex items-center justify-center text-primary mb-2 text-xs">
+                            Icon
+                          </div>
+                          <h3 className="text-xl font-bold">{s.value || "-"}</h3>
+                          <p className="text-[10px] text-muted-foreground">{s.label || "Label"}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {aboutContent.values.length > 0 && (
+                  <div className="px-6 py-8 border-t">
+                    <h3 className="text-center font-semibold mb-6">Nilai Inti Kami</h3>
+                    <div className="grid grid-cols-1 gap-4">
+                      {aboutContent.values.map((v, i) => (
+                        <div key={i} className="p-4 border rounded-xl bg-card">
+                          <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary mb-3 text-xs">Icon</div>
+                          <div className="text-sm font-bold mb-1">{v.title || `Nilai ${i + 1}`}</div>
+                          <div className="text-xs text-muted-foreground">{v.description || "Deskripsi..."}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {aboutContent.team.length > 0 && (
+                  <div className="px-6 py-8 border-t bg-muted/20">
+                    <h3 className="text-center font-semibold mb-6">Bertemu dengan Tim</h3>
+                    <div className="grid grid-cols-3 gap-2">
+                      {aboutContent.team.map((t, i) => (
+                        <div key={i} className="p-2 text-center">
+                          <div className="w-12 h-12 mx-auto rounded-full bg-secondary flex items-center justify-center text-sm font-bold mb-2">
+                            {t.initials || "AS"}
+                          </div>
+                          <div className="text-[10px] font-bold truncate">{t.name || "Nama"}</div>
+                          <div className="text-[9px] text-muted-foreground truncate">{t.role || "Role"}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                <div className="px-6 py-4 border-t bg-primary text-primary-foreground text-center">
+                  <div className="text-sm font-bold">Jadilah Bagian dari Perjalanan Kami</div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );

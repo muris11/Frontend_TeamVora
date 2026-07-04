@@ -22,7 +22,10 @@ export default function KarirPage() {
     if (raw) {
       const parsed = JSON.parse(raw);
       if (parsed?.benefits?.length) {
-        benefits = parsed.benefits.map((b: any) => b.name || b || "");
+        benefits = parsed.benefits.map((b: any) => ({
+          name: b.name || typeof b === "string" ? b : "",
+          description: b.description || "Kami menyediakan fasilitas terbaik agar Anda dapat fokus bekerja dengan nyaman.",
+        }));
       }
       if (parsed?.openings?.length) {
         jobs = parsed.openings.map((j: any, i: number) => ({
@@ -74,14 +77,14 @@ export default function KarirPage() {
               </p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {benefits.map((benefit: string, idx: number) => (
+              {benefits.map((benefit: any, idx: number) => (
                 <div key={idx} className="flex items-start gap-4 p-6 rounded-2xl bg-muted/20 border border-border/50">
                   <div className="mt-1 flex-shrink-0 w-8 h-8 rounded-full bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
                     <CheckCircle2 className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="font-semibold">{benefit}</h3>
-                    <p className="text-sm text-muted-foreground mt-1">Kami menyediakan fasilitas terbaik agar Anda dapat fokus bekerja dengan nyaman.</p>
+                    <h3 className="font-semibold">{benefit.name}</h3>
+                    <p className="text-sm text-muted-foreground mt-1">{benefit.description}</p>
                   </div>
                 </div>
               ))}

@@ -55,7 +55,7 @@ export default function KarirPage() {
     queryKey: ["platform-settings"],
     queryFn: async () => {
       const res = await api.get("/admin/platform-settings");
-      return res.data.data as { marketing?: { careers_content?: string } };
+      return res.data.data as { general?: { site_name?: string }; marketing?: { careers_content?: string } };
     },
   });
 
@@ -121,7 +121,8 @@ export default function KarirPage() {
         </div>
       </div>
 
-      <div className="space-y-6 max-w-3xl">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+        <div className="space-y-6">
         <Card className="border-border/50 shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between">
             <div><CardTitle>Benefit</CardTitle><CardDescription>Fasilitas yang ditawarkan ke karyawan.</CardDescription></div>
@@ -168,6 +169,61 @@ export default function KarirPage() {
             {careersContent.openings.length === 0 && <p className="text-sm text-muted-foreground text-center py-4">Belum ada posisi terbuka.</p>}
           </CardContent>
         </Card>
+        </div>
+
+        {/* Preview */}
+        <div className="space-y-6">
+          <Card className="border-border/50 shadow-sm sticky top-24">
+            <CardHeader><CardTitle>Live Preview</CardTitle></CardHeader>
+            <CardContent>
+              <div className="border rounded-xl overflow-hidden bg-white dark:bg-gray-950">
+                <div className="flex items-center justify-between px-6 py-3 border-b bg-muted/30">
+                  <span className="font-bold text-sm">{settings?.general?.site_name || "TeamVora"} Karir</span>
+                </div>
+                
+                {careersContent.benefits.length > 0 && (
+                  <div className="px-6 py-8">
+                    <h3 className="text-center font-semibold mb-6">Benefit</h3>
+                    <div className="grid grid-cols-2 gap-3">
+                      {careersContent.benefits.map((b, i) => (
+                        <div key={i} className="p-3 border rounded-xl bg-card">
+                          <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary mb-2 text-xs">Ikon</div>
+                          <div className="text-xs font-bold mb-1">{b.name || `Benefit ${i + 1}`}</div>
+                          <div className="text-[10px] text-muted-foreground">{b.description || "Deskripsi..."}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {careersContent.openings.length > 0 && (
+                  <div className="px-6 py-8 border-t bg-muted/10">
+                    <h3 className="text-center font-semibold mb-6">Posisi Terbuka</h3>
+                    <div className="space-y-3">
+                      {careersContent.openings.map((o, i) => (
+                        <div key={i} className="p-4 border rounded-xl bg-background flex flex-col gap-2">
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <div className="text-sm font-bold">{o.title || `Posisi ${i + 1}`}</div>
+                              <div className="text-[10px] text-muted-foreground">{o.department || "Departemen"}</div>
+                            </div>
+                            <div className="px-2 py-1 bg-primary/10 text-primary rounded-md text-[10px] font-medium">{o.type || "Full-time"}</div>
+                          </div>
+                          <div className="text-[10px] text-muted-foreground line-clamp-2">{o.description || "Deskripsi..."}</div>
+                          <div className="text-[10px] font-medium text-foreground">{o.location || "Lokasi"}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
+                {careersContent.benefits.length === 0 && careersContent.openings.length === 0 && (
+                  <div className="p-8 text-center text-sm text-muted-foreground">Belum ada konten karir</div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );

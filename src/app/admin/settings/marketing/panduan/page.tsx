@@ -11,6 +11,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { IconPicker } from "@/components/ui/icon-picker";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -54,7 +55,7 @@ export default function PanduanPage() {
     queryKey: ["platform-settings"],
     queryFn: async () => {
       const res = await api.get("/admin/platform-settings");
-      return res.data.data as { marketing?: { guide_content?: string } };
+      return res.data.data as { general?: { site_name?: string }; marketing?: { guide_content?: string } };
     },
   });
 
@@ -130,7 +131,8 @@ export default function PanduanPage() {
         </div>
       </div>
 
-      <div className="space-y-6 max-w-3xl">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+        <div className="space-y-6">
         <Card className="border-border/50 shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between">
             <div><CardTitle>Kategori Panduan</CardTitle><CardDescription>Kategori artikel panduan.</CardDescription></div>
@@ -145,7 +147,7 @@ export default function PanduanPage() {
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="grid gap-2"><Label className="text-xs">Judul</Label><Input value={c.title} onChange={(e) => updateCategory(catIdx, "title", e.target.value)} /></div>
-                  <div className="grid gap-2"><Label className="text-xs">Ikon</Label><Input value={c.icon} onChange={(e) => updateCategory(catIdx, "icon", e.target.value)} /></div>
+                  <div className="grid gap-2"><Label className="text-xs">Ikon</Label><IconPicker value={c.icon} onChange={(val) => updateCategory(catIdx, "icon", val)} /></div>
                 </div>
                 <div className="grid gap-2"><Label className="text-xs">Deskripsi</Label><Textarea value={c.description} onChange={(e) => updateCategory(catIdx, "description", e.target.value)} /></div>
                 <div className="space-y-2">
@@ -182,6 +184,59 @@ export default function PanduanPage() {
             {guideContent.faqs.length === 0 && <p className="text-sm text-muted-foreground text-center py-4">Belum ada FAQ.</p>}
           </CardContent>
         </Card>
+        </div>
+
+        {/* Preview */}
+        <div className="space-y-6">
+          <Card className="border-border/50 shadow-sm sticky top-24">
+            <CardHeader><CardTitle>Live Preview</CardTitle></CardHeader>
+            <CardContent>
+              <div className="border rounded-xl overflow-hidden bg-white dark:bg-gray-950">
+                <div className="flex items-center justify-between px-6 py-3 border-b bg-muted/30">
+                  <span className="font-bold text-sm">{settings?.general?.site_name || "TeamVora"} Panduan</span>
+                </div>
+                
+                {guideContent.categories.length > 0 && (
+                  <div className="px-6 py-8">
+                    <h3 className="text-center font-semibold mb-6">Kategori Panduan</h3>
+                    <div className="grid grid-cols-1 gap-4">
+                      {guideContent.categories.map((c, i) => (
+                        <div key={i} className="p-4 border rounded-xl bg-card">
+                          <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary mb-3 text-xs">Ikon</div>
+                          <div className="text-sm font-bold mb-1">{c.title || `Kategori ${i + 1}`}</div>
+                          <div className="text-xs text-muted-foreground mb-3">{c.description || "Deskripsi..."}</div>
+                          <ul className="space-y-2">
+                            {c.articles.map((a, ai) => (
+                              <li key={ai} className="text-[10px] text-primary underline truncate">{a || "Artikel"}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {guideContent.faqs.length > 0 && (
+                  <div className="px-6 py-8 border-t bg-muted/10">
+                    <h3 className="text-center font-semibold mb-6">Pertanyaan Umum</h3>
+                    <div className="space-y-3">
+                      {guideContent.faqs.map((f, i) => (
+                        <div key={i} className="p-3 border rounded-lg bg-background">
+                          <div className="text-xs font-bold mb-1">{f.question || `Pertanyaan ${i + 1}`}</div>
+                          <div className="text-[10px] text-muted-foreground">{f.answer || "Jawaban..."}</div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
+                {guideContent.categories.length === 0 && guideContent.faqs.length === 0 && (
+                  <div className="p-8 text-center text-sm text-muted-foreground">Belum ada panduan</div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );
