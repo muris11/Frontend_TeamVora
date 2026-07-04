@@ -1,8 +1,7 @@
 import * as React from "react"
-import { Check, Info, Box, Layout, Shield, Users, Mail, Phone, MapPin, Search, Plus, Trash2, Edit2, Zap, Settings, Globe, Briefcase, FileText, Activity } from "lucide-react"
+import { Check, Info, Box, Layout, Shield, Users, Mail, Phone, MapPin, Search, Zap, Settings, Globe, Briefcase, FileText, Activity } from "lucide-react"
 
 import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
 import {
   Command,
   CommandEmpty,
@@ -18,7 +17,7 @@ import {
 } from "@/components/ui/popover"
 
 export const iconMap: Record<string, any> = {
-  Box, Layout, Shield, Users, Mail, Phone, MapPin, Search, Plus, Trash2, Edit2, Zap, Settings, Globe, Briefcase, FileText, Activity
+  Box, Layout, Shield, Users, Mail, Phone, MapPin, Search, Zap, Settings, Globe, Briefcase, FileText, Activity
 }
 
 export type IconName = keyof typeof iconMap
@@ -52,25 +51,23 @@ export function IconPicker({
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      {/* @ts-expect-error asChild type issue with Base UI */}
-      <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          role="combobox"
-          aria-expanded={open}
-          className="w-[200px] justify-between"
-        >
-          <div className="flex items-center">
-            {SelectedIcon ? (
-              <SelectedIcon className="w-4 h-4 mr-2" />
-            ) : (
-              <Info className="w-4 h-4 mr-2 text-muted-foreground" />
-            )}
-            {value
-              ? icons.find((icon) => icon.value === value)?.label
-              : "Pilih Ikon"}
-          </div>
-        </Button>
+      <PopoverTrigger
+        className={cn(
+          "inline-flex items-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background",
+          "focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+          "w-[200px] justify-between"
+        )}
+      >
+        <div className="flex items-center">
+          {SelectedIcon ? (
+            <SelectedIcon className="w-4 h-4 mr-2" />
+          ) : (
+            <Info className="w-4 h-4 mr-2 text-muted-foreground" />
+          )}
+          {value
+            ? icons.find((icon) => icon.value === value)?.label
+            : "Pilih Ikon"}
+        </div>
       </PopoverTrigger>
       <PopoverContent className="w-[200px] p-0">
         <Command>

@@ -2,7 +2,6 @@ import * as React from "react"
 import { Check, Paintbrush } from "lucide-react"
 
 import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
 import {
   Command,
   CommandEmpty,
@@ -40,25 +39,23 @@ export function ColorPicker({
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      {/* @ts-expect-error asChild type issue with Base UI */}
-      <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          role="combobox"
-          aria-expanded={open}
-          className="w-[200px] justify-between"
-        >
-          <div className="flex items-center">
-            {value ? (
-              <div className={cn("w-4 h-4 rounded-full mr-2", `bg-${value}-500`)} />
-            ) : (
-              <Paintbrush className="w-4 h-4 mr-2 text-muted-foreground" />
-            )}
-            {value
-              ? colors.find((color) => color.value === value)?.label
-              : "Pilih Warna"}
-          </div>
-        </Button>
+      <PopoverTrigger
+        className={cn(
+          "inline-flex items-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background",
+          "focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+          "w-[200px] justify-between"
+        )}
+      >
+        <div className="flex items-center">
+          {value ? (
+            <div className={cn("w-4 h-4 rounded-full mr-2", `bg-${value}-500`)} />
+          ) : (
+            <Paintbrush className="w-4 h-4 mr-2 text-muted-foreground" />
+          )}
+          {value
+            ? colors.find((color) => color.value === value)?.label
+            : "Pilih Warna"}
+        </div>
       </PopoverTrigger>
       <PopoverContent className="w-[200px] p-0">
         <Command>

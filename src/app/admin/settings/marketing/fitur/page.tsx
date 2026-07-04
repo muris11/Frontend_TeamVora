@@ -60,8 +60,9 @@ export default function FiturPage() {
   useEffect(() => {
     if (settings?.marketing?.features_content) {
       const parsed = safeJsonParse<FeaturesContent>(settings.marketing.features_content, { sections: [] });
+      const sections = Array.isArray(parsed?.sections) ? parsed.sections : [];
       const cleaned = {
-        sections: parsed.sections.map((s) => {
+        sections: sections.map((s: any) => {
           let col = s.color || "blue";
           if (col.startsWith("text-")) col = col.replace("text-", "").replace("-500", "");
           return { ...s, color: col };
