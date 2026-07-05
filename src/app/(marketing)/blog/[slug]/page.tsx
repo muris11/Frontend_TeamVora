@@ -104,8 +104,8 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
             
             <div className="flex flex-wrap items-center gap-6 text-base">
               <div className="flex items-center gap-3">
-                {blog.author?.avatar_path ? (
-                  <Image src={blog.author.avatar_path} alt={blog.author.name} width={48} height={48} className="rounded-full shadow-sm border border-border/50" />
+                {blog.author?.avatar_url ? (
+                  <Image src={blog.author.avatar_url} alt={blog.author.name} width={48} height={48} className="rounded-full shadow-sm border border-border/50" />
                 ) : (
                   <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary">
                     <User className="w-6 h-6" />

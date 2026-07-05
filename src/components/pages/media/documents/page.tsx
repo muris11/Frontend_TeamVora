@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
-import { FileText, Upload, Download, Search } from "lucide-react";
+import { FileText, Upload, Download, Search, Trash2, Copy } from "lucide-react";
+import { toast } from "sonner";
 import api from "@/lib/api";
 import { TeamMedia } from "@/types";
 import { Card, CardContent } from "@/components/ui/card";
@@ -15,6 +16,7 @@ import { formatFileSize, formatDate } from "@/lib/format";
 
 export function DocumentsPage({ basePath }: { basePath: string }) {
   const [search, setSearch] = useState("");
+  const queryClient = useQueryClient();
 
   const { data, isLoading } = useQuery({
     queryKey: ["media", "document"],
@@ -23,6 +25,27 @@ export function DocumentsPage({ basePath }: { basePath: string }) {
       return res.data.data || res.data;
     },
   });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string | number) => api.delete(`/media/${id}`),
+    onSuccess: () => {
+      toast.success("Dokumen berhasil dihapus");
+      queryClient.invalidateQueries({ queryKey: ["media", "document"] });
+    },
+    onError: () => toast.error("Gagal menghapus dokumen"),
+  });
+
+  const handleDelete = (id: string | number) => {
+    if (confirm("Yakin ingin menghapus dokumen ini?")) {
+      deleteMutation.mutate(id);
+    }
+  };
+
+  const handleCopyUrl = (url: string | null) => {
+    if (!url) return;
+    navigator.clipboard.writeText(url);
+    toast.success("URL disalin ke clipboard!");
+  };
 
   const documents = (Array.isArray(data) ? data : []) as TeamMedia[];
   const filtered = documents.filter((d) =>
@@ -90,8 +113,8 @@ export function DocumentsPage({ basePath }: { basePath: string }) {
           {filtered.map((doc) => (
             <Card
               key={doc.id}
-              className="border-border/50 hover:shadow-md transition-all cursor-pointer group"
-              onClick={() => { if (doc.file_url) window.open(doc.file_url, "_blank"); }}
+              className="border-border/50 hover:shadow-md transition-all cursor-pointer group relative"
+              onClick={() => { if (doc.file_path) window.open(doc.file_path, "_blank"); }}
             >
               <CardContent className="p-5">
                 <div className="flex items-start gap-3">
@@ -109,16 +132,31 @@ export function DocumentsPage({ basePath }: { basePath: string }) {
                       {formatDate(doc.created_at)}
                     </p>
                   </div>
+                </div>
+                
+                <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex gap-1 z-10">
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="w-8 h-8 shrink-0 hover:bg-muted"
                     onClick={(e) => {
                       e.stopPropagation();
-                      if (doc.file_url) window.open(doc.file_url, "_blank");
+                      handleCopyUrl(doc.file_path);
                     }}
                   >
-                    <Download className="w-4 h-4" />
+                    <Copy className="w-4 h-4 text-muted-foreground" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="w-8 h-8 shrink-0 hover:bg-destructive/10 hover:text-destructive"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDelete(doc.id);
+                    }}
+                    disabled={deleteMutation.isPending}
+                  >
+                    <Trash2 className="w-4 h-4" />
                   </Button>
                 </div>
               </CardContent>

@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/label";
 import { FileUpload } from "@/components/shared/file-upload";
 import { MediaPicker } from "@/components/shared/media-picker";
 import { PageTitle } from "@/components/shared/page-title";
+import { RichTextEditor } from "@/components/shared/rich-text-editor";
 
 export function BlogCreatePage({ basePath }: { basePath: string }) {
   const router = useRouter();
@@ -23,6 +24,7 @@ export function BlogCreatePage({ basePath }: { basePath: string }) {
     excerpt: "",
     content: "",
     status: "draft",
+    published_at: "",
   });
   const [file, setFile] = useState<File | null>(null);
   const [mediaPickerOpen, setMediaPickerOpen] = useState(false);
@@ -35,6 +37,9 @@ export function BlogCreatePage({ basePath }: { basePath: string }) {
       formData.append("excerpt", form.excerpt);
       formData.append("content", form.content);
       formData.append("status", form.status);
+      if (form.published_at) {
+        formData.append("published_at", form.published_at);
+      }
       if (file) formData.append("featured_image", file);
       else if (existingImageUrl) formData.append("featured_image", existingImageUrl);
       const res = await api.post("/blogs", formData, {
@@ -94,12 +99,9 @@ export function BlogCreatePage({ basePath }: { basePath: string }) {
             </div>
             <div className="space-y-2">
               <Label htmlFor="content">Konten</Label>
-              <Textarea
-                id="content"
+              <RichTextEditor
                 value={form.content}
-                onChange={(e) => setForm({ ...form, content: e.target.value })}
-                placeholder="Tulis konten blog di sini..."
-                rows={12}
+                onChange={(value) => setForm({ ...form, content: value })}
               />
             </div>
           </CardContent>
@@ -121,8 +123,20 @@ export function BlogCreatePage({ basePath }: { basePath: string }) {
                 >
                   <option value="draft">Draft</option>
                   <option value="published">Published</option>
+                  <option value="scheduled">Scheduled</option>
                 </select>
               </div>
+              {form.status === 'scheduled' && (
+                <div className="space-y-2">
+                  <Label htmlFor="published_at">Jadwal Publikasi</Label>
+                  <Input 
+                    id="published_at" 
+                    type="datetime-local" 
+                    value={form.published_at} 
+                    onChange={(e) => setForm({ ...form, published_at: e.target.value })} 
+                  />
+                </div>
+              )}
               <div className="space-y-2">
                 <Label>Gambar Unggulan</Label>
                 <div className="flex gap-2">

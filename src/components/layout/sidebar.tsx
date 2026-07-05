@@ -92,6 +92,7 @@ export function AppSidebar() {
       items: [
         { title: "Profil", href: `${basePath}/settings/profile`, icon: UserCircle, permissions: [] },
         ...(isTeamLeader ? [
+          { title: "Profil Tim", href: `${basePath}/settings/team-profile`, icon: ShieldCheck, permissions: [] },
           { title: "Anggota Tim", href: `${basePath}/settings/team-members`, icon: Users, permissions: ["manage_teams"] },
         ] : []),
       ],

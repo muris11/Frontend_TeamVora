@@ -17,13 +17,15 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { PageTitle } from "@/components/shared/page-title";
+import { RichTextEditor } from "@/components/shared/rich-text-editor";
 
 const blogSchema = z.object({
   title: z.string().min(2, "Judul minimal 2 karakter"),
   excerpt: z.string().optional(),
   content: z.string().min(10, "Konten minimal 10 karakter"),
-  status: z.enum(["draft", "published"]),
-  featured_image: z.string().url("URL tidak valid").optional().or(z.literal("")),
+  status: z.enum(["draft", "published", "scheduled"]),
+  featured_image: z.any().optional(),
+  published_at: z.string().optional(),
 });
 
 type BlogForm = z.infer<typeof blogSchema>;
@@ -49,6 +51,7 @@ export default function AdminBlogEditPage() {
       content: "",
       status: "draft",
       featured_image: "",
+      published_at: "",
     },
     values: blog
       ? {
@@ -57,12 +60,24 @@ export default function AdminBlogEditPage() {
           content: blog.content || "",
           status: blog.status || "draft",
           featured_image: blog.featured_image || "",
+          published_at: blog.published_at ? new Date(blog.published_at).toISOString().slice(0, 16) : "",
         }
       : undefined,
   });
 
   const updateMutation = useMutation({
-    mutationFn: (data: BlogForm) => api.put(`/blogs/${blogId}`, data),
+    mutationFn: async (data: BlogForm) => {
+      const formData = new FormData();
+      Object.entries(data).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== "") {
+          formData.append(key, value as string | Blob);
+        }
+      });
+      formData.append('_method', 'PUT');
+      return api.post(`/blogs/${blogId}`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+    },
     onSuccess: () => {
       toast.success("Blog berhasil diperbarui");
       router.push("/admin/blogs");
@@ -141,7 +156,7 @@ export default function AdminBlogEditPage() {
                   <FormItem>
                     <FormLabel>Konten</FormLabel>
                     <FormControl>
-                      <Textarea placeholder="Tulis konten blog di sini..." rows={15} {...field} />
+                      <RichTextEditor value={field.value} onChange={field.onChange} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -150,11 +165,21 @@ export default function AdminBlogEditPage() {
               <FormField
                 control={form.control}
                 name="featured_image"
-                render={({ field }) => (
+                render={({ field: { value, onChange, ...field } }) => (
                   <FormItem>
-                    <FormLabel>Featured Image URL</FormLabel>
+                    <FormLabel>Featured Image</FormLabel>
                     <FormControl>
-                      <Input placeholder="https://example.com/image.jpg" {...field} />
+                      <Input 
+                        type="file" 
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            onChange(file);
+                          }
+                        }}
+                        {...field} 
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -175,12 +200,28 @@ export default function AdminBlogEditPage() {
                       <SelectContent>
                         <SelectItem value="draft">Draft</SelectItem>
                         <SelectItem value="published">Published</SelectItem>
+                        <SelectItem value="scheduled">Scheduled</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
                   </FormItem>
                 )}
               />
+              {form.watch("status") === "scheduled" && (
+                <FormField
+                  control={form.control}
+                  name="published_at"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Jadwal Publikasi</FormLabel>
+                      <FormControl>
+                        <Input type="datetime-local" {...field} value={field.value ? String(field.value) : ""} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
               <div className="flex gap-2 pt-4">
                 <Button type="submit" disabled={updateMutation.isPending}>
                   {updateMutation.isPending ? "Menyimpan..." : "Simpan Perubahan"}

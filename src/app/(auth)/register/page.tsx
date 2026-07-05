@@ -35,6 +35,7 @@ function RegisterForm() {
   const { setAuth } = useAuthStore();
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [isLead, setIsLead] = useState(false);
 
   const form = useForm<RegisterForm>({
     resolver: zodResolver(registerSchema),
@@ -51,7 +52,7 @@ function RegisterForm() {
         password_confirmation: data.password_confirmation,
       };
 
-      if (data.team_name) {
+      if (isLead && data.team_name) {
         payload.team_name = data.team_name;
       }
 
@@ -93,6 +94,25 @@ function RegisterForm() {
           Bergabung dengan TeamVora
         </p>
       </div>
+
+      {!inviteToken && (
+        <div className="flex w-full rounded-md border border-input p-1 mb-2 bg-muted">
+          <button
+            type="button"
+            className={`flex-1 py-1.5 text-sm font-medium rounded-sm transition-colors ${!isLead ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+            onClick={() => setIsLead(false)}
+          >
+            Anggota Tim
+          </button>
+          <button
+            type="button"
+            className={`flex-1 py-1.5 text-sm font-medium rounded-sm transition-colors ${isLead ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+            onClick={() => setIsLead(true)}
+          >
+            Team Lead
+          </button>
+        </div>
+      )}
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -172,22 +192,23 @@ function RegisterForm() {
               </FormItem>
             )}
           />
-          {!inviteToken && (
+          {!inviteToken && isLead && (
             <FormField
               control={form.control}
               name="team_name"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>
-                    Nama Tim <span className="text-muted-foreground font-normal">(opsional)</span>
+                    Nama Tim <span className="text-destructive">*</span>
                   </FormLabel>
                   <FormControl>
                     <div className="relative">
                       <Users className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                       <Input
-                        placeholder="Kosongkan jika tidak membuat tim"
+                        placeholder="Masukkan nama tim Anda"
                         className="pl-10"
                         {...field}
+                        required={isLead}
                       />
                     </div>
                   </FormControl>

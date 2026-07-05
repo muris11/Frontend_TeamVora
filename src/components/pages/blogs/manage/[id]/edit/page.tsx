@@ -17,6 +17,7 @@ import { MediaPicker } from "@/components/shared/media-picker";
 import { PageTitle } from "@/components/shared/page-title";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
+import { RichTextEditor } from "@/components/shared/rich-text-editor";
 
 export function BlogEditPage({ basePath }: { basePath: string }) {
   const router = useRouter();
@@ -28,6 +29,7 @@ export function BlogEditPage({ basePath }: { basePath: string }) {
     excerpt: "",
     content: "",
     status: "draft",
+    published_at: "",
   });
   const [file, setFile] = useState<File | null>(null);
   const [existingImage, setExistingImage] = useState<string>("");
@@ -49,6 +51,7 @@ export function BlogEditPage({ basePath }: { basePath: string }) {
         excerpt: blog.excerpt || "",
         content: blog.content || "",
         status: blog.status || "draft",
+        published_at: blog.published_at ? new Date(blog.published_at).toISOString().slice(0, 16) : "",
       });
       if (blog.featured_image) {
         setExistingImage(blog.featured_image);
@@ -59,12 +62,16 @@ export function BlogEditPage({ basePath }: { basePath: string }) {
   const updateMutation = useMutation({
     mutationFn: async () => {
       const formData = new FormData();
+      formData.append("_method", "PUT");
       formData.append("title", form.title);
       formData.append("excerpt", form.excerpt);
       formData.append("content", form.content);
       formData.append("status", form.status);
+      if (form.published_at) {
+        formData.append("published_at", form.published_at);
+      }
       if (file) formData.append("featured_image", file);
-      const res = await api.put(`/blogs/${id}`, formData, {
+      const res = await api.post(`/blogs/${id}`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       return res.data;
@@ -153,12 +160,9 @@ export function BlogEditPage({ basePath }: { basePath: string }) {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="content">Konten</Label>
-                <Textarea
-                  id="content"
+                <RichTextEditor
                   value={form.content}
-                  onChange={(e) => setForm({ ...form, content: e.target.value })}
-                  placeholder="Tulis konten blog di sini..."
-                  rows={12}
+                  onChange={(value) => setForm({ ...form, content: value })}
                 />
               </div>
             </CardContent>
@@ -180,8 +184,20 @@ export function BlogEditPage({ basePath }: { basePath: string }) {
                   >
                     <option value="draft">Draft</option>
                     <option value="published">Published</option>
+                    <option value="scheduled">Scheduled</option>
                   </select>
                 </div>
+                {form.status === 'scheduled' && (
+                  <div className="space-y-2">
+                    <Label htmlFor="published_at">Jadwal Publikasi</Label>
+                    <Input 
+                      id="published_at" 
+                      type="datetime-local" 
+                      value={form.published_at} 
+                      onChange={(e) => setForm({ ...form, published_at: e.target.value })} 
+                    />
+                  </div>
+                )}
                 <div className="space-y-2">
                   <Label>Gambar Unggulan</Label>
                   {existingImage && !file && (

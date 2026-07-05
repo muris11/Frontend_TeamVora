@@ -105,8 +105,8 @@ export default function PublicBlogPage() {
                       )}
                       <div className="flex items-center justify-between text-sm text-muted-foreground mt-auto">
                         <div className="flex items-center gap-3">
-                          {blogs[0].author?.avatar_path ? (
-                            <Image src={blogs[0].author.avatar_path} alt={blogs[0].author.name} width={32} height={32} className="rounded-full" />
+                          {blogs[0].author?.avatar_url ? (
+                            <Image src={blogs[0].author.avatar_url} alt={blogs[0].author.name} width={32} height={32} className="rounded-full" />
                           ) : (
                             <div className="bg-muted p-2 rounded-full"><User className="w-4 h-4" /></div>
                           )}
@@ -155,8 +155,8 @@ export default function PublicBlogPage() {
                       )}
                       <div className="flex items-center justify-between text-xs text-muted-foreground pt-5 border-t border-border/40 mt-auto">
                         <div className="flex items-center gap-2">
-                          {blog.author?.avatar_path ? (
-                            <Image src={blog.author.avatar_path} alt={blog.author.name} width={24} height={24} className="rounded-full" />
+                          {blog.author?.avatar_url ? (
+                            <Image src={blog.author.avatar_url} alt={blog.author.name} width={24} height={24} className="rounded-full" />
                           ) : (
                             <User className="w-3 h-3" />
                           )}
