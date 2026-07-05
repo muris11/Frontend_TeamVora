@@ -137,17 +137,18 @@ export default function EmailSettingsPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <PageTitle title="Pengaturan Email | TeamVora Admin" />
-
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Pengaturan Email</h1>
-        <p className="text-muted-foreground">
-          Sesuaikan tampilan dan pengirim email notifikasi sistem.
-        </p>
+    <div className="space-y-8 pb-10">
+      <div className="flex flex-col gap-4">
+        <PageTitle title="Pengaturan Email | TeamVora Admin" />
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Pengaturan Email</h1>
+          <p className="text-muted-foreground mt-1">
+            Sesuaikan tampilan dan pengirim email notifikasi sistem.
+          </p>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
         <div className="space-y-6">
           <Card className="border-border/50 shadow-sm">
             <CardHeader>
@@ -294,14 +295,14 @@ export default function EmailSettingsPage() {
                 Pratinjau tampilan email asli (berdasarkan template Laravel).
               </CardDescription>
             </CardHeader>
-            <CardContent>
-              <Tabs defaultValue="test" className="w-full">
-                <TabsList className="w-full mb-4">
-                  <TabsTrigger value="test" className="flex-1">Test Email</TabsTrigger>
-                  <TabsTrigger value="reset" className="flex-1">Reset Password</TabsTrigger>
+            <CardContent className="pt-6">
+              <Tabs defaultValue="test" className="w-full flex flex-col">
+                <TabsList className="grid w-full grid-cols-2 mb-8 bg-muted/50 p-1 rounded-xl">
+                  <TabsTrigger value="test" className="rounded-lg">Test Email</TabsTrigger>
+                  <TabsTrigger value="reset" className="rounded-lg">Reset Password</TabsTrigger>
                 </TabsList>
                 
-                <div className="border rounded-xl bg-[#f9fafb] p-4 sm:p-8 flex flex-col items-center justify-center min-h-[500px] overflow-hidden">
+                <div className="border border-border/50 rounded-2xl bg-muted/20 p-4 sm:p-8 flex flex-col items-center justify-center min-h-[500px] overflow-hidden shadow-inner">
                   {/* Email Wrapper */}
                   <div className="bg-white shadow-sm w-full max-w-[600px] rounded-xl overflow-hidden border border-[#e5e7eb] font-sans text-[#374151] leading-relaxed">
                     
