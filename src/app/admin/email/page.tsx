@@ -26,6 +26,8 @@ interface EmailSettings {
   email_sender_name: string;
   email_reply_to: string;
   email_button_color?: string;
+  email_footer_text?: string;
+  email_primary_color?: string;
 }
 
 interface PlatformSettings {
@@ -38,6 +40,8 @@ export default function EmailSettingsPage() {
   const [senderName, setSenderName] = useState("");
   const [replyTo, setReplyTo] = useState("");
   const [buttonColor, setButtonColor] = useState("blue");
+  const [primaryColor, setPrimaryColor] = useState("blue");
+  const [footerText, setFooterText] = useState("");
   const [testEmail, setTestEmail] = useState("");
 
   const { data: emailSettings, isLoading } = useQuery({
@@ -62,6 +66,8 @@ export default function EmailSettingsPage() {
       setSenderName((emailSettings as any).email_sender_name ?? "TeamVora");
       setReplyTo((emailSettings as any).email_reply_to ?? "");
       setButtonColor((emailSettings as any).email_button_color ?? "blue");
+      setPrimaryColor((emailSettings as any).email_primary_color ?? "blue");
+      setFooterText((emailSettings as any).email_footer_text ?? "");
     }
   }, [emailSettings]);
 
@@ -81,6 +87,8 @@ export default function EmailSettingsPage() {
       email_sender_name: senderName,
       email_reply_to: replyTo,
       email_button_color: buttonColor,
+      email_primary_color: primaryColor,
+      email_footer_text: footerText,
     });
   };
 
@@ -171,6 +179,13 @@ export default function EmailSettingsPage() {
                 />
               </div>
               <div className="grid gap-2">
+                <Label>Warna Utama (Header/Aksen)</Label>
+                <ColorPicker
+                  value={primaryColor}
+                  onChange={setPrimaryColor}
+                />
+              </div>
+              <div className="grid gap-2">
                 <Label>Warna Tombol Email</Label>
                 <ColorPicker
                   value={buttonColor}
@@ -226,6 +241,18 @@ export default function EmailSettingsPage() {
                 />
                 <p className="text-xs text-muted-foreground">
                   Alamat email tujuan saat pengguna membalas email notifikasi.
+                </p>
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="footer_text">Teks Footer Email</Label>
+                <Input
+                  id="footer_text"
+                  value={footerText}
+                  onChange={(e) => setFooterText(e.target.value)}
+                  placeholder="&copy; 2026 TeamVora. Hak Cipta Dilindungi."
+                />
+                <p className="text-xs text-muted-foreground">
+                  Teks kustom yang muncul di bagian paling bawah email.
                 </p>
               </div>
             </CardContent>
@@ -353,7 +380,7 @@ export default function EmailSettingsPage() {
                       {replyTo && (
                         <p className="mb-4">Balas ke: <a href={`mailto:${replyTo}`} className="text-[#6b7280]">{replyTo}</a></p>
                       )}
-                      <p className="mb-0">&copy; {new Date().getFullYear()} TeamVora. Hak Cipta Dilindungi.</p>
+                      <p className="mb-0">{footerText || `\u00A9 ${new Date().getFullYear()} TeamVora. Hak Cipta Dilindungi.`}</p>
                     </div>
 
                   </div>

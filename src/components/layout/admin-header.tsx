@@ -226,7 +226,7 @@ export function AdminHeader() {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48 rounded-xl border-border/50 p-1.5">
               <DropdownMenuItem
-                onClick={() => router.push("/admin/settings/profile")}
+                onClick={() => router.push("/admin/profile")}
                 className="rounded-lg text-sm"
               >
                 <User className="mr-2 h-4 w-4" />

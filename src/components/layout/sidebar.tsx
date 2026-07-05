@@ -15,6 +15,7 @@ import {
   Users,
   ChevronDown,
   PenTool,
+  ShieldCheck,
 } from "lucide-react";
 import {
   Sidebar,
@@ -133,7 +134,13 @@ export function AppSidebar() {
         {user?.team && (
           <div className="mx-3 mb-2">
             <div className="rounded-lg bg-primary/5 border border-primary/10 px-3 py-1.5">
-              <p className="text-[10px] font-medium text-primary truncate">{user.team.name}</p>
+              <div className="flex items-center gap-1.5">
+                <ShieldCheck className="h-3 w-3 text-primary" />
+                <p className="text-[10px] font-medium text-primary truncate">{user.team.name}</p>
+              </div>
+              <p className="text-[9px] text-muted-foreground mt-0.5 truncate">
+                {isTeamLeader ? "Akses manajemen tim" : "Akses anggota tim"}
+              </p>
             </div>
           </div>
         )}
