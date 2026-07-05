@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation } from "@tanstack/react-query";
 import Link from "next/link";
-import { ArrowLeft, Save } from "lucide-react";
+import { ArrowLeft, Save, ImageIcon, X } from "lucide-react";
 import api from "@/lib/api";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { FileUpload } from "@/components/shared/file-upload";
+import { MediaPicker } from "@/components/shared/media-picker";
 import { PageTitle } from "@/components/shared/page-title";
 
 export function BlogCreatePage({ basePath }: { basePath: string }) {
@@ -24,6 +25,8 @@ export function BlogCreatePage({ basePath }: { basePath: string }) {
     status: "draft",
   });
   const [file, setFile] = useState<File | null>(null);
+  const [mediaPickerOpen, setMediaPickerOpen] = useState(false);
+  const [existingImageUrl, setExistingImageUrl] = useState<string>("");
 
   const { mutate, isPending } = useMutation({
     mutationFn: async () => {
@@ -33,6 +36,7 @@ export function BlogCreatePage({ basePath }: { basePath: string }) {
       formData.append("content", form.content);
       formData.append("status", form.status);
       if (file) formData.append("featured_image", file);
+      else if (existingImageUrl) formData.append("featured_image", existingImageUrl);
       const res = await api.post("/blogs", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
@@ -121,12 +125,38 @@ export function BlogCreatePage({ basePath }: { basePath: string }) {
               </div>
               <div className="space-y-2">
                 <Label>Gambar Unggulan</Label>
-                <FileUpload
-                  accept="image/*"
-                  value={file}
-                  onFileSelect={setFile}
-                  onClear={() => setFile(null)}
-                />
+                <div className="flex gap-2">
+                  <div className="flex-1">
+                    <FileUpload
+                      accept="image/*"
+                      value={file}
+                      onFileSelect={setFile}
+                      onClear={() => { setFile(null); setExistingImageUrl(""); }}
+                    />
+                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setMediaPickerOpen(true)}
+                    className="shrink-0"
+                  >
+                    <ImageIcon className="w-4 h-4 mr-1" /> Pilih
+                  </Button>
+                </div>
+                {existingImageUrl && !file && (
+                  <div className="mt-2 relative w-full h-32 rounded-lg overflow-hidden border">
+                    <img src={existingImageUrl} alt="Preview" className="w-full h-full object-cover" />
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="icon"
+                      className="absolute top-1 right-1 h-6 w-6"
+                      onClick={() => setExistingImageUrl("")}
+                    >
+                      <X className="w-3 h-3" />
+                    </Button>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -141,6 +171,13 @@ export function BlogCreatePage({ basePath }: { basePath: string }) {
           </Button>
         </div>
       </div>
+
+      <MediaPicker
+        open={mediaPickerOpen}
+        onOpenChange={setMediaPickerOpen}
+        onSelect={(url) => setExistingImageUrl(url)}
+        type="gallery"
+      />
     </div>
   );
 }

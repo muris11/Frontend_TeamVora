@@ -79,7 +79,6 @@ export function MarketingFooter() {
                 <h4 className="font-semibold mb-4">Perusahaan</h4>
                 <div className="flex flex-col gap-3 text-sm text-muted-foreground">
                   <Link href="/kontak" className="hover:text-foreground transition-colors">Hubungi Kami</Link>
-                  <Link href="/karir" className="hover:text-foreground transition-colors">Karir</Link>
                 </div>
               </div>
 

@@ -20,7 +20,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Save, Loader2, Plus, Trash2, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 import api from "@/lib/api";
-import { getColorTheme } from "@/lib/colors";
+import { PreviewFrame } from "@/components/shared/preview-frame";
 
 interface FeatureSection {
   id: string;
@@ -176,41 +176,7 @@ export default function FiturPage() {
           <Card className="border-border/50 shadow-sm sticky top-24">
             <CardHeader><CardTitle>Live Preview</CardTitle></CardHeader>
             <CardContent>
-              <div className="border rounded-xl overflow-hidden bg-white dark:bg-gray-950">
-                <div className="flex items-center justify-between px-6 py-3 border-b bg-muted/30">
-                  <span className="font-bold text-sm">{settings?.general?.site_name || "TeamVora"} Fitur</span>
-                </div>
-                
-                {featuresContent.sections.length > 0 && (
-                  <div className="px-6 py-8">
-                    <div className="space-y-8">
-                      {featuresContent.sections.map((s, i) => (
-                        <div key={i} className={`flex flex-col gap-4 items-center ${i % 2 !== 0 ? "lg:flex-row-reverse" : "lg:flex-row"}`}>
-                          <div className="flex-1 space-y-2">
-                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs ${getColorTheme(s.color).bg} ${getColorTheme(s.color).text}`}>
-                              Ikon
-                            </div>
-                            <h2 className="text-lg font-bold">{s.title || `Fitur ${i + 1}`}</h2>
-                            <p className="text-xs text-muted-foreground line-clamp-2">{s.description || "Deskripsi"}</p>
-                            
-                            <ul className="space-y-1 pt-1">
-                              {s.points.map((p, pi) => (
-                                <li key={pi} className="flex items-center gap-2">
-                                  <div className="w-3 h-3 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                                    <div className="w-1.5 h-1.5 bg-primary rounded-full" />
-                                  </div>
-                                  <span className="text-[10px] text-foreground/90">{p}</span>
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                {featuresContent.sections.length === 0 && <div className="p-8 text-center text-sm text-muted-foreground">Belum ada fitur</div>}
-              </div>
+              <PreviewFrame url="/" title="Fitur" />
             </CardContent>
           </Card>
         </div>

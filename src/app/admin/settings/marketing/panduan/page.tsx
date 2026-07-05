@@ -19,6 +19,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Save, Loader2, Plus, Trash2, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 import api from "@/lib/api";
+import { PreviewFrame } from "@/components/shared/preview-frame";
 
 interface GuideCategory {
   title: string;
@@ -191,49 +192,7 @@ export default function PanduanPage() {
           <Card className="border-border/50 shadow-sm sticky top-24">
             <CardHeader><CardTitle>Live Preview</CardTitle></CardHeader>
             <CardContent>
-              <div className="border rounded-xl overflow-hidden bg-white dark:bg-gray-950">
-                <div className="flex items-center justify-between px-6 py-3 border-b bg-muted/30">
-                  <span className="font-bold text-sm">{settings?.general?.site_name || "TeamVora"} Panduan</span>
-                </div>
-                
-                {guideContent.categories.length > 0 && (
-                  <div className="px-6 py-8">
-                    <h3 className="text-center font-semibold mb-6">Kategori Panduan</h3>
-                    <div className="grid grid-cols-1 gap-4">
-                      {guideContent.categories.map((c, i) => (
-                        <div key={i} className="p-4 border rounded-xl bg-card">
-                          <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary mb-3 text-xs">Ikon</div>
-                          <div className="text-sm font-bold mb-1">{c.title || `Kategori ${i + 1}`}</div>
-                          <div className="text-xs text-muted-foreground mb-3">{c.description || "Deskripsi..."}</div>
-                          <ul className="space-y-2">
-                            {c.articles.map((a, ai) => (
-                              <li key={ai} className="text-[10px] text-primary underline truncate">{a || "Artikel"}</li>
-                            ))}
-                          </ul>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {guideContent.faqs.length > 0 && (
-                  <div className="px-6 py-8 border-t bg-muted/10">
-                    <h3 className="text-center font-semibold mb-6">Pertanyaan Umum</h3>
-                    <div className="space-y-3">
-                      {guideContent.faqs.map((f, i) => (
-                        <div key={i} className="p-3 border rounded-lg bg-background">
-                          <div className="text-xs font-bold mb-1">{f.question || `Pertanyaan ${i + 1}`}</div>
-                          <div className="text-[10px] text-muted-foreground">{f.answer || "Jawaban..."}</div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                
-                {guideContent.categories.length === 0 && guideContent.faqs.length === 0 && (
-                  <div className="p-8 text-center text-sm text-muted-foreground">Belum ada panduan</div>
-                )}
-              </div>
+              <PreviewFrame url="/panduan" title="Panduan" />
             </CardContent>
           </Card>
         </div>

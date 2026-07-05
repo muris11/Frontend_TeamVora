@@ -77,7 +77,6 @@ const navGroups = [
           { title: "Fitur", href: "/admin/settings/marketing/fitur" },
           { title: "Panduan", href: "/admin/settings/marketing/panduan" },
           { title: "Bantuan", href: "/admin/settings/marketing/bantuan" },
-          { title: "Karir", href: "/admin/settings/marketing/karir" },
           { title: "Privasi", href: "/admin/settings/marketing/privasi" },
           { title: "Syarat", href: "/admin/settings/marketing/syarat" },
         ]

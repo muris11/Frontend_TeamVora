@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import Link from "next/link";
-import { ArrowLeft, Save, Trash2 } from "lucide-react";
+import { ArrowLeft, Save, Trash2, ImageIcon, X } from "lucide-react";
 import api from "@/lib/api";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { FileUpload } from "@/components/shared/file-upload";
+import { MediaPicker } from "@/components/shared/media-picker";
 import { PageTitle } from "@/components/shared/page-title";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -31,6 +32,7 @@ export function BlogEditPage({ basePath }: { basePath: string }) {
   const [file, setFile] = useState<File | null>(null);
   const [existingImage, setExistingImage] = useState<string>("");
   const [showDelete, setShowDelete] = useState(false);
+  const [mediaPickerOpen, setMediaPickerOpen] = useState(false);
 
   const { data: blog, isLoading } = useQuery({
     queryKey: ["blog", id],
@@ -183,20 +185,41 @@ export function BlogEditPage({ basePath }: { basePath: string }) {
                 <div className="space-y-2">
                   <Label>Gambar Unggulan</Label>
                   {existingImage && !file && (
-                    <div className="mb-2">
+                    <div className="mb-2 relative">
                       <img
                         src={existingImage}
                         alt="Featured"
                         className="w-full h-32 object-cover rounded-lg border"
                       />
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="icon"
+                        className="absolute top-1 right-1 h-6 w-6"
+                        onClick={() => setExistingImage("")}
+                      >
+                        <X className="w-3 h-3" />
+                      </Button>
                     </div>
                   )}
-                  <FileUpload
-                    accept="image/*"
-                    value={file}
-                    onFileSelect={setFile}
-                    onClear={() => setFile(null)}
-                  />
+                  <div className="flex gap-2">
+                    <div className="flex-1">
+                      <FileUpload
+                        accept="image/*"
+                        value={file}
+                        onFileSelect={setFile}
+                        onClear={() => setFile(null)}
+                      />
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setMediaPickerOpen(true)}
+                      className="shrink-0"
+                    >
+                      <ImageIcon className="w-4 h-4 mr-1" /> Pilih
+                    </Button>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -221,6 +244,13 @@ export function BlogEditPage({ basePath }: { basePath: string }) {
         onConfirm={() => deleteMutation.mutate()}
         variant="destructive"
         confirmLabel="Hapus"
+      />
+
+      <MediaPicker
+        open={mediaPickerOpen}
+        onOpenChange={setMediaPickerOpen}
+        onSelect={(url) => setExistingImage(url)}
+        type="gallery"
       />
     </div>
   );

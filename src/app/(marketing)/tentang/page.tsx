@@ -152,9 +152,6 @@ export default function TentangPage() {
                 <h2 className="text-3xl md:text-4xl font-bold mb-4">Bertemu dengan Tim</h2>
                 <p className="text-lg text-muted-foreground">Orang-orang berdedikasi di balik platform {siteName}.</p>
               </div>
-              <Button variant="outline" className="rounded-full">
-                <Link href="/karir">Lihat Lowongan Kerja</Link>
-              </Button>
             </div>
             
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">

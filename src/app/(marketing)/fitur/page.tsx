@@ -64,7 +64,7 @@ export default function FiturPage() {
     // Analytics
     BarChart3, BarChart4, LineChart, PieChart, Activity,
     // Media
-    PlayCircle, Video, Image, ImagePlus, Camera, Film,
+    PlayCircle, Video, ImagePlus, Camera, Film,
     // Communication
     Bell, BellRing, MessageCircle, MessageSquare, Send, Mail, Inbox,
     // Time

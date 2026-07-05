@@ -18,6 +18,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Save, Loader2, ExternalLink, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import api from "@/lib/api";
+import { PreviewFrame } from "@/components/shared/preview-frame";
 
 interface PrivacySection {
   title: string;
@@ -216,32 +217,7 @@ export default function PrivasiPage() {
           <Card className="border-border/50 shadow-sm sticky top-24">
             <CardHeader><CardTitle>Live Preview</CardTitle></CardHeader>
             <CardContent>
-              <div className="border rounded-xl overflow-hidden bg-background">
-                <div className="px-6 py-8 border-b border-border/50 text-center bg-muted/10">
-                  <h1 className="text-2xl font-bold tracking-tight mb-2">Kebijakan Privasi</h1>
-                  <p className="text-xs text-muted-foreground">Terakhir diperbarui: {privacyContent.last_updated || "..."}</p>
-                </div>
-                <div className="px-6 py-6 space-y-8">
-                  {privacyContent.sections.length === 0 ? (
-                    <p className="text-muted-foreground text-sm text-center">Belum ada konten...</p>
-                  ) : (
-                    privacyContent.sections.map((section, idx) => (
-                      <div key={idx}>
-                        <h2 className="text-lg font-bold mb-3">{section.title || `Bagian ${idx + 1}`}</h2>
-                        <div 
-                          className="prose dark:prose-invert max-w-none prose-sm" 
-                          dangerouslySetInnerHTML={{ __html: section.content || "<p class='text-muted-foreground'>Isi konten...</p>" }} 
-                        />
-                      </div>
-                    ))
-                  )}
-                  {privacyContent.contact_email && (
-                    <div className="mt-8 pt-6 border-t border-border/50 text-sm">
-                      Jika Anda memiliki pertanyaan, hubungi kami di <a href={`mailto:${privacyContent.contact_email}`} className="text-primary hover:underline">{privacyContent.contact_email}</a>.
-                    </div>
-                  )}
-                </div>
-              </div>
+              <PreviewFrame url="/privasi" title="Kebijakan Privasi" />
             </CardContent>
           </Card>
         </div>
