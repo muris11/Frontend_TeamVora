@@ -80,6 +80,7 @@ export interface Team {
   description: string | null;
   leader?: Pick<User, "id" | "name" | "email">;
   members_count?: number;
+  logo_url?: string | null;
   settings: Record<string, unknown> | null;
   created_at: string;
 }
