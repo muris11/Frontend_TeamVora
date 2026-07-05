@@ -1,13 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
-import { ArrowRight, CheckCircle2, Eye, EyeOff, Lock } from "lucide-react";
+import { ArrowRight, CheckCircle2, Eye, EyeOff, Lock, Loader2 } from "lucide-react";
 import api from "@/lib/api";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
@@ -26,7 +26,7 @@ const resetSchema = z.object({
 
 type ResetForm = z.infer<typeof resetSchema>;
 
-export default function ResetPasswordPage() {
+function ResetPasswordForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [loading, setLoading] = useState(false);
@@ -100,11 +100,7 @@ export default function ResetPasswordPage() {
               <FormItem>
                 <FormLabel>Email</FormLabel>
                 <FormControl>
-                  <Input
-                    placeholder="email@contoh.com"
-                    type="email"
-                    {...field}
-                  />
+                  <Input placeholder="email@contoh.com" type="email" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -177,13 +173,9 @@ export default function ResetPasswordPage() {
               </FormItem>
             )}
           />
-          <Button
-            type="submit"
-            className="w-full"
-            disabled={loading}
-          >
+          <Button type="submit" className="w-full" disabled={loading}>
             {loading ? (
-              <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground/30 border-t-primary-foreground" />
+              <Loader2 className="h-4 w-4 animate-spin" />
             ) : (
               <>
                 Reset Password
@@ -201,5 +193,17 @@ export default function ResetPasswordPage() {
         </Link>
       </div>
     </div>
+  );
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center min-h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    }>
+      <ResetPasswordForm />
+    </Suspense>
   );
 }

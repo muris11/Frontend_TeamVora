@@ -19,7 +19,7 @@ export function DocumentsPage({ basePath }: { basePath: string }) {
   const { data, isLoading } = useQuery({
     queryKey: ["media", "document"],
     queryFn: async () => {
-      const res = await api.get("/media?type=document");
+      const res = await api.get("/media/documents");
       return res.data.data || res.data;
     },
   });
@@ -91,7 +91,7 @@ export function DocumentsPage({ basePath }: { basePath: string }) {
             <Card
               key={doc.id}
               className="border-border/50 hover:shadow-md transition-all cursor-pointer group"
-              onClick={() => window.open(doc.file_url, "_blank")}
+              onClick={() => { if (doc.file_url) window.open(doc.file_url, "_blank"); }}
             >
               <CardContent className="p-5">
                 <div className="flex items-start gap-3">
@@ -115,7 +115,7 @@ export function DocumentsPage({ basePath }: { basePath: string }) {
                     className="h-8 w-8 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity"
                     onClick={(e) => {
                       e.stopPropagation();
-                      window.open(doc.file_url, "_blank");
+                      if (doc.file_url) window.open(doc.file_url, "_blank");
                     }}
                   >
                     <Download className="w-4 h-4" />

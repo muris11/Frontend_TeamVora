@@ -10,7 +10,11 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: 'cdn.teamvora.web.id',
-      }
+      },
+      {
+        protocol: 'https',
+        hostname: 'cdnteamvora.center.biz.id',
+      },
     ],
   },
 };

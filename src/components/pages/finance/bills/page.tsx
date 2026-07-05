@@ -23,7 +23,7 @@ export function BillsPage({ basePath }: { basePath: string }) {
     queryFn: async () => {
       const params = new URLSearchParams();
       if (statusFilter !== "all") params.append("status", statusFilter);
-      const res = await api.get(`/bills?${params.toString()}`);
+      const res = await api.get(`/split-bills?${params.toString()}`);
       return res.data.data ?? res.data;
     },
   });

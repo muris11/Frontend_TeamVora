@@ -30,7 +30,7 @@ export function CashBookEditPage({ basePath }: { basePath: string }) {
   const { data: cashBook, isLoading } = useQuery({
     queryKey: ["cash-book", id],
     queryFn: async () => {
-      const res = await api.get(`/cash-book/${id}`);
+      const res = await api.get(`/cash-books/${id}`);
       return (res.data.data ?? res.data) as CashBook;
     },
   });
@@ -48,22 +48,22 @@ export function CashBookEditPage({ basePath }: { basePath: string }) {
   const updateMutation = useMutation({
     mutationFn: async () => {
       const formData = new FormData();
-      formData.append("title", title);
+      formData.append("category", title);
       formData.append("type", type);
       formData.append("amount", amount);
-      formData.append("date", date);
+      formData.append("transaction_date", date);
       if (description) formData.append("description", description);
       if (file) formData.append("attachment", file);
       formData.append("_method", "PUT");
 
-      const res = await api.post(`/cash-book/${id}`, formData, {
+      const res = await api.post(`/cash-books/${id}`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       return res.data;
     },
     onSuccess: () => {
       toast.success("Data kas berhasil diupdate");
-      router.push(`${basePath}/finance/cash-book`);
+      router.push(`${basePath}/finance/cash-books`);
     },
     onError: (err: any) => {
       toast.error(err?.response?.data?.message || "Gagal mengupdate data");
@@ -72,11 +72,11 @@ export function CashBookEditPage({ basePath }: { basePath: string }) {
 
   const deleteMutation = useMutation({
     mutationFn: async () => {
-      await api.delete(`/cash-book/${id}`);
+      await api.delete(`/cash-books/${id}`);
     },
     onSuccess: () => {
       toast.success("Data kas berhasil dihapus");
-      router.push(`${basePath}/finance/cash-book`);
+      router.push(`${basePath}/finance/cash-books`);
     },
     onError: (err: any) => {
       toast.error(err?.response?.data?.message || "Gagal menghapus data");

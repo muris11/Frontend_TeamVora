@@ -25,7 +25,7 @@ export function CashBookPage({ basePath }: { basePath: string }) {
     queryFn: async () => {
       const params = new URLSearchParams();
       if (typeFilter !== "all") params.append("type", typeFilter);
-      const res = await api.get(`/cash-book?${params.toString()}`);
+      const res = await api.get(`/cash-books?${params.toString()}`);
       return res.data.data ?? res.data;
     },
   });

@@ -7,7 +7,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
-import { ArrowRight, Eye, EyeOff } from "lucide-react";
+import { ArrowRight, Eye, EyeOff, Shield } from "lucide-react";
+import Image from "next/image";
 import api from "@/lib/api";
 import { useAuthStore } from "@/stores/auth-store";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -22,7 +23,7 @@ const loginSchema = z.object({
 
 type LoginForm = z.infer<typeof loginSchema>;
 
-export default function LoginPage() {
+export default function AdminLoginPage() {
   const router = useRouter();
   const { setAuth } = useAuthStore();
   const [loading, setLoading] = useState(false);
@@ -38,11 +39,14 @@ export default function LoginPage() {
     try {
       const res = await api.post("/login", data);
       const { user, token } = res.data;
+      if (user.role !== "super_admin") {
+        toast.error("Akun ini bukan akun Super Admin");
+        setLoading(false);
+        return;
+      }
       setAuth(user, token);
-      toast.success("Login berhasil");
-      if (user.role === "super_admin") router.push("/admin");
-      else if (user.role === "team_leader") router.push("/lead");
-      else router.push("/member");
+      toast.success("Login Super Admin berhasil");
+      router.push("/admin");
     } catch (err: unknown) {
       const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message || "Login gagal";
       toast.error(msg);
@@ -53,12 +57,17 @@ export default function LoginPage() {
 
   return (
     <div className="flex flex-col space-y-6">
-      <PageTitle title="Login" />
-      <div className="flex flex-col space-y-2 text-center md:text-left">
-        <h1 className="text-2xl font-semibold tracking-tight">Selamat datang kembali</h1>
-        <p className="text-sm text-muted-foreground">
-          Masukkan email dan password Anda untuk masuk ke akun TeamVora
-        </p>
+      <PageTitle title="Admin Login" />
+      <div className="flex flex-col items-center space-y-4 text-center">
+        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 shadow-lg shadow-blue-500/25">
+          <Shield className="h-8 w-8 text-white" />
+        </div>
+        <div className="space-y-2">
+          <h1 className="text-2xl font-semibold tracking-tight">Super Admin</h1>
+          <p className="text-sm text-muted-foreground">
+            Masukkan kredensial admin untuk mengakses panel administrasi
+          </p>
+        </div>
       </div>
 
       <Form {...form}>
@@ -68,10 +77,10 @@ export default function LoginPage() {
             name="email"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Email</FormLabel>
+                <FormLabel>Email Admin</FormLabel>
                 <FormControl>
                   <Input
-                    placeholder="email@contoh.com"
+                    placeholder="admin@teamvora.com"
                     {...field}
                   />
                 </FormControl>
@@ -106,21 +115,16 @@ export default function LoginPage() {
               </FormItem>
             )}
           />
-          <div className="flex items-center justify-end">
-            <Link href="/forgot-password" className="text-sm font-medium text-primary hover:underline underline-offset-4">
-              Lupa password?
-            </Link>
-          </div>
           <Button
             type="submit"
-            className="w-full"
+            className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
             disabled={loading}
           >
             {loading ? (
               <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground/30 border-t-primary-foreground" />
             ) : (
               <>
-                Masuk
+                Masuk sebagai Admin
                 <ArrowRight className="ml-2 h-4 w-4" />
               </>
             )}
@@ -129,14 +133,8 @@ export default function LoginPage() {
       </Form>
 
       <div className="text-center text-sm text-muted-foreground">
-        Belum punya akun?{" "}
-        <Link href="/register" className="font-medium text-primary hover:underline underline-offset-4">
-          Daftar sekarang
-        </Link>
-      </div>
-      <div className="text-center text-sm text-muted-foreground">
-        <Link href="/admin-login" className="font-medium text-muted-foreground hover:text-foreground hover:underline underline-offset-4">
-          Login sebagai Admin
+        <Link href="/login" className="font-medium text-primary hover:underline underline-offset-4">
+          Kembali ke login biasa
         </Link>
       </div>
     </div>

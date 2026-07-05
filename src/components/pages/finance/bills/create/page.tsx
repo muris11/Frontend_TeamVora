@@ -1,12 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import api from "@/lib/api";
+import { User } from "@/types";
 import { PageTitle } from "@/components/shared/page-title";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,7 +15,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 
 interface BillItem {
-  user_name: string;
+  user_id: string;
   amount: string;
 }
 
@@ -26,8 +27,15 @@ export function BillsCreatePage({ basePath }: { basePath: string }) {
   const [dueDate, setDueDate] = useState("");
   const [items, setItems] = useState<BillItem[]>([]);
 
+  const { data: membersResponse } = useQuery({
+    queryKey: ["team-members"],
+    queryFn: () => api.get("/team-members").then((r) => r.data),
+  });
+
+  const members: User[] = membersResponse?.data ?? [];
+
   const addItem = () => {
-    setItems([...items, { user_name: "", amount: "" }]);
+    setItems([...items, { user_id: "", amount: "" }]);
   };
 
   const removeItem = (index: number) => {
@@ -50,11 +58,11 @@ export function BillsCreatePage({ basePath }: { basePath: string }) {
       if (description) payload.description = description;
       if (items.length > 0) {
         payload.items = items
-          .filter((i) => i.user_name && i.amount)
-          .map((i) => ({ user_name: i.user_name, amount: Number(i.amount) }));
+          .filter((i) => i.user_id && i.amount)
+          .map((i) => ({ user_id: Number(i.user_id), amount: Number(i.amount) }));
       }
 
-      const res = await api.post("/bills", payload);
+      const res = await api.post("/split-bills", payload);
       return res.data;
     },
     onSuccess: () => {
@@ -146,12 +154,18 @@ export function BillsCreatePage({ basePath }: { basePath: string }) {
 
             {items.map((item, index) => (
               <div key={index} className="flex items-center gap-2">
-                <Input
-                  placeholder="Nama anggota"
-                  value={item.user_name}
-                  onChange={(e) => updateItem(index, "user_name", e.target.value)}
-                  className="flex-1"
-                />
+                <select
+                  value={item.user_id}
+                  onChange={(e) => updateItem(index, "user_id", e.target.value)}
+                  className="flex h-10 flex-1 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  <option value="">Pilih anggota</option>
+                  {members.map((m) => (
+                    <option key={m.id} value={String(m.id)}>
+                      {m.name}
+                    </option>
+                  ))}
+                </select>
                 <Input
                   type="number"
                   placeholder="Jumlah"

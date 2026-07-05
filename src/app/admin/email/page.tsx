@@ -48,6 +48,14 @@ export default function EmailSettingsPage() {
     },
   });
 
+  const { data: emailConfig } = useQuery({
+    queryKey: ["email-config"],
+    queryFn: async () => {
+      const res = await api.get("/email-config");
+      return res.data.data as Record<string, string>;
+    },
+  });
+
   useEffect(() => {
     if (emailSettings) {
       setLogoUrl(emailSettings.general?.logo_url ?? "");
@@ -250,10 +258,11 @@ export default function EmailSettingsPage() {
             <CardContent>
               <div className="space-y-3 text-sm text-muted-foreground bg-muted/30 p-4 rounded-xl">
                 {[
-                  { label: "MAIL_MAILER", value: "smtp" },
-                  { label: "MAIL_HOST", value: "smtp-relay.brevo.com" },
-                  { label: "MAIL_PORT", value: "587" },
-                  { label: "MAIL_FROM_ADDRESS", value: "info@teamvora.coded.my.id" },
+                  { label: "MAIL_MAILER", value: emailConfig?.MAIL_MAILER || "-" },
+                  { label: "MAIL_HOST", value: emailConfig?.MAIL_HOST || "-" },
+                  { label: "MAIL_PORT", value: emailConfig?.MAIL_PORT || "-" },
+                  { label: "MAIL_FROM_ADDRESS", value: emailConfig?.MAIL_FROM_ADDRESS || "-" },
+                  { label: "MAIL_USERNAME", value: emailConfig?.MAIL_USERNAME || "-" },
                 ].map((item) => (
                   <div
                     key={item.label}

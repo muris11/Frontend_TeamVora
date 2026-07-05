@@ -66,7 +66,7 @@ function RegisterForm() {
 
       if (inviteToken) {
         try {
-          await api.post(`/invitations/${inviteToken}/accept`);
+          await api.get(`/invitations/${inviteToken}/accept`);
           toast.success("Berhasil bergabung dengan tim!");
         } catch {
           // Invitation accept failed but registration succeeded

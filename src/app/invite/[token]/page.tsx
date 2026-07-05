@@ -41,7 +41,7 @@ export default function InvitePage({ params }: { params: { token: string } }) {
         return;
       }
       setAccepting(true);
-      const res = await api.post(`/invitations/${params.token}/accept`);
+      const res = await api.get(`/invitations/${params.token}/accept`);
       return res.data;
     },
     onSuccess: () => {

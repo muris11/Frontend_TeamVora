@@ -7,6 +7,7 @@ import { PageTitle } from "@/components/shared/page-title";
 import { Button } from "@/components/ui/button";
 import { usePlatformSettings } from "@/hooks/use-platform-settings";
 import { SEOHead } from "@/components/shared/seo-head";
+import { iconMap } from "@/components/ui/icon-picker";
 
 const staggerContainer = {
   hidden: { opacity: 0 },
@@ -25,7 +26,8 @@ export default function TentangPage() {
   const { data: settings } = usePlatformSettings();
   const siteName = settings?.general?.site_name || "TeamVora";
 
-  const iconMap: Record<string, any> = { Users, Globe2, Trophy, Target, ArrowRight, Zap, Shield, HeartHandshake };
+
+
 
   const defaultStats: any[] = [];
   const defaultValues: any[] = [];

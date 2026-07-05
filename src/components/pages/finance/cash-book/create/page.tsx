@@ -26,14 +26,14 @@ export function CashBookCreatePage({ basePath }: { basePath: string }) {
   const mutation = useMutation({
     mutationFn: async () => {
       const formData = new FormData();
-      formData.append("title", title);
+      formData.append("category", title);
       formData.append("type", type);
       formData.append("amount", amount);
-      formData.append("date", date);
+      formData.append("transaction_date", date);
       if (description) formData.append("description", description);
       if (file) formData.append("attachment", file);
 
-      const res = await api.post("/cash-book", formData, {
+      const res = await api.post("/cash-books", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       return res.data;

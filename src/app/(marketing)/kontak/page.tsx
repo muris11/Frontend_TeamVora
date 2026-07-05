@@ -11,6 +11,16 @@ import { Button } from "@/components/ui/button";
 import api from "@/lib/api";
 import { usePlatformSettings } from "@/hooks/use-platform-settings";
 import { SEOHead } from "@/components/shared/seo-head";
+import dynamic from "next/dynamic";
+
+const LeafletMap = dynamic(() => import("@/components/shared/leaflet-map"), {
+  ssr: false,
+  loading: () => (
+    <div className="h-[400px] w-full rounded-xl bg-muted animate-pulse flex items-center justify-center">
+      <span className="text-sm text-muted-foreground">Memuat peta...</span>
+    </div>
+  ),
+});
 
 const contactSchema = z.object({
   firstName: z.string().min(2, "Nama depan wajib diisi"),
@@ -235,14 +245,16 @@ export default function KontakPage() {
           className="max-w-6xl mx-auto mt-16"
         >
           <div className="p-4 rounded-3xl border border-border/50 bg-card shadow-sm overflow-hidden">
-            <iframe
-              src="https://www.openstreetmap.org/export/embed.html?bbox=106.815,-6.225,106.835,-6.210&layer=mapnik&marker=-6.2175,106.825"
-              width="100%"
-              height="400"
-              style={{ border: 0, borderRadius: 12 }}
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-              title="Lokasi Kantor TeamVora - Jakarta Selatan"
+            <LeafletMap
+              center={[-6.2175, 106.825]}
+              zoom={15}
+              markers={[
+                {
+                  position: [-6.2175, 106.825] as [number, number],
+                  popup: "TeamVora Office - Jakarta Selatan",
+                },
+              ]}
+              className="h-[400px] w-full rounded-xl"
             />
           </div>
         </motion.div>

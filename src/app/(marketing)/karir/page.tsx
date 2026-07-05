@@ -23,8 +23,8 @@ export default function KarirPage() {
       const parsed = JSON.parse(raw);
       if (parsed?.benefits?.length) {
         benefits = parsed.benefits.map((b: any) => ({
-          name: b.name || typeof b === "string" ? b : "",
-          description: b.description || "Kami menyediakan fasilitas terbaik agar Anda dapat fokus bekerja dengan nyaman.",
+          name: typeof b === "string" ? b : (b.name || ""),
+          description: typeof b === "string" ? "" : (b.description || "Kami menyediakan fasilitas terbaik agar Anda dapat fokus bekerja dengan nyaman."),
         }));
       }
       if (parsed?.openings?.length) {

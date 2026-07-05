@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Users } from "lucide-react";
+import Image from "next/image";
 
 export default function AuthLayout({
   children,
@@ -11,9 +11,13 @@ export default function AuthLayout({
       <div className="flex flex-col gap-4 p-6 md:p-10">
         <div className="flex justify-center gap-2 md:justify-start">
           <Link href="/" className="flex items-center gap-2 font-medium group">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground transition-transform group-hover:scale-105">
-              <Users className="size-5" />
-            </div>
+            <Image
+              src="/icon.png"
+              alt="TeamVora"
+              width={32}
+              height={32}
+              className="rounded-lg transition-transform group-hover:scale-105"
+            />
             <span className="text-xl font-bold tracking-tight">TeamVora</span>
           </Link>
         </div>
@@ -34,9 +38,13 @@ export default function AuthLayout({
         {/* Branding text/quote */}
         <div className="absolute inset-0 flex flex-col justify-end p-12 text-zinc-50">
           <div className="space-y-6 max-w-lg">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/10 backdrop-blur-md border border-white/10">
-              <Users className="size-6 text-white" />
-            </div>
+            <Image
+              src="/icon.png"
+              alt="TeamVora"
+              width={48}
+              height={48}
+              className="rounded-xl bg-white/10 backdrop-blur-md border border-white/10"
+            />
             <h2 className="text-3xl font-semibold leading-tight tracking-tight">
               Platform Kolaborasi & Manajemen Tim Terbaik.
             </h2>

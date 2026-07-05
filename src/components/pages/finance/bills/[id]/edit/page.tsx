@@ -27,7 +27,7 @@ export function BillsEditPage({ basePath }: { basePath: string }) {
   const { data: bill, isLoading } = useQuery({
     queryKey: ["bill", id],
     queryFn: async () => {
-      const res = await api.get(`/bills/${id}`);
+      const res = await api.get(`/split-bills/${id}`);
       return (res.data.data ?? res.data) as SplitBill;
     },
   });
@@ -43,7 +43,7 @@ export function BillsEditPage({ basePath }: { basePath: string }) {
 
   const updateMutation = useMutation({
     mutationFn: async () => {
-      const res = await api.put(`/bills/${id}`, {
+      const res = await api.put(`/split-bills/${id}`, {
         title,
         description,
         total_amount: Number(totalAmount),
@@ -62,7 +62,7 @@ export function BillsEditPage({ basePath }: { basePath: string }) {
 
   const deleteMutation = useMutation({
     mutationFn: async () => {
-      await api.delete(`/bills/${id}`);
+      await api.delete(`/split-bills/${id}`);
     },
     onSuccess: () => {
       toast.success("Tagihan berhasil dihapus");

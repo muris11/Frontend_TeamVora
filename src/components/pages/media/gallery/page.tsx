@@ -19,12 +19,13 @@ export function GalleryPage({ basePath }: { basePath: string }) {
   const { data, isLoading } = useQuery({
     queryKey: ["media", "gallery"],
     queryFn: async () => {
-      const res = await api.get("/media?type=gallery");
+      const res = await api.get("/media/gallery");
       return res.data.data || res.data;
     },
   });
 
   const images = (Array.isArray(data) ? data : []) as TeamMedia[];
+  const validImages = images.filter((img) => !!img.file_url);
 
   return (
     <div className="space-y-6 pb-10">
@@ -64,14 +65,14 @@ export function GalleryPage({ basePath }: { basePath: string }) {
         />
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-          {images.map((img) => (
+          {validImages.map((img) => (
             <div
               key={img.id}
               className="group relative aspect-square rounded-lg overflow-hidden cursor-pointer border border-border/50 hover:ring-2 hover:ring-primary/50 transition-all"
               onClick={() => setLightbox(img)}
             >
               <img
-                src={img.file_url}
+                src={img.file_url ?? ""}
                 alt={img.name}
                 className="h-full w-full object-cover transition-transform group-hover:scale-105"
               />
@@ -101,7 +102,7 @@ export function GalleryPage({ basePath }: { basePath: string }) {
               <X className="w-5 h-5" />
             </Button>
             <img
-              src={lightbox.file_url}
+              src={lightbox.file_url ?? ""}
               alt={lightbox.name}
               className="max-h-[80vh] mx-auto rounded-lg object-contain"
             />

@@ -21,7 +21,7 @@ export default function AdminBlogsPage() {
   const { data: blogs, isLoading } = useQuery({
     queryKey: ["admin-blogs"],
     queryFn: async () => {
-      const res = await api.get("/blogs");
+      const res = await api.get("/blogs/manage");
       return res.data.data || res.data || [];
     },
   });

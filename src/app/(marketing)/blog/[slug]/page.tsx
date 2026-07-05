@@ -16,7 +16,7 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
   const { data: blog, isLoading } = useQuery({
     queryKey: ["blog", slug],
     queryFn: async () => {
-      const res = await api.get(`/blogs/public/${slug}`);
+      const res = await api.get(`/blogs/${slug}`);
       return (res.data.data || res.data) as Blog;
     },
   });

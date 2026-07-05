@@ -74,7 +74,7 @@ export default function AdminUsersPage() {
       render: (item: User) => (
         <div className="flex items-center gap-3">
           <Avatar className="h-8 w-8">
-            <AvatarImage src={item.avatar_url} alt={item.name} />
+            <AvatarImage src={item.avatar_url ?? undefined} alt={item.name} />
             <AvatarFallback>{item.name?.charAt(0)?.toUpperCase()}</AvatarFallback>
           </Avatar>
           <div>

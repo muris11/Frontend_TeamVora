@@ -68,7 +68,7 @@ export function AdminHeader() {
   const unreadCount = notifications.filter((n) => !n.read_at).length;
 
   const markReadMutation = useMutation({
-    mutationFn: (id: number) => api.post(`/notifications/${id}/read`),
+    mutationFn: (id: string) => api.post(`/notifications/${id}/read`),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["notifications"] });
     },
@@ -196,12 +196,12 @@ export function AdminHeader() {
                       }}
                     >
                       <div className="flex w-full items-start justify-between">
-                        <span className="text-sm font-medium leading-tight">{notification.title}</span>
+                        <span className="text-sm font-medium leading-tight">{(notification.data as Record<string, unknown>)?.title as string ?? "Notifikasi"}</span>
                         {!notification.read_at && (
                           <span className="mt-1 h-2 w-2 flex-shrink-0 rounded-full bg-primary" />
                         )}
                       </div>
-                      <p className="text-xs text-muted-foreground line-clamp-2">{notification.message}</p>
+                      <p className="text-xs text-muted-foreground line-clamp-2">{(notification.data as Record<string, unknown>)?.message as string ?? ""}</p>
                       <span className="text-[10px] text-muted-foreground/60">
                         {formatDate(notification.created_at)}
                       </span>
@@ -215,7 +215,7 @@ export function AdminHeader() {
           <DropdownMenu>
             <DropdownMenuTrigger className="group flex items-center gap-2.5 rounded-xl border border-border/50 bg-muted/30 py-1.5 pl-1.5 pr-3 transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] hover:border-primary/20 hover:bg-muted/50">
               <Avatar className="h-7 w-7 rounded-lg">
-                <AvatarImage src={user?.avatar_url} alt={user?.name} />
+                <AvatarImage src={user?.avatar_url ?? undefined} alt={user?.name} />
                 <AvatarFallback className="rounded-lg bg-primary/10 text-xs font-medium text-primary">
                   {user?.name?.charAt(0)?.toUpperCase() || "U"}
                 </AvatarFallback>

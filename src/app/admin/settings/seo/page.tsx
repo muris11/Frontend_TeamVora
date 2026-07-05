@@ -464,7 +464,7 @@ export default function SeoSettingsPage() {
                           : "text-muted-foreground"
                       }`}
                     >
-                      {form.og_image_url ? "✓ Terisi" : "✗ Kosong"}
+                      {form.og_image_url ? "[Terisi]" : "[Kosong]"}
                     </span>
                   </div>
                   <div className="flex items-center justify-between p-2 rounded-lg bg-muted/30">
@@ -476,7 +476,7 @@ export default function SeoSettingsPage() {
                           : "text-muted-foreground"
                       }`}
                     >
-                      {form.ga_id ? "✓ Terisi" : "✗ Kosong"}
+                      {form.ga_id ? "[Terisi]" : "[Kosong]"}
                     </span>
                   </div>
                 </div>

@@ -1,13 +1,36 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { CheckCircle2, ListTodo, Wallet, FolderOpen, ArrowRight, Zap, Target, LayoutDashboard, ShieldCheck } from "lucide-react";
+import {
+  CheckCircle2, ListTodo, Wallet, FolderOpen, ArrowRight, Zap, Target, LayoutDashboard, ShieldCheck,
+  Banknote, CreditCard, PiggyBank, Receipt, TrendingUp, TrendingDown, DollarSign, Coins,
+  CheckSquare, ClipboardList, ClipboardCheck, ListChecks, BadgeCheck,
+  Users, UserCheck, UserPlus, UserCog, UsersRound, Contact,
+  Shield, ShieldAlert, Lock, KeyRound, Fingerprint,
+  Rocket, Sparkles, Star, Stars,
+  BarChart3, BarChart4, LineChart, PieChart, Activity,
+  PlayCircle, Video, ImagePlus, Camera, Film,
+  Bell, BellRing, MessageCircle, MessageSquare, Send, Mail, Inbox,
+  Calendar, CalendarCheck, CalendarDays, Clock, Timer, AlarmClock,
+  FolderArchive, FileText, FilePlus, FileCheck, Archive,
+  Settings, Settings2, SlidersHorizontal, Cog, Wrench,
+  Building, Building2, Briefcase, Package, Store, Globe,
+  Map, MapPin, Navigation, Compass,
+  Cpu, Database, Server, Cloud, CloudUpload, HardDrive, Wifi,
+  BookOpen, BookMarked, GraduationCap, Library, Newspaper,
+  Heart, Handshake, Award, Trophy, Milestone, Flag,
+  LayoutGrid, Layers, Grid2X2, PanelLeft, AppWindow,
+  ExternalLink, QrCode, Share2, Download, Upload,
+  Sun, Moon, Palette, Brush, Pen, PenLine,
+  AlertCircle, Info, HelpCircle, Lightbulb, Flame
+} from "lucide-react";
 import Link from "next/link";
 import { PageTitle } from "@/components/shared/page-title";
 import { Button } from "@/components/ui/button";
 import { SEOHead } from "@/components/shared/seo-head";
 import { usePlatformSettings } from "@/hooks/use-platform-settings";
 import { getColorTheme } from "@/lib/colors";
+
 
 const staggerContainer = {
   hidden: { opacity: 0 },
@@ -27,7 +50,49 @@ export default function FiturPage() {
 
   const defaultFeatures: any[] = [];
 
-  const iconMap: Record<string, any> = { CheckCircle2, ListTodo, Wallet, FolderOpen, Zap, Target, LayoutDashboard, ShieldCheck };
+  const iconMap: Record<string, any> = {
+    // Finance
+    Wallet, Banknote, CreditCard, PiggyBank, Receipt, TrendingUp, TrendingDown, DollarSign, Coins,
+    // Tasks & Productivity
+    CheckSquare, CheckCircle2, ClipboardList, ClipboardCheck, ListTodo, ListChecks, BadgeCheck,
+    // People
+    Users, UserCheck, UserPlus, UserCog, UsersRound, Contact,
+    // Security
+    Shield, ShieldCheck, ShieldAlert, Lock, KeyRound, Fingerprint,
+    // Performance
+    Zap, Rocket, Sparkles, Star, Stars,
+    // Analytics
+    BarChart3, BarChart4, LineChart, PieChart, Activity,
+    // Media
+    PlayCircle, Video, Image, ImagePlus, Camera, Film,
+    // Communication
+    Bell, BellRing, MessageCircle, MessageSquare, Send, Mail, Inbox,
+    // Time
+    Calendar, CalendarCheck, CalendarDays, Clock, Timer, AlarmClock,
+    // Files
+    FolderOpen, FolderArchive, FileText, FilePlus, FileCheck, Archive,
+    // Settings
+    Settings, Settings2, SlidersHorizontal, Cog, Wrench,
+    // Business
+    Building, Building2, Briefcase, Package, Store, Globe,
+    // Location
+    Map, MapPin, Navigation, Compass,
+    // Tech
+    Cpu, Database, Server, Cloud, CloudUpload, HardDrive, Wifi,
+    // Knowledge
+    BookOpen, BookMarked, GraduationCap, Library, Newspaper,
+    // Engagement
+    Heart, Handshake, Award, Trophy, Target, Milestone, Flag,
+    // Layout
+    LayoutDashboard, LayoutGrid, Layers, Grid2X2, PanelLeft, AppWindow,
+    // Sharing
+    Link, ExternalLink, QrCode, Share2, Download, Upload, ArrowRight,
+    // Design
+    Sun, Moon, Palette, Brush, Pen, PenLine,
+    // Misc
+    AlertCircle, Info, HelpCircle, Lightbulb, Flame,
+  };
+
   let features = defaultFeatures;
   try {
     const raw = settings?.marketing?.features_content;

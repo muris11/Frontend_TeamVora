@@ -25,22 +25,22 @@ export function BillDetailPage({ basePath }: { basePath: string }) {
   const id = params.id as string;
   const queryClient = useQueryClient();
   const { user } = useAuthStore();
-  const [payingItemId, setPayingItemId] = useState<string | null>(null);
+  const [payingItemId, setPayingItemId] = useState<number | null>(null);
   const [proofFile, setProofFile] = useState<File | null>(null);
 
   const { data: bill, isLoading } = useQuery({
     queryKey: ["bill", id],
     queryFn: async () => {
-      const res = await api.get(`/bills/${id}`);
+      const res = await api.get(`/split-bills/${id}`);
       return (res.data.data ?? res.data) as SplitBill;
     },
   });
 
   const uploadProofMutation = useMutation({
-    mutationFn: async ({ itemId }: { itemId: string }) => {
+    mutationFn: async ({ itemId }: { itemId: number }) => {
       const formData = new FormData();
       if (proofFile) formData.append("proof", proofFile);
-      const res = await api.post(`/bills/items/${itemId}/pay`, formData, {
+      const res = await api.post(`/bill-items/${itemId}/pay`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       return res.data;
@@ -57,8 +57,8 @@ export function BillDetailPage({ basePath }: { basePath: string }) {
   });
 
   const verifyMutation = useMutation({
-    mutationFn: async ({ itemId }: { itemId: string }) => {
-      const res = await api.post(`/bills/items/${itemId}/verify`);
+    mutationFn: async ({ itemId }: { itemId: number }) => {
+      const res = await api.put(`/bill-items/${itemId}/verify`, { status: "paid" });
       return res.data;
     },
     onSuccess: () => {

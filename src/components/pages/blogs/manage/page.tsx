@@ -19,7 +19,7 @@ export function BlogManagePage({ basePath }: { basePath: string }) {
   const { data, isLoading } = useQuery({
     queryKey: ["blogs"],
     queryFn: async () => {
-      const res = await api.get("/blogs");
+      const res = await api.get("/blogs/manage");
       return res.data.data || res.data;
     },
   });

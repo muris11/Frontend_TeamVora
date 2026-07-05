@@ -92,7 +92,15 @@ export function DataTable<T>({
                 <TableCell key={col.key} className={col.className}>
                   {col.render
                     ? col.render(item)
-                    : String((item as Record<string, unknown>)[col.key] ?? "")}
+                    : (() => {
+                        const val = (item as Record<string, unknown>)[col.key];
+                        if (val === null || val === undefined) return "";
+                        if (typeof val === "object") {
+                          if ("name" in val) return String((val as Record<string, unknown>).name ?? "");
+                          return JSON.stringify(val);
+                        }
+                        return String(val);
+                      })()}
                 </TableCell>
               ))}
             </TableRow>

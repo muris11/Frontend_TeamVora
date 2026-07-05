@@ -62,7 +62,7 @@ export function BlogEditPage({ basePath }: { basePath: string }) {
       formData.append("content", form.content);
       formData.append("status", form.status);
       if (file) formData.append("featured_image", file);
-      const res = await api.post(`/blogs/${id}`, formData, {
+      const res = await api.put(`/blogs/${id}`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       return res.data;
