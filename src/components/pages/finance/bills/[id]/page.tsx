@@ -93,18 +93,31 @@ export function BillDetailPage({ basePath }: { basePath: string }) {
       header: "Bukti",
       render: (item: BillItem) => {
         if (item.proof_url) {
+          const isImage = /\.(jpg|jpeg|png|gif|webp)(\?.*)?$/i.test(item.proof_url);
           return (
-            <a
-              href={item.proof_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-primary underline text-sm"
-            >
-              Lihat
-            </a>
+            <div className="flex flex-col gap-1">
+              {isImage ? (
+                <a href={item.proof_url} target="_blank" rel="noopener noreferrer">
+                  <img
+                    src={item.proof_url}
+                    alt="Bukti pembayaran"
+                    className="w-16 h-16 object-cover rounded border border-border hover:opacity-80 transition-opacity cursor-pointer"
+                  />
+                </a>
+              ) : (
+                <a
+                  href={item.proof_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-primary underline text-sm flex items-center gap-1"
+                >
+                  <span>📄</span> Lihat PDF
+                </a>
+              )}
+            </div>
           );
         }
-        return "-";
+        return <span className="text-muted-foreground text-sm">-</span>;
       },
     },
     {
