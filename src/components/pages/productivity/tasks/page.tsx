@@ -47,7 +47,11 @@ export function TasksPage({ basePath }: { basePath: string }) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
       toast.success("Status tugas diperbarui");
-    }
+    },
+    onError: () => {
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      toast.error("Gagal memperbarui status tugas");
+    },
   });
 
   const reorderMutation = useMutation({
@@ -85,7 +89,9 @@ export function TasksPage({ basePath }: { basePath: string }) {
     // Determine drop position based on mouse Y within the column
     const dropY = e.clientY;
     const columnEl = e.currentTarget as HTMLElement;
-    const cards = columnEl.querySelectorAll("[data-task-card]");
+    const cards = Array.from(columnEl.querySelectorAll("[data-task-card]")).filter(
+      (el) => (el as HTMLElement).dataset.taskId !== taskId
+    );
     let insertIndex = targetColumnTasks.length;
 
     for (let i = 0; i < cards.length; i++) {
@@ -109,7 +115,8 @@ export function TasksPage({ basePath }: { basePath: string }) {
     }));
 
     // If task moved to a different column, also reindex the source column
-    if (task.status !== targetStatus) {
+    const isCrossColumn = task.status !== targetStatus;
+    if (isCrossColumn) {
       const sourceColumnTasks = tasks
         .filter((t: Task) => t.status === task.status && String(t.id) !== taskId)
         .sort((a: Task, b: Task) => (a.position ?? 0) - (b.position ?? 0));
@@ -117,20 +124,27 @@ export function TasksPage({ basePath }: { basePath: string }) {
       sourceColumnTasks.forEach((t: Task, idx: number) => {
         reorderPayload.push({ id: t.id, position: idx });
       });
-
-      // Optimistic update: move task locally
-      queryClient.setQueryData(["tasks", statusFilter, priorityFilter], (old: typeof response) => {
-        if (!old) return old;
-        return {
-          ...old,
-          data: old.data.map((t: Task) =>
-            String(t.id) === taskId
-              ? { ...t, status: targetStatus as Task["status"], position: insertIndex }
-              : t
-          ),
-        };
-      });
     }
+
+    // Optimistic update: update positions locally
+    const reorderMap = new Map(reorderPayload.map((r) => [String(r.id), r.position]));
+    queryClient.setQueryData(["tasks", statusFilter, priorityFilter], (old: typeof response) => {
+      if (!old) return old;
+      return {
+        ...old,
+        data: old.data.map((t: Task) => {
+          const Stringid = String(t.id);
+          if (reorderMap.has(Stringid)) {
+            const newPos = reorderMap.get(Stringid)!;
+            if (isCrossColumn && Stringid === taskId) {
+              return { ...t, status: targetStatus as Task["status"], position: newPos };
+            }
+            return { ...t, position: newPos };
+          }
+          return t;
+        }),
+      };
+    });
 
     // Persist to server
     reorderMutation.mutate({ tasks: reorderPayload });
@@ -214,6 +228,7 @@ export function TasksPage({ basePath }: { basePath: string }) {
                 <Card 
                   key={task.id}
                   data-task-card
+                  data-task-id={String(task.id)}
                   draggable 
                   onDragStart={(e) => handleDragStart(e as unknown as React.DragEvent, task.id)}
                   className="cursor-grab hover:border-primary/50 transition-colors active:cursor-grabbing" 
@@ -266,6 +281,7 @@ export function TasksPage({ basePath }: { basePath: string }) {
                 <Card 
                   key={task.id}
                   data-task-card
+                  data-task-id={String(task.id)}
                   draggable 
                   onDragStart={(e) => handleDragStart(e as unknown as React.DragEvent, task.id)}
                   className="cursor-grab border-blue-200 dark:border-blue-900 hover:border-blue-500/50 transition-colors active:cursor-grabbing" 
@@ -318,6 +334,7 @@ export function TasksPage({ basePath }: { basePath: string }) {
                 <Card 
                   key={task.id}
                   data-task-card
+                  data-task-id={String(task.id)}
                   draggable 
                   onDragStart={(e) => handleDragStart(e as unknown as React.DragEvent, task.id)}
                   className="cursor-grab border-green-200 dark:border-green-900 hover:border-green-500/50 opacity-75 transition-colors active:cursor-grabbing" 

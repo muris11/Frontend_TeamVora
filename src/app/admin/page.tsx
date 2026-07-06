@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   FolderKanban,
   Users,
@@ -87,6 +87,7 @@ const storageData = [
 
 export default function AdminDashboardPage() {
   const [activeUsers, setActiveUsers] = useState(0);
+  const queryClient = useQueryClient();
 
   const { data: stats, isLoading } = useQuery({
     queryKey: ["admin-stats"],
@@ -110,6 +111,7 @@ export default function AdminDashboardPage() {
       if (typeof data.active_users === "number") {
         setActiveUsers(data.active_users);
       }
+      queryClient.invalidateQueries({ queryKey: ["admin-stats"] });
     },
   });
 
