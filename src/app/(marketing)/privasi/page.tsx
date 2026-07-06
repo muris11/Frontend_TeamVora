@@ -1,5 +1,6 @@
 "use client";
 
+import { motion } from "motion/react";
 import { usePlatformSettings } from "@/hooks/use-platform-settings";
 import { PageTitle } from "@/components/shared/page-title";
 
@@ -38,7 +39,6 @@ export default function PrivasiPage() {
     if (parsed) {
       content = parsed;
     } else {
-      // Legacy fallback
       content.sections = [
         { title: "Kebijakan Privasi", content: settings.marketing.privacy_content }
       ];
@@ -46,20 +46,27 @@ export default function PrivasiPage() {
   }
 
   return (
-    <main className="min-h-screen bg-background">
+    <main className="min-h-screen bg-background pt-32 pb-24">
       <PageTitle title="Kebijakan Privasi - TeamVora" />
 
-      <section className="pt-32 pb-20 border-b border-border/50">
-        <div className="container mx-auto px-6 max-w-4xl text-center">
-          <h1 className="text-4xl font-bold tracking-tight mb-4">Kebijakan Privasi</h1>
+      <div className="container mx-auto px-6 max-w-4xl">
+        <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-center mb-16"
+        >
+          <h1 className="text-4xl md:text-5xl font-extrabold tracking-tighter mb-4">Kebijakan Privasi</h1>
           <p className="text-muted-foreground">Terakhir diperbarui: {content.last_updated || "3 Juli 2026"}</p>
-        </div>
-      </section>
+        </motion.div>
 
-      <section className="py-16">
-        <div className="container mx-auto px-6 max-w-4xl space-y-12">
+        <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="space-y-12 bg-card p-8 md:p-12 rounded-3xl border border-border/50 shadow-sm"
+        >
           {content.sections.length === 0 ? (
-            <div className="text-center text-muted-foreground">
+            <div className="text-center text-muted-foreground py-12">
               Konten kebijakan privasi sedang diperbarui.
             </div>
           ) : (
@@ -69,7 +76,7 @@ export default function PrivasiPage() {
                   <h2 className="text-2xl font-bold tracking-tight">{section.title}</h2>
                 )}
                 <div
-                  className="prose prose-slate dark:prose-invert max-w-none"
+                  className="prose prose-slate dark:prose-invert max-w-none leading-relaxed"
                   dangerouslySetInnerHTML={{ __html: section.content }}
                 />
               </div>
@@ -77,18 +84,18 @@ export default function PrivasiPage() {
           )}
 
           {content.contact_email && (
-            <div className="mt-12 pt-8 border-t border-border/50">
-              <h3 className="text-xl font-semibold mb-4">Hubungi Kami</h3>
+            <div className="pt-8 border-t border-border/50">
+              <h3 className="text-xl font-bold mb-4">Hubungi Kami</h3>
               <p className="text-muted-foreground">
                 Jika Anda memiliki pertanyaan mengenai Kebijakan Privasi ini, silakan hubungi kami di:{" "}
-                <a href={`mailto:${content.contact_email}`} className="text-primary hover:underline font-medium">
+                <a href={`mailto:${content.contact_email}`} className="text-primary hover:underline font-semibold">
                   {content.contact_email}
                 </a>
               </p>
             </div>
           )}
-        </div>
-      </section>
+        </motion.div>
+      </div>
     </main>
   );
 }

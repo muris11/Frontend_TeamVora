@@ -1,11 +1,16 @@
 import type { Metadata } from "next";
-import { Geist } from "next/font/google";
+import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { QueryProvider } from "@/providers/query-provider";
 import { AppToaster } from "@/providers/toaster";
 
 const geist = Geist({
   variable: "--font-sans",
+  subsets: ["latin"],
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
   subsets: ["latin"],
 });
 
@@ -30,7 +35,7 @@ export default function RootLayout({
       <head>
         <link rel="icon" href="/icon.png" sizes="any" />
       </head>
-      <body className={`${geist.variable} font-sans`}>
+      <body className={`${geist.variable} ${geistMono.variable} font-sans`}>
         <QueryProvider>
           {children}
           <AppToaster />

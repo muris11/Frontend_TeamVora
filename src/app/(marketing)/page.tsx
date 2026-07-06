@@ -3,7 +3,7 @@
 import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import Image from "next/image";
-import { motion, useReducedMotion } from "framer-motion";
+import { motion, useReducedMotion } from "motion/react";
 import {
   ArrowRight,
   Wallet, Banknote, CreditCard, PiggyBank, Receipt, TrendingUp, TrendingDown, DollarSign, Coins,
@@ -202,11 +202,17 @@ export default function MarketingPage() {
               variants={fadeUpVariants}
               className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4"
             >
-              <Button size="lg" className="h-14 px-8 text-base font-semibold rounded-full w-full sm:w-auto shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-all hover:-translate-y-0.5 group" asChild>
-                <Link href={heroCtaLink}>
-                  {heroCtaText}
-                  <ArrowRight data-icon="inline-end" className="group-hover:translate-x-1 transition-transform" />
-                </Link>
+              <Button 
+                size="lg" 
+                className="h-14 px-8 text-base font-semibold rounded-full w-full sm:w-auto shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-all group" 
+                asChild
+              >
+                <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                  <Link href={heroCtaLink}>
+                    {heroCtaText}
+                    <ArrowRight data-icon="inline-end" className="group-hover:translate-x-1 transition-transform" />
+                  </Link>
+                </motion.div>
               </Button>
               <Button size="lg" variant="outline" className="h-14 px-8 text-base font-semibold rounded-full w-full sm:w-auto hover:bg-secondary/50">
                 <PlayCircle data-icon="inline-start" className="text-muted-foreground" />
@@ -215,23 +221,23 @@ export default function MarketingPage() {
             </motion.div>
           </motion.div>
 
-          <motion.div 
-            className="mt-16 relative mx-auto max-w-3xl rounded-xl md:rounded-2xl border bg-background/50 p-2 md:p-3 shadow-2xl backdrop-blur-sm"
-            initial={shouldReduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 80, rotateX: 10 }}
-            animate={{ opacity: 1, y: 0, rotateX: 0 }}
-            transition={{ duration: 1, delay: 0.4, ease: [0.22, 1, 0.36, 1] }}
-            style={{ perspective: "1000px" }}
-          >
-            <div className="rounded-xl md:rounded-2xl overflow-hidden border bg-background shadow-sm ring-1 ring-border/50 relative aspect-[16/9] flex items-center justify-center bg-muted/20">
-              <Image 
-                src="/hero_3d.png" 
-                alt="Dashboard Interface" 
-                fill
-                className="object-contain p-2 md:p-6 drop-shadow-2xl"
-                priority
-              />
-            </div>
-          </motion.div>
+            <motion.div 
+              className="mt-16 relative mx-auto max-w-3xl rounded-3xl border bg-background/50 p-2 md:p-3 shadow-2xl backdrop-blur-sm"
+              initial={shouldReduceMotion ? { opacity: 1, y: 0 } : { opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
+            >
+              <div className="rounded-2xl md:rounded-3xl overflow-hidden border bg-background shadow-sm ring-1 ring-border/50 relative aspect-[16/9] flex items-center justify-center bg-muted/20">
+                <Image 
+                  src="/hero_3d.png" 
+                  alt="Dashboard Interface" 
+                  fill
+                  className="object-contain p-2 md:p-6 drop-shadow-2xl"
+                  priority
+                />
+              </div>
+            </motion.div>
+
         </div>
       </section>
 
@@ -268,30 +274,32 @@ export default function MarketingPage() {
               )}
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:gap-6 max-w-6xl mx-auto">
-              {features.map((feature, i) => (
-                <motion.div
-                  key={i}
-                  initial="hidden"
-                  whileInView="visible"
-                  viewport={{ once: true, margin: "-50px" }}
-                  variants={scaleInVariants}
-                  className={cn("h-full", feature.col)}
-                >
-                  <Card className="h-full overflow-hidden flex flex-col hover:shadow-xl transition-all duration-300 group border-border/50 hover:border-border">
-                    <CardHeader className="flex-1 space-y-4">
-                      <div className={cn("h-12 w-12 rounded-2xl flex items-center justify-center border", feature.bg)}>
-                        <feature.icon className={cn("h-6 w-6", feature.color)} />
-                      </div>
-                      <div>
-                        <CardTitle className="text-xl mb-2">{feature.title}</CardTitle>
-                        <CardDescription className="text-base">{feature.desc}</CardDescription>
-                      </div>
-                    </CardHeader>
-                    <div className="absolute inset-0 bg-gradient-to-br from-transparent to-muted/50 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
-                  </Card>
-                </motion.div>
-              ))}
+            <div className="grid grid-cols-1 md:grid-cols-6 gap-4 md:gap-6 max-w-6xl mx-auto">
+              {features.map((feature, i) => {
+                  const isLarge = i % 3 === 0;
+                  return (
+                    <motion.div
+                      key={i}
+                      initial="hidden"
+                      whileInView="visible"
+                      viewport={{ once: true, margin: "-50px" }}
+                      variants={scaleInVariants}
+                      className={cn("h-full", isLarge ? "md:col-span-3" : "md:col-span-2")}
+                    >
+                      <Card className="h-full overflow-hidden flex flex-col hover:shadow-lg transition-all duration-300 group border-border/50 hover:border-primary/20">
+                        <CardHeader className="flex-1 space-y-4">
+                          <div className={cn("h-12 w-12 rounded-2xl flex items-center justify-center border", feature.bg)}>
+                            <feature.icon className={cn("h-6 w-6", feature.color)} />
+                          </div>
+                          <div>
+                            <CardTitle className="text-xl mb-2">{feature.title}</CardTitle>
+                            <CardDescription className="text-base">{feature.desc}</CardDescription>
+                          </div>
+                        </CardHeader>
+                      </Card>
+                    </motion.div>
+                  );
+              })}
             </div>
           </div>
         </section>
