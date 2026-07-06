@@ -81,7 +81,10 @@ export function TasksPage({ basePath }: { basePath: string }) {
     const task = tasks.find((t: Task) => String(t.id) === taskId);
     if (!task) return;
 
-    // Get target column tasks sorted by position
+    const isCrossColumn = task.status !== targetStatus;
+    const oldPosition = task.position ?? 0;
+
+    // Get target column tasks sorted by position (excluding dragged task)
     const targetColumnTasks = tasks
       .filter((t: Task) => t.status === targetStatus && String(t.id) !== taskId)
       .sort((a: Task, b: Task) => (a.position ?? 0) - (b.position ?? 0));
@@ -104,26 +107,65 @@ export function TasksPage({ basePath }: { basePath: string }) {
       }
     }
 
-    // Build new array for the target column
-    const newColumnTasks = [...targetColumnTasks];
-    newColumnTasks.splice(insertIndex, 0, { ...task, status: targetStatus as Task["status"] });
+    // Only include tasks whose position actually changed
+    const reorderPayload: { id: string | number; position: number }[] = [];
 
-    // Assign positions
-    const reorderPayload = newColumnTasks.map((t, idx) => ({
-      id: t.id,
-      position: idx,
-    }));
-
-    // If task moved to a different column, also reindex the source column
-    const isCrossColumn = task.status !== targetStatus;
     if (isCrossColumn) {
+      // Cross-column: dragged task gets new position
+      reorderPayload.push({ id: task.id, position: insertIndex });
+
+      // Target column: tasks at/after insertIndex shift up by +1
+      for (let i = insertIndex; i < targetColumnTasks.length; i++) {
+        const t = targetColumnTasks[i];
+        if ((t.position ?? 0) !== i + 1) {
+          reorderPayload.push({ id: t.id, position: i + 1 });
+        }
+      }
+
+      // Source column: tasks after oldPosition shift down by -1
       const sourceColumnTasks = tasks
         .filter((t: Task) => t.status === task.status && String(t.id) !== taskId)
         .sort((a: Task, b: Task) => (a.position ?? 0) - (b.position ?? 0));
 
-      sourceColumnTasks.forEach((t: Task, idx: number) => {
-        reorderPayload.push({ id: t.id, position: idx });
-      });
+      for (let i = 0; i < sourceColumnTasks.length; i++) {
+        const t = sourceColumnTasks[i];
+        const expectedPos = (t.position ?? 0) > oldPosition ? (t.position ?? 0) - 1 : (t.position ?? 0);
+        if (expectedPos !== i) {
+          reorderPayload.push({ id: t.id, position: i });
+        }
+      }
+    } else {
+      // Intra-column: determine shift direction
+      if (insertIndex < oldPosition) {
+        // Moving up: tasks between insertIndex and oldPosition shift down by +1
+        for (let i = insertIndex; i < targetColumnTasks.length; i++) {
+          const t = targetColumnTasks[i];
+          const oldPos = t.position ?? 0;
+          if (oldPos <= oldPosition) {
+            const expectedPos = i + 1;
+            if (oldPos !== expectedPos) {
+              reorderPayload.push({ id: t.id, position: expectedPos });
+            }
+          }
+        }
+      } else if (insertIndex > oldPosition) {
+        // Moving down: tasks between oldPosition and insertIndex shift up by -1
+        for (let i = 0; i < targetColumnTasks.length; i++) {
+          const t = targetColumnTasks[i];
+          const oldPos = t.position ?? 0;
+          if (oldPos >= oldPosition && oldPos <= insertIndex) {
+            const expectedPos = i;
+            if (oldPos !== expectedPos) {
+              reorderPayload.push({ id: t.id, position: expectedPos });
+            }
+          }
+        }
+      }
+    }
+
+    // Always include the dragged task itself
+    if (!reorderPayload.some((r) => String(r.id) === taskId)) {
+      reorderPayload.push({ id: task.id, position: insertIndex });
     }
 
     // Optimistic update: update positions locally
@@ -146,8 +188,10 @@ export function TasksPage({ basePath }: { basePath: string }) {
       };
     });
 
-    // Persist to server
-    reorderMutation.mutate({ tasks: reorderPayload });
+    // Persist to server (only changed tasks)
+    if (reorderPayload.length > 0) {
+      reorderMutation.mutate({ tasks: reorderPayload });
+    }
   };
 
   const sortTasks = (list: Task[]) =>
