@@ -100,7 +100,10 @@ export default function LandingPage() {
 
   useEffect(() => {
     if (settings?.marketing) {
-      setForm((prev) => ({ ...prev, ...settings.marketing }));
+      const cleanData = Object.fromEntries(
+        Object.entries(settings.marketing).map(([k, v]) => [k, v ?? ""])
+      );
+      setForm((prev) => ({ ...prev, ...cleanData as any }));
     }
   }, [settings]);
 
@@ -208,36 +211,36 @@ export default function LandingPage() {
             <CardContent className="space-y-4">
               <div className="grid gap-2">
                 <Label>Judul Hero</Label>
-                <Input value={form.hero_title} onChange={(e) => setForm({ ...form, hero_title: e.target.value })} placeholder="Manajemen Tim Modern" />
+                <Input value={form.hero_title || ""} onChange={(e) => setForm({ ...form, hero_title: e.target.value })} placeholder="Manajemen Tim Modern" />
               </div>
               <div className="grid gap-2">
                 <Label>Subtitle Hero</Label>
-                <Textarea value={form.hero_subtitle} onChange={(e) => setForm({ ...form, hero_subtitle: e.target.value })} placeholder="Platform kolaborasi untuk tim produktif..." />
+                <Textarea value={form.hero_subtitle || ""} onChange={(e) => setForm({ ...form, hero_subtitle: e.target.value })} placeholder="Platform kolaborasi untuk tim produktif..." />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="grid gap-2">
                   <Label>Teks CTA 1</Label>
-                  <Input value={form.hero_cta_text} onChange={(e) => setForm({ ...form, hero_cta_text: e.target.value })} placeholder="Mulai Gratis" />
+                  <Input value={form.hero_cta_text || ""} onChange={(e) => setForm({ ...form, hero_cta_text: e.target.value })} placeholder="Mulai Gratis" />
                 </div>
                 <div className="grid gap-2">
                   <Label>Link CTA 1</Label>
-                  <Input value={form.hero_cta_link} onChange={(e) => setForm({ ...form, hero_cta_link: e.target.value })} placeholder="/register" />
+                  <Input value={form.hero_cta_link || ""} onChange={(e) => setForm({ ...form, hero_cta_link: e.target.value })} placeholder="/register" />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="grid gap-2">
                   <Label>Teks CTA 2</Label>
-                  <Input value={form.hero_cta2_text} onChange={(e) => setForm({ ...form, hero_cta2_text: e.target.value })} placeholder="Hubungi Sales" />
+                  <Input value={form.hero_cta2_text || ""} onChange={(e) => setForm({ ...form, hero_cta2_text: e.target.value })} placeholder="Hubungi Sales" />
                 </div>
                 <div className="grid gap-2">
                   <Label>Link CTA 2</Label>
-                  <Input value={form.hero_cta2_link} onChange={(e) => setForm({ ...form, hero_cta2_link: e.target.value })} placeholder="/contact" />
+                  <Input value={form.hero_cta2_link || ""} onChange={(e) => setForm({ ...form, hero_cta2_link: e.target.value })} placeholder="/contact" />
                 </div>
               </div>
               <div className="grid gap-2">
                 <Label>Gambar Hero</Label>
                 <div className="flex gap-2">
-                  <Input value={form.hero_image_url} onChange={(e) => setForm({ ...form, hero_image_url: e.target.value })} placeholder="/hero_3d.png" />
+                  <Input value={form.hero_image_url || ""} onChange={(e) => setForm({ ...form, hero_image_url: e.target.value })} placeholder="/hero_3d.png" />
                   <Button variant="outline" onClick={() => setActivePicker("hero_image")}>
                     Pilih Media
                   </Button>
@@ -263,7 +266,7 @@ export default function LandingPage() {
             <CardContent className="space-y-4">
               <div className="grid gap-2">
                 <Label>Judul Section Fitur</Label>
-                <Input value={form.features_title} onChange={(e) => setForm({ ...form, features_title: e.target.value })} placeholder="Mengapa Memilih Kami?" />
+                <Input value={form.features_title || ""} onChange={(e) => setForm({ ...form, features_title: e.target.value })} placeholder="Mengapa Memilih Kami?" />
               </div>
               {features.map((f, idx) => (
                 <div key={idx} className="border rounded-xl p-4 space-y-3 bg-muted/20">
@@ -274,7 +277,7 @@ export default function LandingPage() {
                   <div className="grid grid-cols-2 gap-3">
                     <div className="grid gap-2">
                       <Label className="text-xs">Judul</Label>
-                      <Input value={f.title} onChange={(e) => updateFeature(idx, "title", e.target.value)} />
+                      <Input value={f.title || ""} onChange={(e) => updateFeature(idx, "title", e.target.value)} />
                     </div>
                     <div className="grid gap-2">
                       <Label className="text-xs">Ikon</Label>
@@ -311,7 +314,7 @@ export default function LandingPage() {
             <CardContent className="space-y-4">
               <div className="grid gap-2">
                 <Label>Judul Section Testimoni</Label>
-                <Input value={form.testimonials_title} onChange={(e) => setForm({ ...form, testimonials_title: e.target.value })} placeholder="Apa Kata Mereka?" />
+                <Input value={form.testimonials_title || ""} onChange={(e) => setForm({ ...form, testimonials_title: e.target.value })} placeholder="Apa Kata Mereka?" />
               </div>
               {testimonials.map((t, idx) => (
                 <div key={idx} className="border rounded-xl p-4 space-y-3 bg-muted/20">
@@ -320,10 +323,10 @@ export default function LandingPage() {
                     <Button variant="ghost" size="icon-xs" onClick={() => removeTestimonial(idx)}><Trash2 className="w-3 h-3" /></Button>
                   </div>
                   <div className="grid grid-cols-2 gap-3">
-                    <div className="grid gap-2"><Label className="text-xs">Nama</Label><Input value={t.name} onChange={(e) => updateTestimonial(idx, "name", e.target.value)} /></div>
-                    <div className="grid gap-2"><Label className="text-xs">Jabatan</Label><Input value={t.role} onChange={(e) => updateTestimonial(idx, "role", e.target.value)} /></div>
+                    <div className="grid gap-2"><Label className="text-xs">Nama</Label><Input value={t.name || ""} onChange={(e) => updateTestimonial(idx, "name", e.target.value)} /></div>
+                    <div className="grid gap-2"><Label className="text-xs">Jabatan</Label><Input value={t.role || ""} onChange={(e) => updateTestimonial(idx, "role", e.target.value)} /></div>
                   </div>
-                  <div className="grid gap-2"><Label className="text-xs">Ulasan</Label><Textarea value={t.quote} onChange={(e) => updateTestimonial(idx, "quote", e.target.value)} /></div>
+                  <div className="grid gap-2"><Label className="text-xs">Ulasan</Label><Textarea value={t.quote || ""} onChange={(e) => updateTestimonial(idx, "quote", e.target.value)} /></div>
                 </div>
               ))}
               {testimonials.length === 0 && <p className="text-sm text-muted-foreground text-center py-4">Belum ada testimoni.</p>}
@@ -347,7 +350,7 @@ export default function LandingPage() {
             <CardContent className="space-y-4">
               {clientLogos.map((logo, idx) => (
                 <div key={idx} className="flex items-center gap-2">
-                  <Input value={logo} onChange={(e) => updateClientLogo(idx, e.target.value)} placeholder="Nama Perusahaan (Teks/Logo)" className="flex-1" />
+                  <Input value={logo || ""} onChange={(e) => updateClientLogo(idx, e.target.value)} placeholder="Nama Perusahaan (Teks/Logo)" className="flex-1" />
                   <Button variant="ghost" size="icon-xs" onClick={() => removeClientLogo(idx)}><Trash2 className="w-3 h-3" /></Button>
                 </div>
               ))}
@@ -368,7 +371,7 @@ export default function LandingPage() {
             <CardContent className="space-y-4">
               <div className="grid gap-2">
                 <Label>Teks Footer</Label>
-                <Input value={form.footer_text} onChange={(e) => setForm({ ...form, footer_text: e.target.value })} placeholder="© 2026 TeamVora. All rights reserved." />
+                <Input value={form.footer_text || ""} onChange={(e) => setForm({ ...form, footer_text: e.target.value })} placeholder="© 2026 TeamVora. All rights reserved." />
               </div>
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
@@ -377,8 +380,8 @@ export default function LandingPage() {
                 </div>
                 {navLinks.map((l, idx) => (
                   <div key={idx} className="flex items-center gap-2">
-                    <Input value={l.label} onChange={(e) => updateNavLink(idx, "label", e.target.value)} placeholder="Label" className="flex-1" />
-                    <Input value={l.href} onChange={(e) => updateNavLink(idx, "href", e.target.value)} placeholder="/path" className="flex-1" />
+                    <Input value={l.label || ""} onChange={(e) => updateNavLink(idx, "label", e.target.value)} placeholder="Label" className="flex-1" />
+                    <Input value={l.href || ""} onChange={(e) => updateNavLink(idx, "href", e.target.value)} placeholder="/path" className="flex-1" />
                     <Button variant="ghost" size="icon-xs" onClick={() => removeNavLink(idx)}><Trash2 className="w-3 h-3" /></Button>
                   </div>
                 ))}
@@ -411,3 +414,4 @@ export default function LandingPage() {
     </div>
   );
 }
+

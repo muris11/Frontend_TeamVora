@@ -25,6 +25,7 @@ export function MarketingNavbar() {
         { label: "Fitur", href: "/fitur" },
         { label: "Blog", href: "/blog" },
         { label: "Kontak", href: "/kontak" },
+        { label: "Dokumentasi", href: "https://docs.teamvora.web.id" },
       ];
 
   useEffect(() => {

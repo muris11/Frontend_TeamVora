@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -17,6 +17,7 @@ import { Separator } from "@/components/ui/separator";
 import { PageTitle } from "@/components/shared/page-title";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { MediaPicker } from "@/components/shared/media-picker";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
 
@@ -24,6 +25,7 @@ const profileSchema = z.object({
   name: z.string().min(2, "Nama minimal 2 karakter"),
   email: z.string().email("Email tidak valid"),
   phone: z.string().optional(),
+  avatar_url: z.string().url().optional(),
 });
 
 type ProfileForm = z.infer<typeof profileSchema>;
@@ -41,7 +43,7 @@ type PasswordForm = z.infer<typeof passwordSchema>;
 
 export default function ProfilePage() {
   const { user, setAuth, token } = useAuthStore();
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [showMediaPicker, setShowMediaPicker] = useState(false);
 
   const profileForm = useForm<ProfileForm>({
     resolver: zodResolver(profileSchema),
@@ -63,21 +65,6 @@ export default function ProfilePage() {
     onError: () => toast.error("Gagal memperbarui profil"),
   });
 
-  const uploadAvatarMutation = useMutation({
-    mutationFn: async (file: File) => {
-      const formData = new FormData();
-      formData.append("avatar", file);
-      const res = await api.post("/profile/avatar", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-      return res.data.data || res.data;
-    },
-    onSuccess: (updated) => {
-      if (token) setAuth(updated, token);
-      toast.success("Avatar berhasil diperbarui");
-    },
-    onError: () => toast.error("Gagal mengunggah avatar. Maksimal 2MB."),
-  });
 
   const updatePasswordMutation = useMutation({
     mutationFn: (data: PasswordForm) => api.put("/password", data),
@@ -109,7 +96,7 @@ export default function ProfilePage() {
               <div className="flex justify-center -mt-12 mb-4">
                 <div 
                   className="relative group cursor-pointer"
-                  onClick={() => fileInputRef.current?.click()}
+                  onClick={() => setShowMediaPicker(true)}
                 >
                   <Avatar className="w-24 h-24 border-4 border-background shadow-sm">
                     <AvatarImage src={user?.avatar_url || ""} />
@@ -117,25 +104,22 @@ export default function ProfilePage() {
                       {user?.name?.charAt(0).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
-                  <div className={`absolute inset-0 bg-black/40 rounded-full flex items-center justify-center transition-opacity ${uploadAvatarMutation.isPending ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}>
-                    {uploadAvatarMutation.isPending ? (
+                  <div className={`absolute inset-0 bg-black/40 rounded-full flex items-center justify-center transition-opacity ${updateProfileMutation.isPending ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}>
+                    {updateProfileMutation.isPending ? (
                       <Loader2 className="w-6 h-6 text-white animate-spin" />
                     ) : (
                       <Camera className="w-6 h-6 text-white" />
                     )}
                   </div>
-                  <input 
-                    type="file" 
-                    className="hidden" 
-                    ref={fileInputRef} 
-                    accept="image/*"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        uploadAvatarMutation.mutate(file);
-                      }
-                      e.target.value = '';
-                    }}
+                  <MediaPicker 
+                    open={showMediaPicker} 
+                    onOpenChange={setShowMediaPicker} 
+                    onSelect={(url) => {
+                      updateProfileMutation.mutate({
+                        ...profileForm.getValues(),
+                        avatar_url: url
+                      });
+                    }} 
                   />
                 </div>
               </div>

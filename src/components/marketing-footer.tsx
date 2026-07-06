@@ -88,6 +88,7 @@ export function MarketingFooter() {
                   <Link href="/blog" className="hover:text-foreground transition-colors">Blog & Artikel</Link>
                   <Link href="/panduan" className="hover:text-foreground transition-colors">Panduan Pengguna</Link>
                   <Link href="/bantuan" className="hover:text-foreground transition-colors">Pusat Bantuan</Link>
+                  <a href="https://docs.teamvora.web.id" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">Dokumentasi API</a>
                 </div>
               </div>
             </>

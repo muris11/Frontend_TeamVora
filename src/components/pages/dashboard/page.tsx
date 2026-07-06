@@ -1,7 +1,8 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { ArrowDownRight, ArrowUpRight, Wallet, TrendingDown, CheckCircle2, Clock, AlertCircle, FileText, Image as ImageIcon, Send, Activity, Users } from "lucide-react";
+import { ArrowDownRight, ArrowUpRight, Wallet, TrendingDown, CheckCircle2, Clock, AlertCircle, FileText, Image as ImageIcon, Send, Activity, Users, PieChart as PieChartIcon, BarChart3 } from "lucide-react";
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
 import api from "@/lib/api";
 import { useAuthStore } from "@/stores/auth-store";
 import { DashboardStats } from "@/types";
@@ -51,6 +52,8 @@ export function DashboardPage({ basePath }: { basePath: string }) {
 
   const stats = data as DashboardStats | undefined;
   const currentDate = format(new Date(), "EEEE, dd MMMM yyyy", { locale: id });
+
+  const TASK_COLORS = ['#cbd5e1', '#3b82f6', '#f59e0b', '#10b981']; // slate-300, blue-500, amber-500, emerald-500
 
   return (
     <div className="space-y-8 pb-10">
@@ -148,6 +151,100 @@ export function DashboardPage({ basePath }: { basePath: string }) {
             </Card>
           </>
         )}
+      </div>
+
+      {/* Charts Section */}
+      <div className="grid gap-6 lg:grid-cols-3">
+        <Card className="col-span-1 lg:col-span-2 border-border/50 shadow-sm">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <div className="space-y-1">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <BarChart3 className="w-5 h-5 text-primary" /> Tren Arus Kas
+              </CardTitle>
+              <CardDescription>Pemasukan vs Pengeluaran (6 Bulan Terakhir)</CardDescription>
+            </div>
+          </CardHeader>
+          <CardContent>
+            {isLoading ? (
+              <Skeleton className="w-full h-[300px] rounded-xl" />
+            ) : stats?.chart_data?.cash_flow && stats.chart_data.cash_flow.length > 0 ? (
+              <div className="h-[300px] w-full mt-4">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={stats.chart_data.cash_flow} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                    <defs>
+                      <linearGradient id="colorIn" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
+                        <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                      </linearGradient>
+                      <linearGradient id="colorOut" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#f43f5e" stopOpacity={0.3}/>
+                        <stop offset="95%" stopColor="#f43f5e" stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
+                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12 }} dy={10} />
+                    <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12 }} tickFormatter={(val) => `Rp${val / 1000}k`} />
+                    <Tooltip 
+                      formatter={(value: any) => formatCurrency(value)}
+                      contentStyle={{ borderRadius: '12px', border: '1px solid hsl(var(--border))' }}
+                    />
+                    <Legend iconType="circle" wrapperStyle={{ paddingTop: '20px' }} />
+                    <Area type="monotone" name="Pemasukan" dataKey="in" stroke="#10b981" strokeWidth={3} fillOpacity={1} fill="url(#colorIn)" />
+                    <Area type="monotone" name="Pengeluaran" dataKey="out" stroke="#f43f5e" strokeWidth={3} fillOpacity={1} fill="url(#colorOut)" />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            ) : (
+              <div className="h-[300px] flex items-center justify-center text-muted-foreground bg-muted/20 rounded-xl border border-dashed border-border/50">
+                Belum ada data keuangan
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card className="col-span-1 border-border/50 shadow-sm">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <div className="space-y-1">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <PieChartIcon className="w-5 h-5 text-primary" /> Distribusi Tugas
+              </CardTitle>
+              <CardDescription>Berdasarkan Status</CardDescription>
+            </div>
+          </CardHeader>
+          <CardContent className="flex flex-col items-center justify-center">
+            {isLoading ? (
+              <Skeleton className="w-full h-[300px] rounded-xl" />
+            ) : stats?.chart_data?.task_distribution && stats.chart_data.task_distribution.some(d => d.value > 0) ? (
+              <div className="h-[300px] w-full mt-4">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={stats.chart_data.task_distribution}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={60}
+                      outerRadius={90}
+                      paddingAngle={5}
+                      dataKey="value"
+                    >
+                      {stats.chart_data.task_distribution.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={TASK_COLORS[index % TASK_COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip 
+                      contentStyle={{ borderRadius: '12px', border: '1px solid hsl(var(--border))' }}
+                      itemStyle={{ color: 'hsl(var(--foreground))' }}
+                    />
+                    <Legend iconType="circle" />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            ) : (
+              <div className="h-[300px] w-full flex items-center justify-center text-muted-foreground bg-muted/20 rounded-xl border border-dashed border-border/50 mt-4">
+                Belum ada tugas
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
 
       {/* Quick Access Grid */}

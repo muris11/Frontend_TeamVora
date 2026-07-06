@@ -147,7 +147,7 @@ export default function TentangPage() {
             <Button variant="outline" size="sm" onClick={addStat} className="rounded-lg"><Plus className="w-4 h-4 mr-1" />Tambah</Button>
           </CardHeader>
           <CardContent className="space-y-4">
-            {aboutContent.stats.map((s, idx) => (
+            {(aboutContent.stats || []).map((s, idx) => (
               <div key={idx} className="border rounded-xl p-4 space-y-3 bg-muted/20">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-medium text-muted-foreground">Stat #{idx + 1}</span>
@@ -160,7 +160,7 @@ export default function TentangPage() {
                 </div>
               </div>
             ))}
-            {aboutContent.stats.length === 0 && <p className="text-sm text-muted-foreground text-center py-4">Belum ada statistik.</p>}
+            {(aboutContent.stats || []).length === 0 && <p className="text-sm text-muted-foreground text-center py-4">Belum ada statistik.</p>}
           </CardContent>
         </Card>
 
@@ -170,7 +170,7 @@ export default function TentangPage() {
             <Button variant="outline" size="sm" onClick={addValue} className="rounded-lg"><Plus className="w-4 h-4 mr-1" />Tambah</Button>
           </CardHeader>
           <CardContent className="space-y-4">
-            {aboutContent.values.map((v, idx) => (
+            {(aboutContent.values || []).map((v, idx) => (
               <div key={idx} className="border rounded-xl p-4 space-y-3 bg-muted/20">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-medium text-muted-foreground">Nilai #{idx + 1}</span>
@@ -183,7 +183,7 @@ export default function TentangPage() {
                 <div className="grid gap-2"><Label className="text-xs">Deskripsi</Label><RichTextEditor value={v.description || ""} onChange={(val) => updateValue(idx, "description", val)} /></div>
               </div>
             ))}
-            {aboutContent.values.length === 0 && <p className="text-sm text-muted-foreground text-center py-4">Belum ada nilai inti.</p>}
+            {(aboutContent.values || []).length === 0 && <p className="text-sm text-muted-foreground text-center py-4">Belum ada nilai inti.</p>}
           </CardContent>
         </Card>
 
@@ -193,7 +193,7 @@ export default function TentangPage() {
             <Button variant="outline" size="sm" onClick={addTeam} className="rounded-lg"><Plus className="w-4 h-4 mr-1" />Tambah</Button>
           </CardHeader>
           <CardContent className="space-y-4">
-            {aboutContent.team.map((t, idx) => (
+            {(aboutContent.team || []).map((t, idx) => (
               <div key={idx} className="border rounded-xl p-4 space-y-3 bg-muted/20">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-medium text-muted-foreground">Anggota #{idx + 1}</span>
@@ -206,7 +206,7 @@ export default function TentangPage() {
                 </div>
               </div>
             ))}
-            {aboutContent.team.length === 0 && <p className="text-sm text-muted-foreground text-center py-4">Belum ada anggota tim.</p>}
+            {(aboutContent.team || []).length === 0 && <p className="text-sm text-muted-foreground text-center py-4">Belum ada anggota tim.</p>}
           </CardContent>
         </Card>
         </div>

@@ -124,21 +124,32 @@ export default function EmailSettingsPage() {
 
   // Maps tailwind color names to actual hex codes for the email inline styles
   const buttonColorHex: Record<string, string> = {
-    blue: "#2563eb",
-    red: "#dc2626",
-    green: "#16a34a",
-    yellow: "#ca8a04",
-    purple: "#9333ea",
-    orange: "#ea580c",
-    slate: "#475569",
-    rose: "#e11d48",
-    emerald: "#059669",
-    cyan: "#0891b2",
-    amber: "#d97706",
+    blue: "#3b82f6",
+    sky: "#0ea5e9",
+    indigo: "#6366f1",
+    violet: "#8b5cf6",
+    purple: "#a855f7",
+    fuchsia: "#d946ef",
+    pink: "#ec4899",
+    rose: "#f43f5e",
+    red: "#ef4444",
+    orange: "#f97316",
+    amber: "#f59e0b",
+    yellow: "#eab308",
+    lime: "#84cc16",
+    green: "#22c55e",
+    emerald: "#10b981",
+    teal: "#14b8a6",
+    cyan: "#06b6d4",
+    slate: "#64748b",
+    gray: "#6b7280",
+    zinc: "#71717a",
+    primary: "#0f172a",
   };
 
   const actualButtonColor = buttonColorHex[buttonColor] || buttonColor;
   const actualPrimaryColor = buttonColorHex[primaryColor] || primaryColor;
+
   if (isLoading) {
     return (
       <div className="space-y-6">
@@ -333,9 +344,10 @@ export default function EmailSettingsPage() {
             </CardHeader>
             <CardContent className="pt-6">
               <Tabs defaultValue="test" className="w-full flex flex-col">
-                <TabsList className="grid w-full grid-cols-2 mb-8 bg-muted/50 p-1 rounded-xl">
+                <TabsList className="grid w-full grid-cols-3 mb-8 bg-muted/50 p-1 rounded-xl">
                   <TabsTrigger value="test" className="rounded-lg">Test Email</TabsTrigger>
                   <TabsTrigger value="reset" className="rounded-lg">Reset Password</TabsTrigger>
+                  <TabsTrigger value="invite" className="rounded-lg">Undangan Tim</TabsTrigger>
                 </TabsList>
                 
                 <div className="border border-border/50 rounded-2xl bg-muted/20 p-4 sm:p-8 flex flex-col items-center justify-center min-h-[500px] overflow-hidden shadow-inner">
@@ -379,6 +391,20 @@ export default function EmailSettingsPage() {
                         </div>
                         <p className="mb-4">Tautan atur ulang kata sandi ini akan kedaluwarsa dalam 60 menit.</p>
                         <p className="mb-4">Jika Anda tidak meminta pengaturan ulang kata sandi, tidak ada tindakan lebih lanjut yang diperlukan.</p>
+                        <p className="mb-4">Salam,<br />{emailSettings?.general?.site_name || "TeamVora"}</p>
+                      </TabsContent>
+
+                      <TabsContent value="invite" className="m-0 mt-0">
+                        <h1 className="text-xl font-bold text-[#111827] mt-0 mb-4">Undangan Bergabung Tim</h1>
+                        <p className="mb-4">Anda telah diundang oleh <strong>John Doe</strong> untuk bergabung dengan tim <strong>Tim Pemasaran Digital</strong> di {emailSettings?.general?.site_name || "TeamVora"}.</p>
+                        <div className="my-6">
+                          <a href="#" onClick={e => e.preventDefault()} style={{ backgroundColor: actualButtonColor }} className="inline-block text-white font-semibold py-3 px-6 rounded-lg no-underline shadow-sm hover:opacity-90">
+                            Terima Undangan
+                          </a>
+                        </div>
+                        <p className="mb-4">Atau salin dan tempel URL berikut ke browser Anda:</p>
+                        <p className="mb-4 text-[#6b7280] break-all"><a href="#" onClick={e => e.preventDefault()} style={{ color: actualButtonColor }}>https://teamvora.id/invite/abc123xyz</a></p>
+                        <p className="mb-4">Jika Anda tidak mengetahui dari siapa undangan ini, Anda dapat mengabaikan email ini.</p>
                         <p className="mb-4">Salam,<br />{emailSettings?.general?.site_name || "TeamVora"}</p>
                       </TabsContent>
                     </div>
@@ -428,3 +454,7 @@ export default function EmailSettingsPage() {
     </div>
   );
 }
+
+
+
+

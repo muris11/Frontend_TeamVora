@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { PageTitle } from "@/components/shared/page-title";
@@ -154,13 +155,12 @@ export function TeamMembersPage({ basePath }: { basePath: string }) {
             header: "Nama",
             render: (item: User) => (
               <div className="flex items-center gap-3">
-                {item.avatar_url ? (
-                  <img src={item.avatar_url} alt={item.name} className="w-8 h-8 rounded-full object-cover" />
-                ) : (
-                  <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center text-xs font-medium">
+                <Avatar className="w-8 h-8 rounded-full border border-border/50">
+                  <AvatarImage src={item.avatar_url ?? undefined} alt={item.name} className="object-cover" />
+                  <AvatarFallback className="bg-muted text-xs font-medium">
                     {item.name.charAt(0).toUpperCase()}
-                  </div>
-                )}
+                  </AvatarFallback>
+                </Avatar>
                 <div className="flex flex-col">
                   <span className="font-medium flex items-center gap-2">
                     {item.name}

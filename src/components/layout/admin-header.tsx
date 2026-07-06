@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { LogOut, User, ChevronRight, ArrowLeft, Shield, Bell } from "lucide-react";
+import { LogOut, User, ChevronRight, ArrowLeft, Shield, Bell, BookOpen } from "lucide-react";
 import { toast } from "sonner";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { SidebarTrigger } from "@/components/ui/sidebar";
@@ -231,6 +231,13 @@ export function AdminHeader() {
               >
                 <User className="mr-2 h-4 w-4" />
                 Profile
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => window.open("https://docs.teamvora.web.id", "_blank")}
+                className="rounded-lg text-sm"
+              >
+                <BookOpen className="mr-2 h-4 w-4" />
+                Bantuan & Dokumentasi
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={handleLogout} className="rounded-lg text-sm text-destructive focus:text-destructive">

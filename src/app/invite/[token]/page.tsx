@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, use } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -9,6 +9,8 @@ import { Users, Clock, CheckCircle2, Loader2 } from "lucide-react";
 import api from "@/lib/api";
 import { useAuthStore } from "@/stores/auth-store";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { formatDate } from "@/lib/format";
 import { PageTitle } from "@/components/shared/page-title";
 
@@ -19,41 +21,60 @@ interface InvitationData {
   email: string;
   status: string;
   expires_at: string;
+  is_registered?: boolean;
 }
 
-export default function InvitePage({ params }: { params: { token: string } }) {
+export default function InvitePage({ params }: { params: Promise<{ token: string }> }) {
+  const { token } = use(params);
   const router = useRouter();
   const { user, token: authToken } = useAuthStore();
   const [accepting, setAccepting] = useState(false);
+  const [password, setPassword] = useState("");
+  const [passwordConfirmation, setPasswordConfirmation] = useState("");
 
   const { data: invitation, isLoading, error } = useQuery({
-    queryKey: ["invitation", params.token],
+    queryKey: ["invitation", token],
     queryFn: async () => {
-      const res = await api.get(`/invitations/${params.token}`);
+      const res = await api.get(`/invitations/${token}`);
       return (res.data.data || res.data) as InvitationData;
     },
   });
 
   const acceptMutation = useMutation({
     mutationFn: async () => {
-      if (!authToken) {
-        router.push(`/register?token=${params.token}`);
-        return;
+      if (invitation && !invitation.is_registered) {
+        if (!password || password.length < 8) {
+          throw new Error("Password minimal 8 karakter");
+        }
+        if (password !== passwordConfirmation) {
+          throw new Error("Konfirmasi password tidak cocok");
+        }
       }
+
       setAccepting(true);
-      const res = await api.get(`/invitations/${params.token}/accept`);
+      const res = await api.post(`/invitations/${token}/accept`, {
+        password,
+        password_confirmation: passwordConfirmation,
+      });
       return res.data;
     },
     onSuccess: () => {
       toast.success("Berhasil bergabung dengan tim!");
-      const { user } = useAuthStore.getState();
+      
+      const { user, token: currentAuthToken } = useAuthStore.getState();
+      
+      if (!currentAuthToken) {
+        router.push("/login");
+        return;
+      }
+
       if (user?.role === "super_admin") router.push("/admin");
       else if (user?.role === "team_leader") router.push("/lead");
       else router.push("/member");
     },
     onError: (err: any) => {
       setAccepting(false);
-      const msg = err?.response?.data?.message || "Gagal menerima undangan";
+      const msg = err?.message || err?.response?.data?.message || "Gagal menerima undangan";
       toast.error(msg);
     },
   });
@@ -116,9 +137,7 @@ export default function InvitePage({ params }: { params: { token: string } }) {
         <div className="relative">
           {/* Logo */}
           <div className="mb-8 text-center">
-            <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-foreground text-background font-bold text-lg">
-              TV
-            </div>
+            <img src="/icon.png" alt="TeamVora Logo" className="mx-auto mb-4 h-12 w-12" />
             <h1 className="text-2xl font-semibold tracking-tight">Undangan Tim</h1>
           </div>
 
@@ -148,36 +167,45 @@ export default function InvitePage({ params }: { params: { token: string } }) {
                   </div>
                 </div>
 
-                {user ? (
-                  <Button
-                    className="w-full"
-                    onClick={() => acceptMutation.mutate()}
-                    disabled={accepting}
-                  >
-                    {accepting ? (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    ) : (
-                      <CheckCircle2 className="mr-2 h-4 w-4" />
-                    )}
-                    Terima Undangan
-                  </Button>
-                ) : (
-                  <div className="space-y-3">
-                    <p className="text-sm text-muted-foreground">
-                      Masuk atau daftar untuk menerima undangan ini
-                    </p>
-                    <Link href={`/login?redirect=/invite/${params.token}`}>
-                      <Button className="w-full" variant="default">
-                        Masuk
-                      </Button>
-                    </Link>
-                    <Link href={`/register?token=${params.token}`}>
-                      <Button className="w-full" variant="outline">
-                        Daftar Baru
-                      </Button>
-                    </Link>
+                {!invitation.is_registered && (
+                  <div className="space-y-4 text-left pt-2 pb-2">
+                    <div className="space-y-2">
+                      <Label htmlFor="password">Buat Password Baru</Label>
+                      <Input
+                        id="password"
+                        type="password"
+                        placeholder="Minimal 8 karakter"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        disabled={accepting}
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="passwordConfirmation">Konfirmasi Password</Label>
+                      <Input
+                        id="passwordConfirmation"
+                        type="password"
+                        placeholder="Ketik ulang password"
+                        value={passwordConfirmation}
+                        onChange={(e) => setPasswordConfirmation(e.target.value)}
+                        disabled={accepting}
+                      />
+                    </div>
                   </div>
                 )}
+
+                <Button
+                  className="w-full"
+                  onClick={() => acceptMutation.mutate()}
+                  disabled={accepting}
+                >
+                  {accepting ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <CheckCircle2 className="mr-2 h-4 w-4" />
+                  )}
+                  Terima Undangan
+                </Button>
               </div>
             </div>
           </div>

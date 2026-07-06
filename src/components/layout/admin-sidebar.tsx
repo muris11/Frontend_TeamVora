@@ -17,6 +17,7 @@ import {
   Palette,
   Search,
   Activity,
+  BookOpen,
 } from "lucide-react";
 import {
   Sidebar,
@@ -195,7 +196,16 @@ export function AdminSidebar() {
       </SidebarContent>
       <SidebarFooter className="px-3 pb-3">
         <div className="h-px bg-border/50 mb-2" />
-        <p className="text-[10px] text-muted-foreground/40 group-data-[collapsible=icon]:hidden">
+        <a 
+          href="https://docs.teamvora.web.id" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="flex items-center gap-2 px-2 py-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors group-data-[collapsible=icon]:justify-center"
+        >
+          <BookOpen className="h-3.5 w-3.5" />
+          <span className="group-data-[collapsible=icon]:hidden">Dokumentasi</span>
+        </a>
+        <p className="text-[10px] text-muted-foreground/40 mt-1 px-2 group-data-[collapsible=icon]:hidden">
           {siteName} SaaS v1.0 — Admin
         </p>
       </SidebarFooter>

@@ -662,6 +662,10 @@ export interface DashboardStatsResponse {
   recent_logs?: DailyLog[];
   upcoming_recurring_bills?: RecurringBill[];
   team_members_count?: number;
+  chart_data?: {
+    cash_flow: Array<{ name: string; in: number; out: number }>;
+    task_distribution: Array<{ name: string; value: number }>;
+  };
 }
 
 export interface MemberDashboard {
