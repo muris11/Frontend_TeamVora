@@ -4,7 +4,8 @@ import { useEffect } from "react";
 
 export function PageTitle({ title }: { title: string }) {
   useEffect(() => {
-    document.title = `${title} | TeamVora`;
+    const formattedTitle = title.includes("TeamVora") ? title : `${title} | TeamVora`;
+    document.title = formattedTitle;
   }, [title]);
 
   return null;

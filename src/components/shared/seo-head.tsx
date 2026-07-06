@@ -13,7 +13,12 @@ interface SEOProps {
 
 export function SEOHead({ title, description, keywords, ogImage, ogUrl, canonical }: SEOProps) {
   useEffect(() => {
-    if (title) document.title = title;
+    let formattedTitle = title;
+    if (title && !title.includes("TeamVora")) {
+      formattedTitle = `${title} | TeamVora`;
+    }
+
+    if (formattedTitle) document.title = formattedTitle;
 
     const setMeta = (name: string, content: string) => {
       let el =
@@ -30,7 +35,7 @@ export function SEOHead({ title, description, keywords, ogImage, ogUrl, canonica
 
     if (description) setMeta("description", description);
     if (keywords) setMeta("keywords", keywords);
-    if (title) setMeta("og:title", title);
+    if (formattedTitle) setMeta("og:title", formattedTitle);
     if (description) setMeta("og:description", description);
     if (ogImage) setMeta("og:image", ogImage);
     if (ogUrl) setMeta("og:url", ogUrl);
