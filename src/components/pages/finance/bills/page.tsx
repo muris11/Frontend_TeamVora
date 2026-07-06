@@ -87,11 +87,11 @@ export function BillsPage({ basePath }: { basePath: string }) {
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider">Belum Bayar</h3>
             <span className="bg-muted px-2 py-0.5 rounded-full text-xs font-medium">
-              {items.filter(i => i.status === 'unpaid').length}
+              {items.filter(i => i.user_status === 'unpaid').length}
             </span>
           </div>
           <div className="space-y-4">
-            {items.filter(i => i.status === 'unpaid').map(item => (
+            {items.filter(i => i.user_status === 'unpaid').map(item => (
               <Card key={item.id} className="cursor-pointer hover:border-primary/50 transition-colors" onClick={() => router.push(`${basePath}/finance/bills/${item.id}`)}>
                 <CardContent className="p-4">
                   <div className="flex justify-between items-start mb-2">
@@ -107,7 +107,7 @@ export function BillsPage({ basePath }: { basePath: string }) {
                 </CardContent>
               </Card>
             ))}
-            {items.filter(i => i.status === 'unpaid').length === 0 && (
+            {items.filter(i => i.user_status === 'unpaid').length === 0 && (
               <div className="border border-dashed rounded-xl p-8 text-center text-muted-foreground text-sm">
                 Kosong
               </div>
@@ -120,11 +120,11 @@ export function BillsPage({ basePath }: { basePath: string }) {
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider">Verifikasi</h3>
             <span className="bg-muted px-2 py-0.5 rounded-full text-xs font-medium">
-              {items.filter(i => i.status === 'pending_verification').length}
+              {items.filter(i => i.user_status === 'pending_verification').length}
             </span>
           </div>
           <div className="space-y-4">
-            {items.filter(i => i.status === 'pending_verification').map(item => (
+            {items.filter(i => i.user_status === 'pending_verification').map(item => (
               <Card key={item.id} className="cursor-pointer hover:border-primary/50 transition-colors" onClick={() => router.push(`${basePath}/finance/bills/${item.id}`)}>
                 <CardContent className="p-4">
                   <div className="flex justify-between items-start mb-2">
@@ -140,7 +140,7 @@ export function BillsPage({ basePath }: { basePath: string }) {
                 </CardContent>
               </Card>
             ))}
-            {items.filter(i => i.status === 'pending_verification').length === 0 && (
+            {items.filter(i => i.user_status === 'pending_verification').length === 0 && (
               <div className="border border-dashed rounded-xl p-8 text-center text-muted-foreground text-sm">
                 Kosong
               </div>
@@ -153,11 +153,11 @@ export function BillsPage({ basePath }: { basePath: string }) {
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider">Lunas</h3>
             <span className="bg-muted px-2 py-0.5 rounded-full text-xs font-medium">
-              {items.filter(i => i.status === 'paid').length}
+              {items.filter(i => i.user_status === 'paid').length}
             </span>
           </div>
           <div className="space-y-4">
-            {items.filter(i => i.status === 'paid').map(item => (
+            {items.filter(i => i.user_status === 'paid').map(item => (
               <Card key={item.id} className="cursor-pointer hover:border-primary/50 opacity-75 transition-colors" onClick={() => router.push(`${basePath}/finance/bills/${item.id}`)}>
                 <CardContent className="p-4">
                   <div className="flex justify-between items-start mb-2">
@@ -173,7 +173,7 @@ export function BillsPage({ basePath }: { basePath: string }) {
                 </CardContent>
               </Card>
             ))}
-            {items.filter(i => i.status === 'paid').length === 0 && (
+            {items.filter(i => i.user_status === 'paid').length === 0 && (
               <div className="border border-dashed rounded-xl p-8 text-center text-muted-foreground text-sm">
                 Kosong
               </div>

@@ -39,10 +39,8 @@ export function BillDetailPage({ basePath }: { basePath: string }) {
   const uploadProofMutation = useMutation({
     mutationFn: async ({ itemId }: { itemId: number }) => {
       const formData = new FormData();
-      if (proofFile) formData.append("proof", proofFile);
-      const res = await api.post(`/bill-items/${itemId}/pay`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      if (proofFile) formData.append("proof_file", proofFile);
+      const res = await api.post(`/bill-items/${itemId}/pay`, formData);
       return res.data;
     },
     onSuccess: () => {

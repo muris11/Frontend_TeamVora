@@ -238,9 +238,7 @@ export const splitBillApi = {
 
 export const billItemApi = {
   pay: (id: number, formData: FormData) =>
-    api.post<BillItem>(`/bill-items/${id}/pay`, formData, {
-      headers: { "Content-Type": "multipart/form-data" },
-    }),
+    api.post<BillItem>(`/bill-items/${id}/pay`, formData),
 
   verify: (id: number, data: VerifyBillItemRequest) =>
     api.put<BillItem>(`/bill-items/${id}/verify`, data),

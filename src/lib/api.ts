@@ -15,6 +15,13 @@ api.interceptors.request.use((config) => {
       config.headers.Authorization = `Bearer ${token}`;
     }
   }
+  
+  if (config.data instanceof FormData) {
+    // Delete explicitly so browser sets multipart/form-data with boundary
+    delete config.headers["Content-Type"];
+    delete config.headers["content-type"];
+  }
+  
   return config;
 });
 
