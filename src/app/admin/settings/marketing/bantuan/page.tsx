@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { IconPicker } from "@/components/ui/icon-picker";
-import { Textarea } from "@/components/ui/textarea";
+import { RichTextEditor } from "@/components/shared/rich-text-editor";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -134,7 +134,7 @@ export default function BantuanPage() {
                   <div className="grid gap-2"><Label className="text-xs">Judul</Label><Input value={a.title} onChange={(e) => updateArticle(idx, "title", e.target.value)} /></div>
                   <div className="grid gap-2"><Label className="text-xs">Ikon</Label><IconPicker value={a.icon} onChange={(val) => updateArticle(idx, "icon", val)} /></div>
                 </div>
-                <div className="grid gap-2"><Label className="text-xs">Deskripsi</Label><Textarea value={a.description} onChange={(e) => updateArticle(idx, "description", e.target.value)} /></div>
+                <div className="grid gap-2"><Label className="text-xs">Deskripsi</Label><RichTextEditor value={a.description || ""} onChange={(val) => updateArticle(idx, "description", val)} /></div>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="grid gap-2"><Label className="text-xs">Teks Aksi</Label><Input value={a.action} onChange={(e) => updateArticle(idx, "action", e.target.value)} /></div>
                   <div className="grid gap-2"><Label className="text-xs">Link</Label><Input value={a.link} onChange={(e) => updateArticle(idx, "link", e.target.value)} /></div>

@@ -13,7 +13,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { IconPicker } from "@/components/ui/icon-picker";
 import { ColorPicker } from "@/components/ui/color-picker";
-import { Textarea } from "@/components/ui/textarea";
+import { RichTextEditor } from "@/components/shared/rich-text-editor";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -150,7 +150,7 @@ export default function FiturPage() {
                   <div className="grid gap-2"><Label className="text-xs">ID</Label><Input value={s.id} onChange={(e) => updateSection(idx, "id", e.target.value)} placeholder="absensi" /></div>
                   <div className="grid gap-2"><Label className="text-xs">Judul</Label><Input value={s.title} onChange={(e) => updateSection(idx, "title", e.target.value)} /></div>
                 </div>
-                <div className="grid gap-2"><Label className="text-xs">Deskripsi</Label><Textarea value={s.description} onChange={(e) => updateSection(idx, "description", e.target.value)} /></div>
+                <div className="grid gap-2"><Label className="text-xs">Deskripsi</Label><RichTextEditor value={s.description || ""} onChange={(val) => updateSection(idx, "description", val)} /></div>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="grid gap-2"><Label className="text-xs">Ikon</Label><IconPicker value={s.icon} onChange={(val) => updateSection(idx, "icon", val)} /></div>
                   <div className="grid gap-2"><Label className="text-xs">Warna Tema</Label><ColorPicker value={s.color} onChange={(val) => updateSection(idx, "color", val)} /></div>

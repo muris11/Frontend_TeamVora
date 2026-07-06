@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { IconPicker } from "@/components/ui/icon-picker";
-import { Textarea } from "@/components/ui/textarea";
+import { RichTextEditor } from "@/components/shared/rich-text-editor";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -180,7 +180,7 @@ export default function TentangPage() {
                   <div className="grid gap-2"><Label className="text-xs">Judul</Label><Input value={v.title} onChange={(e) => updateValue(idx, "title", e.target.value)} /></div>
                   <div className="grid gap-2"><Label className="text-xs">Ikon</Label><IconPicker value={v.icon} onChange={(val) => updateValue(idx, "icon", val)} /></div>
                 </div>
-                <div className="grid gap-2"><Label className="text-xs">Deskripsi</Label><Textarea value={v.description} onChange={(e) => updateValue(idx, "description", e.target.value)} /></div>
+                <div className="grid gap-2"><Label className="text-xs">Deskripsi</Label><RichTextEditor value={v.description || ""} onChange={(val) => updateValue(idx, "description", val)} /></div>
               </div>
             ))}
             {aboutContent.values.length === 0 && <p className="text-sm text-muted-foreground text-center py-4">Belum ada nilai inti.</p>}

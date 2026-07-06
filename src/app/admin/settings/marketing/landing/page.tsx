@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { RichTextEditor } from "@/components/shared/rich-text-editor";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -286,7 +287,7 @@ export default function LandingPage() {
                       <ColorPicker value={f.color || "blue"} onChange={(val) => updateFeature(idx, "color", val)} />
                     </div>
                   </div>
-                  <div className="grid gap-2"><Label className="text-xs">Deskripsi</Label><Textarea value={f.description} onChange={(e) => updateFeature(idx, "description", e.target.value)} /></div>
+                  <div className="grid gap-2"><Label className="text-xs">Deskripsi</Label><RichTextEditor value={f.description || ""} onChange={(val) => updateFeature(idx, "description", val)} /></div>
                 </div>
               ))}
               {features.length === 0 && <p className="text-sm text-muted-foreground text-center py-4">Belum ada fitur.</p>}

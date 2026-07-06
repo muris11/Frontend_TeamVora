@@ -11,7 +11,7 @@ import { PageTitle } from "@/components/shared/page-title";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { RichTextEditor } from "@/components/shared/rich-text-editor";
 import {
   Select,
   SelectContent,
@@ -88,14 +88,9 @@ export function TaskCreatePage({ basePath }: { basePath: string }) {
 
             <div className="space-y-2">
               <Label htmlFor="description">Deskripsi</Label>
-              <Textarea
-                id="description"
-                value={form.description}
-                onChange={(e) =>
-                  setForm({ ...form, description: e.target.value })
-                }
-                placeholder="Masukkan deskripsi tugas"
-                rows={4}
+              <RichTextEditor
+                value={form.description || ""}
+                onChange={(val) => setForm({ ...form, description: val })}
               />
             </div>
 

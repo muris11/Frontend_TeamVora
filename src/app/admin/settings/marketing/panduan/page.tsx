@@ -13,6 +13,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { IconPicker } from "@/components/ui/icon-picker";
 import { Textarea } from "@/components/ui/textarea";
+import { RichTextEditor } from "@/components/shared/rich-text-editor";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -150,7 +151,7 @@ export default function PanduanPage() {
                   <div className="grid gap-2"><Label className="text-xs">Judul</Label><Input value={c.title} onChange={(e) => updateCategory(catIdx, "title", e.target.value)} /></div>
                   <div className="grid gap-2"><Label className="text-xs">Ikon</Label><IconPicker value={c.icon} onChange={(val) => updateCategory(catIdx, "icon", val)} /></div>
                 </div>
-                <div className="grid gap-2"><Label className="text-xs">Deskripsi</Label><Textarea value={c.description} onChange={(e) => updateCategory(catIdx, "description", e.target.value)} /></div>
+                <div className="grid gap-2"><Label className="text-xs">Deskripsi</Label><RichTextEditor value={c.description || ""} onChange={(val) => updateCategory(catIdx, "description", val)} /></div>
                 <div className="space-y-2">
                   <div className="flex items-center justify-between"><Label className="text-xs">Artikel</Label><Button variant="outline" size="sm" onClick={() => addArticle(catIdx)} className="rounded-lg h-7"><Plus className="w-3 h-3 mr-1" />Tambah</Button></div>
                   {c.articles.map((a, ai) => (
