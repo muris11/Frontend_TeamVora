@@ -3,16 +3,18 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
+import { toast } from "sonner";
 import api from "@/lib/api";
 import { formatDate } from "@/lib/format";
 import { Task } from "@/types";
 import { PageTitle } from "@/components/shared/page-title";
 import { StatusBadge } from "@/components/shared/status-badge";
-import { DataTable } from "@/components/shared/data-table";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   Select,
   SelectContent,
@@ -25,6 +27,7 @@ export function TasksPage({ basePath }: { basePath: string }) {
   const router = useRouter();
   const [statusFilter, setStatusFilter] = useState("all");
   const [priorityFilter, setPriorityFilter] = useState("all");
+  const queryClient = useQueryClient();
 
   const queryParams = new URLSearchParams();
   if (statusFilter !== "all") queryParams.set("status", statusFilter);
@@ -38,48 +41,119 @@ export function TasksPage({ basePath }: { basePath: string }) {
 
   const tasks = response?.data ?? [];
 
-  const columns = [
-    {
-      key: "title",
-      header: "Judul",
-      render: (item: Task) => (
-        <span className="font-medium">{item.title}</span>
-      ),
+  const updateStatusMutation = useMutation({
+    mutationFn: ({ id, status }: { id: string | number; status: string }) => 
+      api.patch(`/tasks/${id}/status`, { status }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      toast.success("Status tugas diperbarui");
+    }
+  });
+
+  const reorderMutation = useMutation({
+    mutationFn: (data: { tasks: { id: string | number; position: number }[] }) =>
+      api.patch("/tasks/reorder", data),
+    onError: () => {
+      toast.error("Gagal menyimpan urutan tugas");
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
     },
-    {
-      key: "assignee",
-      header: "Penanggung Jawab",
-      render: (item: Task) => item.assignee?.name ?? "-",
-    },
-    {
-      key: "priority",
-      header: "Prioritas",
-      render: (item: Task) => <StatusBadge status={item.priority} />,
-    },
-    {
-      key: "status",
-      header: "Status",
-      render: (item: Task) => <StatusBadge status={item.status} />,
-    },
-    {
-      key: "due_date",
-      header: "Jatuh Tempo",
-      render: (item: Task) => formatDate(item.due_date),
-    },
-  ];
+  });
+
+  const handleDragStart = (e: React.DragEvent, id: string | number) => {
+    e.dataTransfer.setData("taskId", id.toString());
+    e.dataTransfer.effectAllowed = "move";
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+  };
+
+  const handleDrop = (e: React.DragEvent, targetStatus: string) => {
+    e.preventDefault();
+    const taskId = e.dataTransfer.getData("taskId");
+    if (!taskId) return;
+
+    const task = tasks.find((t: Task) => String(t.id) === taskId);
+    if (!task) return;
+
+    // Get target column tasks sorted by position
+    const targetColumnTasks = tasks
+      .filter((t: Task) => t.status === targetStatus && String(t.id) !== taskId)
+      .sort((a: Task, b: Task) => (a.position ?? 0) - (b.position ?? 0));
+
+    // Determine drop position based on mouse Y within the column
+    const dropY = e.clientY;
+    const columnEl = e.currentTarget as HTMLElement;
+    const cards = columnEl.querySelectorAll("[data-task-card]");
+    let insertIndex = targetColumnTasks.length;
+
+    for (let i = 0; i < cards.length; i++) {
+      const card = cards[i];
+      const rect = card.getBoundingClientRect();
+      const midY = rect.top + rect.height / 2;
+      if (dropY < midY) {
+        insertIndex = i;
+        break;
+      }
+    }
+
+    // Build new array for the target column
+    const newColumnTasks = [...targetColumnTasks];
+    newColumnTasks.splice(insertIndex, 0, { ...task, status: targetStatus as Task["status"] });
+
+    // Assign positions
+    const reorderPayload = newColumnTasks.map((t, idx) => ({
+      id: t.id,
+      position: idx,
+    }));
+
+    // If task moved to a different column, also reindex the source column
+    if (task.status !== targetStatus) {
+      const sourceColumnTasks = tasks
+        .filter((t: Task) => t.status === task.status && String(t.id) !== taskId)
+        .sort((a: Task, b: Task) => (a.position ?? 0) - (b.position ?? 0));
+
+      sourceColumnTasks.forEach((t: Task, idx: number) => {
+        reorderPayload.push({ id: t.id, position: idx });
+      });
+
+      // Optimistic update: move task locally
+      queryClient.setQueryData(["tasks", statusFilter, priorityFilter], (old: typeof response) => {
+        if (!old) return old;
+        return {
+          ...old,
+          data: old.data.map((t: Task) =>
+            String(t.id) === taskId
+              ? { ...t, status: targetStatus as Task["status"], position: insertIndex }
+              : t
+          ),
+        };
+      });
+    }
+
+    // Persist to server
+    reorderMutation.mutate({ tasks: reorderPayload });
+  };
+
+  const sortTasks = (list: Task[]) =>
+    [...list].sort((a: Task, b: Task) => (a.position ?? 0) - (b.position ?? 0));
 
   return (
     <div className="space-y-6">
       <PageTitle title="Tugas" />
 
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Tugas</h1>
-        <Link href={`${basePath}/productivity/tasks/create`}>
-          <Button>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Tugas</h1>
+          <p className="text-sm text-muted-foreground">Kelola dan pantau tugas tim Anda</p>
+        </div>
+        <Button asChild className="rounded-xl">
+          <Link href={`${basePath}/productivity/tasks/create`}>
             <Plus className="mr-2 h-4 w-4" />
             Tambah Baru
-          </Button>
-        </Link>
+          </Link>
+        </Button>
       </div>
 
       <div className="flex gap-4">
@@ -113,23 +187,170 @@ export function TasksPage({ basePath }: { basePath: string }) {
           title="Belum ada tugas"
           description="Tugas akan muncul di sini setelah ditambahkan."
           action={
-            <Link href={`${basePath}/productivity/tasks/create`}>
-              <Button>
+            <Button asChild size="sm">
+              <Link href={`${basePath}/productivity/tasks/create`}>
                 <Plus className="mr-2 h-4 w-4" />
                 Tambah Tugas
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           }
         />
       ) : (
-        <DataTable
-          columns={columns}
-          data={tasks}
-          isLoading={isLoading}
-          onRowClick={(item) =>
-            router.push(`${basePath}/productivity/tasks/${item.id}/edit`)
-          }
-        />
+        <div className="flex gap-6 overflow-x-auto pb-4 snap-x">
+          {/* To Do Column */}
+          <div 
+            className="flex-1 min-w-[300px] snap-center bg-muted/30 rounded-xl p-4 border border-border/50"
+            onDragOver={handleDragOver}
+            onDrop={(e) => handleDrop(e, 'todo')}
+          >
+            <div className="flex items-center justify-between mb-4 px-2">
+              <h3 className="font-semibold text-sm uppercase tracking-wider">To Do</h3>
+              <span className="bg-background shadow-sm px-2 py-0.5 rounded-full text-xs font-medium">
+                {tasks.filter((t: Task) => t.status === 'todo').length}
+              </span>
+            </div>
+            <div className="space-y-3">
+              {sortTasks(tasks.filter((t: Task) => t.status === 'todo')).map((task: Task) => (
+                <Card 
+                  key={task.id}
+                  data-task-card
+                  draggable 
+                  onDragStart={(e) => handleDragStart(e as unknown as React.DragEvent, task.id)}
+                  className="cursor-grab hover:border-primary/50 transition-colors active:cursor-grabbing" 
+                  onClick={() => router.push(`${basePath}/productivity/tasks/${task.id}/edit`)}
+                >
+                  <CardContent className="p-4">
+                    <div className="flex justify-between items-start mb-2 gap-2">
+                      <h4 className="font-semibold text-sm line-clamp-2">{task.title}</h4>
+                      <StatusBadge status={task.priority} />
+                    </div>
+                    <div className="flex justify-between items-center text-xs text-muted-foreground mt-4 pt-3 border-t">
+                      <span className={task.due_date && new Date(task.due_date) < new Date() ? 'text-destructive font-medium' : ''}>
+                        {task.due_date ? formatDate(task.due_date) : 'Tidak ada tenggat'}
+                      </span>
+                      {task.assignee && (
+                        <div className="flex items-center gap-1.5 bg-muted rounded-full pr-2">
+                          <Avatar className="h-5 w-5">
+                            <AvatarImage src={task.assignee.avatar_url || ""} />
+                            <AvatarFallback className="text-[10px]">{task.assignee.name?.substring(0, 2).toUpperCase()}</AvatarFallback>
+                          </Avatar>
+                          <span className="truncate max-w-[80px]">{task.assignee.name.split(' ')[0]}</span>
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+              {tasks.filter((t: Task) => t.status === 'todo').length === 0 && (
+                <div className="border-2 border-dashed border-border/60 rounded-xl p-8 text-center text-muted-foreground text-sm bg-background/50">
+                  Tarik tugas ke sini
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* In Progress Column */}
+          <div 
+            className="flex-1 min-w-[300px] snap-center bg-muted/30 rounded-xl p-4 border border-border/50"
+            onDragOver={handleDragOver}
+            onDrop={(e) => handleDrop(e, 'in_progress')}
+          >
+            <div className="flex items-center justify-between mb-4 px-2">
+              <h3 className="font-semibold text-sm uppercase tracking-wider text-blue-600 dark:text-blue-400">Proses</h3>
+              <span className="bg-background shadow-sm px-2 py-0.5 rounded-full text-xs font-medium">
+                {tasks.filter((t: Task) => t.status === 'in_progress').length}
+              </span>
+            </div>
+            <div className="space-y-3">
+              {sortTasks(tasks.filter((t: Task) => t.status === 'in_progress')).map((task: Task) => (
+                <Card 
+                  key={task.id}
+                  data-task-card
+                  draggable 
+                  onDragStart={(e) => handleDragStart(e as unknown as React.DragEvent, task.id)}
+                  className="cursor-grab border-blue-200 dark:border-blue-900 hover:border-blue-500/50 transition-colors active:cursor-grabbing" 
+                  onClick={() => router.push(`${basePath}/productivity/tasks/${task.id}/edit`)}
+                >
+                  <CardContent className="p-4">
+                    <div className="flex justify-between items-start mb-2 gap-2">
+                      <h4 className="font-semibold text-sm line-clamp-2">{task.title}</h4>
+                      <StatusBadge status={task.priority} />
+                    </div>
+                    <div className="flex justify-between items-center text-xs text-muted-foreground mt-4 pt-3 border-t">
+                      <span className={task.due_date && new Date(task.due_date) < new Date() ? 'text-destructive font-medium' : ''}>
+                        {task.due_date ? formatDate(task.due_date) : 'Tidak ada tenggat'}
+                      </span>
+                      {task.assignee && (
+                        <div className="flex items-center gap-1.5 bg-muted rounded-full pr-2">
+                          <Avatar className="h-5 w-5">
+                            <AvatarImage src={task.assignee.avatar_url || ""} />
+                            <AvatarFallback className="text-[10px]">{task.assignee.name?.substring(0, 2).toUpperCase()}</AvatarFallback>
+                          </Avatar>
+                          <span className="truncate max-w-[80px]">{task.assignee.name.split(' ')[0]}</span>
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+              {tasks.filter((t: Task) => t.status === 'in_progress').length === 0 && (
+                <div className="border-2 border-dashed border-border/60 rounded-xl p-8 text-center text-muted-foreground text-sm bg-background/50">
+                  Tarik tugas ke sini
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Done Column */}
+          <div 
+            className="flex-1 min-w-[300px] snap-center bg-muted/30 rounded-xl p-4 border border-border/50"
+            onDragOver={handleDragOver}
+            onDrop={(e) => handleDrop(e, 'done')}
+          >
+            <div className="flex items-center justify-between mb-4 px-2">
+              <h3 className="font-semibold text-sm uppercase tracking-wider text-green-600 dark:text-green-400">Selesai</h3>
+              <span className="bg-background shadow-sm px-2 py-0.5 rounded-full text-xs font-medium">
+                {tasks.filter((t: Task) => t.status === 'done').length}
+              </span>
+            </div>
+            <div className="space-y-3">
+              {sortTasks(tasks.filter((t: Task) => t.status === 'done')).map((task: Task) => (
+                <Card 
+                  key={task.id}
+                  data-task-card
+                  draggable 
+                  onDragStart={(e) => handleDragStart(e as unknown as React.DragEvent, task.id)}
+                  className="cursor-grab border-green-200 dark:border-green-900 hover:border-green-500/50 opacity-75 transition-colors active:cursor-grabbing" 
+                  onClick={() => router.push(`${basePath}/productivity/tasks/${task.id}/edit`)}
+                >
+                  <CardContent className="p-4">
+                    <div className="flex justify-between items-start mb-2 gap-2">
+                      <h4 className="font-semibold text-sm line-clamp-2 line-through text-muted-foreground">{task.title}</h4>
+                      <StatusBadge status={task.priority} />
+                    </div>
+                    <div className="flex justify-between items-center text-xs text-muted-foreground mt-4 pt-3 border-t opacity-70">
+                      <span>{task.due_date ? formatDate(task.due_date) : 'Tidak ada tenggat'}</span>
+                      {task.assignee && (
+                        <div className="flex items-center gap-1.5 bg-muted rounded-full pr-2">
+                          <Avatar className="h-5 w-5">
+                            <AvatarImage src={task.assignee.avatar_url || ""} />
+                            <AvatarFallback className="text-[10px]">{task.assignee.name?.substring(0, 2).toUpperCase()}</AvatarFallback>
+                          </Avatar>
+                          <span className="truncate max-w-[80px]">{task.assignee.name.split(' ')[0]}</span>
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+              {tasks.filter((t: Task) => t.status === 'done').length === 0 && (
+                <div className="border-2 border-dashed border-border/60 rounded-xl p-8 text-center text-muted-foreground text-sm bg-background/50">
+                  Tarik tugas ke sini
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

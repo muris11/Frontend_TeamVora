@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
-import { Upload, ImageIcon, X, Trash2, Copy } from "lucide-react";
+import { Upload, ImageIcon, X, Trash2, Copy, Edit } from "lucide-react";
 import { toast } from "sonner";
 import api from "@/lib/api";
 import { TeamMedia } from "@/types";
@@ -16,6 +16,8 @@ import { formatDate } from "@/lib/format";
 
 export function GalleryPage({ basePath }: { basePath: string }) {
   const [lightbox, setLightbox] = useState<TeamMedia | null>(null);
+  const [editingId, setEditingId] = useState<number | string | null>(null);
+  const [editName, setEditName] = useState("");
   const queryClient = useQueryClient();
 
   const { data, isLoading } = useQuery({
@@ -38,6 +40,29 @@ export function GalleryPage({ basePath }: { basePath: string }) {
   const handleDelete = (id: string | number) => {
     if (confirm("Yakin ingin menghapus gambar ini?")) {
       deleteMutation.mutate(id);
+    }
+  };
+
+  const updateMutation = useMutation({
+    mutationFn: ({ id, name }: { id: string | number; name: string }) => 
+      api.put(`/media/${id}`, { name }),
+    onSuccess: () => {
+      toast.success("Nama gambar berhasil diperbarui");
+      setEditingId(null);
+      queryClient.invalidateQueries({ queryKey: ["media", "gallery"] });
+    },
+    onError: () => toast.error("Gagal memperbarui nama gambar"),
+  });
+
+  const handleEdit = (img: TeamMedia) => {
+    setEditingId(img.id);
+    setEditName(img.name);
+  };
+
+  const submitEdit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (editingId && editName.trim()) {
+      updateMutation.mutate({ id: editingId, name: editName });
     }
   };
 
@@ -110,6 +135,14 @@ export function GalleryPage({ basePath }: { basePath: string }) {
                   variant="secondary"
                   size="icon"
                   className="w-8 h-8 bg-black/50 text-white hover:bg-black/70 border-0"
+                  onClick={(e) => { e.stopPropagation(); handleEdit(img); }}
+                >
+                  <Edit className="w-4 h-4" />
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="icon"
+                  className="w-8 h-8 bg-black/50 text-white hover:bg-black/70 border-0"
                   onClick={(e) => { e.stopPropagation(); handleCopyUrl(img.file_path); }}
                 >
                   <Copy className="w-4 h-4" />
@@ -157,6 +190,28 @@ export function GalleryPage({ basePath }: { basePath: string }) {
               <p className="text-white font-medium">{lightbox.name}</p>
               <p className="text-white/60 text-sm">{lightbox.user?.name} &middot; {formatDate(lightbox.created_at)}</p>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Simple Edit Modal */}
+      {editingId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
+          <div className="bg-background rounded-lg p-6 max-w-sm w-full">
+            <h3 className="text-lg font-semibold mb-4">Edit Nama Gambar</h3>
+            <form onSubmit={submitEdit}>
+              <input
+                type="text"
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 mb-4"
+                autoFocus
+              />
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" type="button" onClick={() => setEditingId(null)}>Batal</Button>
+                <Button type="submit" disabled={updateMutation.isPending}>Simpan</Button>
+              </div>
+            </form>
           </div>
         </div>
       )}

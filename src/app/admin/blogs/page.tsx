@@ -99,7 +99,7 @@ export default function AdminBlogsPage() {
             )}
           </Button>
           <Link
-            href={`/admin/blogs/${item.id}/edit`}
+            href={`/admin/blogs/${item.slug}/edit`}
             className="inline-flex items-center justify-center rounded-md p-2 hover:bg-accent"
           >
             <Pencil className="h-4 w-4" />
@@ -113,7 +113,7 @@ export default function AdminBlogsPage() {
   ];
 
   return (
-    <div className="space-y-4">
+    <div className="max-w-6xl mx-auto space-y-6">
       <PageTitle title="Kelola Blog" />
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Kelola Blog</h1>

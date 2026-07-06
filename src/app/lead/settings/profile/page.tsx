@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -19,6 +19,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
+import { MediaPicker } from "@/components/shared/media-picker";
 
 const profileSchema = z.object({
   name: z.string().min(2, "Nama minimal 2 karakter"),
@@ -42,6 +43,7 @@ type PasswordForm = z.infer<typeof passwordSchema>;
 export default function ProfilePage() {
   const { user, setAuth, token } = useAuthStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [showMediaPicker, setShowMediaPicker] = useState(false);
 
   const profileForm = useForm<ProfileForm>({
     resolver: zodResolver(profileSchema),
@@ -62,6 +64,15 @@ export default function ProfilePage() {
     },
     onError: () => toast.error("Gagal memperbarui profil"),
   });
+
+  const handleMediaSelect = (url: string) => {
+    updateProfileMutation.mutate({
+      name: profileForm.getValues("name"),
+      email: profileForm.getValues("email"),
+      phone: profileForm.getValues("phone"),
+      avatar_url: url
+    } as any);
+  };
 
   const uploadAvatarMutation = useMutation({
     mutationFn: async (file: File) => {
@@ -106,38 +117,59 @@ export default function ProfilePage() {
           <Card className="border-border/50 shadow-sm overflow-hidden">
             <div className="h-24 bg-gradient-to-r from-primary/80 to-primary"></div>
             <CardContent className="pt-0 relative px-6 pb-6 text-center">
-              <div className="flex justify-center -mt-12 mb-4">
-                <div 
-                  className="relative group cursor-pointer"
-                  onClick={() => fileInputRef.current?.click()}
-                >
+              <div className="flex flex-col items-center -mt-12 mb-4">
+                <div className="relative group cursor-pointer mb-4">
                   <Avatar className="w-24 h-24 border-4 border-background shadow-sm">
                     <AvatarImage src={user?.avatar_url || ""} />
                     <AvatarFallback className="text-2xl font-bold bg-primary/10 text-primary">
                       {user?.name?.charAt(0).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
-                  <div className={`absolute inset-0 bg-black/40 rounded-full flex items-center justify-center transition-opacity ${uploadAvatarMutation.isPending ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}>
-                    {uploadAvatarMutation.isPending ? (
-                      <Loader2 className="w-6 h-6 text-white animate-spin" />
-                    ) : (
-                      <Camera className="w-6 h-6 text-white" />
-                    )}
+                  <div className="absolute -bottom-2 -right-2">
+                    <Button 
+                      variant="secondary" 
+                      size="icon" 
+                      className="rounded-full shadow-sm w-8 h-8 relative"
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                    >
+                      <Camera className="w-4 h-4" />
+                    </Button>
                   </div>
-                  <input 
-                    type="file" 
-                    className="hidden" 
-                    ref={fileInputRef} 
-                    accept="image/*"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        uploadAvatarMutation.mutate(file);
-                      }
-                      e.target.value = '';
-                    }}
-                  />
                 </div>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploadAvatarMutation.isPending}
+                  >
+                    {uploadAvatarMutation.isPending ? "Mengunggah..." : "Upload Foto"}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    type="button"
+                    onClick={() => setShowMediaPicker(true)}
+                    disabled={uploadAvatarMutation.isPending}
+                  >
+                    Pilih dari Media
+                  </Button>
+                </div>
+                <input 
+                  type="file" 
+                  className="hidden" 
+                  ref={fileInputRef} 
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      uploadAvatarMutation.mutate(file);
+                    }
+                    e.target.value = '';
+                  }}
+                />
               </div>
               <h2 className="text-xl font-bold">{user?.name}</h2>
               <p className="text-muted-foreground text-sm mb-3">{user?.email}</p>
@@ -266,6 +298,12 @@ export default function ProfilePage() {
 
         </div>
       </div>
+      
+      <MediaPicker 
+        open={showMediaPicker} 
+        onOpenChange={setShowMediaPicker} 
+        onSelect={handleMediaSelect} 
+      />
     </div>
   );
 }

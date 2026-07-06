@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { ArrowDownRight, ArrowUpRight, Wallet, TrendingDown, CheckCircle2, Clock, AlertCircle, FileText, Image as ImageIcon, Send, Activity } from "lucide-react";
+import { ArrowDownRight, ArrowUpRight, Wallet, TrendingDown, CheckCircle2, Clock, AlertCircle, FileText, Image as ImageIcon, Send, Activity, Users } from "lucide-react";
 import api from "@/lib/api";
 import { useAuthStore } from "@/stores/auth-store";
 import { DashboardStats } from "@/types";
@@ -121,6 +121,20 @@ export function DashboardPage({ basePath }: { basePath: string }) {
               </CardContent>
             </Card>
 
+            {user?.role === "team_leader" && stats?.team_members_count !== undefined && (
+              <Card className="border-border/50 shadow-sm hover:shadow-md transition-all group bg-primary text-primary-foreground border-transparent">
+                <CardContent className="p-6">
+                  <div className="flex justify-between items-start">
+                    <div className="p-3 rounded-2xl bg-white/20 group-hover:scale-110 transition-transform"><Users className="w-6 h-6 text-white" /></div>
+                  </div>
+                  <div className="mt-4">
+                    <h3 className="text-2xl font-bold">{stats.team_members_count} Anggota</h3>
+                    <p className="text-sm font-medium text-primary-foreground/80 mt-1">Dalam Tim</p>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+            
             <Card className="border-border/50 shadow-sm hover:shadow-md transition-all group bg-primary text-primary-foreground border-transparent">
               <CardContent className="p-6">
                 <div className="flex justify-between items-start">
@@ -210,6 +224,63 @@ export function DashboardPage({ basePath }: { basePath: string }) {
           )}
         </ListCard>
       </div>
+      
+      {/* Lead specific lists */}
+      {user?.role === "team_leader" && (
+        <div className="grid gap-6 lg:grid-cols-2 mt-6">
+          <ListCard title="Log Harian Terbaru" href={`${basePath}/productivity/daily-log`}>
+            {isLoading ? (
+              <div className="space-y-3">
+                {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-12 w-full rounded-xl" />)}
+              </div>
+            ) : stats?.recent_logs?.length ? (
+              <div className="space-y-2">
+                {stats.recent_logs.map((log) => (
+                  <div key={log.id} className="flex items-center justify-between rounded-xl bg-muted/30 p-3 transition-colors hover:bg-muted/50">
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-medium">{log.user?.name}</p>
+                      <p className="text-xs text-muted-foreground">{formatDate(log.log_date || log.created_at)}</p>
+                    </div>
+                    <StatusBadge status="completed" />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-8 text-center bg-muted/20 rounded-xl border border-dashed border-border/50">
+                <FileText className="mb-2 h-8 w-8 text-muted-foreground/30" />
+                <p className="text-sm font-medium text-muted-foreground">Belum ada log harian</p>
+              </div>
+            )}
+          </ListCard>
+
+          <ListCard title="Tagihan Mendatang (Berulang)" href={`${basePath}/finance/recurring-bills`}>
+            {isLoading ? (
+              <div className="space-y-3">
+                {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-12 w-full rounded-xl" />)}
+              </div>
+            ) : stats?.upcoming_recurring_bills?.length ? (
+              <div className="space-y-2">
+                {stats.upcoming_recurring_bills.map((bill) => (
+                  <div key={bill.id} className="flex items-center justify-between rounded-xl bg-muted/30 p-3 transition-colors hover:bg-muted/50">
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-medium">{bill.title}</p>
+                      <p className="text-xs text-muted-foreground">Tiba: {formatDate(bill.next_date)}</p>
+                    </div>
+                    <div className="font-semibold text-sm">
+                      {formatCurrency(bill.amount)}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-8 text-center bg-muted/20 rounded-xl border border-dashed border-border/50">
+                <CheckCircle2 className="mb-2 h-8 w-8 text-muted-foreground/30" />
+                <p className="text-sm font-medium text-muted-foreground">Tidak ada tagihan mendatang</p>
+              </div>
+            )}
+          </ListCard>
+        </div>
+      )}
     </div>
   );
 }

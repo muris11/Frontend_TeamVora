@@ -13,6 +13,7 @@ interface UseSSEOptions {
   onTeamUpdated?: (data: any) => void;
   onConnected?: (data: any) => void;
   onHeartbeat?: (data: any) => void;
+  onAdminStats?: (data: any) => void;
   onError?: (error: Event) => void;
 }
 
@@ -75,6 +76,13 @@ export function useSSE(options: UseSSEOptions = {}) {
       } catch {}
     });
 
+    eventSource.addEventListener("admin_stats", (e) => {
+      try {
+        const data = JSON.parse(e.data);
+        options.onAdminStats?.(data);
+      } catch {}
+    });
+
     // Fallback for untyped events
     eventSource.onmessage = (e) => {
       try {
@@ -96,6 +104,7 @@ export function useSSE(options: UseSSEOptions = {}) {
         reconnectAttempts.current++;
 
         reconnectTimeoutRef.current = setTimeout(() => {
+          // eslint-disable-next-line @typescript-eslint/no-use-before-define
           connect();
         }, delay);
       }

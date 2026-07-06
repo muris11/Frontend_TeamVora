@@ -2,126 +2,119 @@
 
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Upload, ImageIcon, X, Search, Check } from "lucide-react";
+import { Loader2, Image as ImageIcon, X } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 import api from "@/lib/api";
 import { TeamMedia } from "@/types";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { formatFileSize } from "@/lib/format";
 
 interface MediaPickerProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onSelect: (url: string) => void;
-  type?: "gallery" | "document";
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  onSelect?: (url: string) => void;
+  type?: string;
+  // Input mode props
+  value?: string;
+  onChange?: (val: string) => void;
+  placeholder?: string;
 }
 
-export function MediaPicker({ open, onOpenChange, onSelect, type = "gallery" }: MediaPickerProps) {
-  const [search, setSearch] = useState("");
-  const [selectedId, setSelectedId] = useState<number | null>(null);
+export function MediaPicker({ 
+  open: externalOpen, 
+  onOpenChange: externalOnOpenChange, 
+  onSelect, 
+  type,
+  value,
+  onChange,
+  placeholder 
+}: MediaPickerProps) {
+  const [internalOpen, setInternalOpen] = useState(false);
+  
+  const isInputMode = value !== undefined && onChange !== undefined;
+  
+  const open = externalOpen !== undefined ? externalOpen : internalOpen;
+  const onOpenChange = externalOnOpenChange || setInternalOpen;
 
   const { data, isLoading } = useQuery({
-    queryKey: ["media-picker", type],
+    queryKey: ["media", "gallery"],
     queryFn: async () => {
-      const endpoint = type === "gallery" ? "/media/gallery" : "/media/documents";
-      const res = await api.get(endpoint);
-      return res.data.data || res.data || [];
+      const res = await api.get("/media/gallery");
+      return res.data.data || res.data;
     },
     enabled: open,
   });
 
-  const items = (Array.isArray(data) ? data : []) as TeamMedia[];
-  const filtered = items.filter((item) =>
-    item.name.toLowerCase().includes(search.toLowerCase())
-  );
+  const mediaList = (Array.isArray(data) ? data : []) as TeamMedia[];
 
-  const handleSelect = () => {
-    const selected = items.find((item) => item.id === selectedId);
-    if (selected) {
-      onSelect(selected.file_path || selected.file_url || "");
-      onOpenChange(false);
-      setSelectedId(null);
-      setSearch("");
-    }
+  const handleSelect = (url: string) => {
+    if (onSelect) onSelect(url);
+    if (onChange) onChange(url);
+    onOpenChange(false);
   };
 
-  return (
+  const dialogContent = (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[80vh] flex flex-col">
+      <DialogContent className="max-w-3xl">
         <DialogHeader>
-          <DialogTitle>Pilih dari Media</DialogTitle>
+          <DialogTitle>Pilih dari Media Tim</DialogTitle>
         </DialogHeader>
-
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Cari media..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-9"
-          />
-        </div>
-
-        <div className="flex-1 overflow-y-auto min-h-[300px]">
-          {isLoading ? (
-            <div className="grid grid-cols-3 gap-3">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="aspect-square rounded-lg bg-muted animate-pulse" />
-              ))}
-            </div>
-          ) : filtered.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-[300px] text-muted-foreground">
-              <ImageIcon className="h-12 w-12 mb-4 opacity-30" />
-              <p className="text-sm">Belum ada media</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-3 gap-3">
-              {filtered.map((item) => (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={() => setSelectedId(item.id)}
-                  className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all group ${
-                    selectedId === item.id
-                      ? "border-primary ring-2 ring-primary/20"
-                      : "border-border/50 hover:border-primary/50"
-                  }`}
-                >
-                  {type === "gallery" && item.file_path ? (
-                    <img
-                      src={item.file_path}
-                      alt={item.name}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-muted">
-                      <ImageIcon className="h-8 w-8 text-muted-foreground" />
-                    </div>
-                  )}
-                  {selectedId === item.id && (
-                    <div className="absolute inset-0 bg-primary/20 flex items-center justify-center">
-                      <Check className="h-8 w-8 text-primary" />
-                    </div>
-                  )}
-                  <div className="absolute bottom-0 left-0 right-0 bg-black/60 px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <p className="text-white text-xs truncate">{item.name}</p>
-                  </div>
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-
-        <div className="flex justify-end gap-2 pt-2 border-t">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Batal
-          </Button>
-          <Button onClick={handleSelect} disabled={!selectedId}>
-            Pilih
-          </Button>
-        </div>
+        
+        {isLoading ? (
+          <div className="flex justify-center py-8">
+            <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+          </div>
+        ) : mediaList.length === 0 ? (
+          <div className="text-center py-8 text-muted-foreground">
+            <ImageIcon className="w-12 h-12 mx-auto mb-3 opacity-20" />
+            <p>Galeri tim masih kosong.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 max-h-[60vh] overflow-y-auto p-1">
+            {mediaList.map((media) => (
+              <div 
+                key={media.id} 
+                className="group relative aspect-square rounded-md overflow-hidden border cursor-pointer hover:ring-2 hover:ring-primary transition-all"
+                onClick={() => handleSelect(media.file_path || "")}
+              >
+                <img 
+                  src={media.file_path || ""} 
+                  alt={media.name} 
+                  className="w-full h-full object-cover"
+                />
+                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                  <span className="text-white text-sm font-medium px-2 text-center line-clamp-1">{media.name}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );
+
+  if (isInputMode) {
+    return (
+      <div className="flex gap-2">
+        <div className="relative flex-1">
+          <input
+            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder={placeholder || "Pilih media..."}
+          />
+        </div>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => onOpenChange(true)}
+        >
+          <ImageIcon className="w-4 h-4 mr-2" />
+          Pilih
+        </Button>
+        {dialogContent}
+      </div>
+    );
+  }
+
+  return dialogContent;
 }

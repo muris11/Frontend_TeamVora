@@ -35,7 +35,7 @@ function RegisterForm() {
   const { setAuth } = useAuthStore();
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [isLead, setIsLead] = useState(false);
+  const isLead = !inviteToken;
 
   const form = useForm<RegisterForm>({
     resolver: zodResolver(registerSchema),
@@ -94,25 +94,6 @@ function RegisterForm() {
           Bergabung dengan TeamVora
         </p>
       </div>
-
-      {!inviteToken && (
-        <div className="flex w-full rounded-md border border-input p-1 mb-2 bg-muted">
-          <button
-            type="button"
-            className={`flex-1 py-1.5 text-sm font-medium rounded-sm transition-colors ${!isLead ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
-            onClick={() => setIsLead(false)}
-          >
-            Anggota Tim
-          </button>
-          <button
-            type="button"
-            className={`flex-1 py-1.5 text-sm font-medium rounded-sm transition-colors ${isLead ? 'bg-background shadow-sm text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
-            onClick={() => setIsLead(true)}
-          >
-            Team Lead
-          </button>
-        </div>
-      )}
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">

@@ -214,10 +214,14 @@ export default function MarketingPage() {
                   </Link>
                 </motion.div>
               </Button>
-              <Button size="lg" variant="outline" className="h-14 px-8 text-base font-semibold rounded-full w-full sm:w-auto hover:bg-secondary/50">
-                <PlayCircle data-icon="inline-start" className="text-muted-foreground" />
-                Lihat Demo Interaktif
-              </Button>
+              {mkt?.hero_cta2_text && (
+                <Button size="lg" variant="outline" className="h-14 px-8 text-base font-semibold rounded-full w-full sm:w-auto hover:bg-secondary/50" asChild>
+                  <Link href={mkt?.hero_cta2_link || "#"}>
+                    <PlayCircle data-icon="inline-start" className="mr-2 text-muted-foreground" />
+                    {mkt.hero_cta2_text}
+                  </Link>
+                </Button>
+              )}
             </motion.div>
           </motion.div>
 
@@ -228,12 +232,10 @@ export default function MarketingPage() {
               transition={{ duration: 0.8, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
             >
               <div className="rounded-2xl md:rounded-3xl overflow-hidden border bg-background shadow-sm ring-1 ring-border/50 relative aspect-[16/9] flex items-center justify-center bg-muted/20">
-                <Image 
-                  src="/hero_3d.png" 
+                <img 
+                  src={mkt?.hero_image_url || "/hero_3d.png"}
                   alt="Dashboard Interface" 
-                  fill
-                  className="object-contain p-2 md:p-6 drop-shadow-2xl"
-                  priority
+                  className="w-full h-full object-contain p-2 md:p-6 drop-shadow-2xl"
                 />
               </div>
             </motion.div>
@@ -378,9 +380,13 @@ export default function MarketingPage() {
                     {heroCtaText}
                   </Link>
                 </Button>
-                <Button size="lg" variant="outline" className="h-14 px-8 text-base font-semibold rounded-full border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/10 w-full sm:w-auto bg-transparent">
-                  Hubungi Tim Sales
-                </Button>
+                {mkt?.hero_cta2_text && (
+                  <Button size="lg" variant="outline" className="h-14 px-8 text-base font-semibold rounded-full border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/10 w-full sm:w-auto bg-transparent" asChild>
+                    <Link href={mkt?.hero_cta2_link || "#"}>
+                      {mkt.hero_cta2_text}
+                    </Link>
+                  </Button>
+                )}
               </div>
               
               <div className="flex flex-wrap justify-center items-center gap-6 pt-6 text-sm text-primary-foreground/80 font-medium">

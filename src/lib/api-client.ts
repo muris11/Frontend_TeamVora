@@ -19,6 +19,7 @@ import type {
   CreateTaskRequest,
   UpdateTaskRequest,
   UpdateTaskStatusRequest,
+  ReorderTasksRequest,
   TaskIndexResponse,
   SplitBill,
   CreateSplitBillRequest,
@@ -202,6 +203,9 @@ export const taskApi = {
 
   updateStatus: (id: number, data: UpdateTaskStatusRequest) =>
     api.patch<Task>(`/tasks/${id}/status`, data),
+
+  reorder: (data: ReorderTasksRequest) =>
+    api.patch<{ message: string }>("/tasks/reorder", data),
 
   delete: (id: number) =>
     api.delete<{ message: string }>(`/tasks/${id}`),

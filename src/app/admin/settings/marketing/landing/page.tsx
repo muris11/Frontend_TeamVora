@@ -22,6 +22,7 @@ import { IconPicker } from "@/components/ui/icon-picker";
 import { ColorPicker } from "@/components/ui/color-picker";
 import { getColorTheme } from "@/lib/colors";
 import { PreviewFrame } from "@/components/shared/preview-frame";
+import { MediaPicker } from "@/components/shared/media-picker";
 
 interface Feature {
   title: string;
@@ -46,6 +47,9 @@ interface Form {
   hero_subtitle: string;
   hero_cta_text: string;
   hero_cta_link: string;
+  hero_cta2_text: string;
+  hero_cta2_link: string;
+  hero_image_url: string;
   features_title: string;
   features: string;
   testimonials_title: string;
@@ -67,11 +71,15 @@ function safeJsonParse<T>(str: string | undefined, fallback: T): T {
 
 export default function LandingPage() {
   const queryClient = useQueryClient();
+  const [activePicker, setActivePicker] = useState<"hero_image" | null>(null);
   const [form, setForm] = useState<Form>({
     hero_title: "",
     hero_subtitle: "",
     hero_cta_text: "",
     hero_cta_link: "/register",
+    hero_cta2_text: "",
+    hero_cta2_link: "",
+    hero_image_url: "",
     features_title: "",
     features: "[]",
     testimonials_title: "",
@@ -159,7 +167,7 @@ export default function LandingPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="max-w-6xl mx-auto space-y-6">
       <PageTitle title="Landing Page | TeamVora Admin" />
 
       <div className="flex items-center justify-between">
@@ -182,7 +190,15 @@ export default function LandingPage() {
                   <CardTitle>Hero Section</CardTitle>
                   <CardDescription>Bagian utama halaman marketing.</CardDescription>
                 </div>
-                <Button onClick={() => handleSave({ hero_title: form.hero_title, hero_subtitle: form.hero_subtitle, hero_cta_text: form.hero_cta_text, hero_cta_link: form.hero_cta_link })} disabled={saveMutation.isPending} className="rounded-xl">
+                <Button onClick={() => handleSave({ 
+                  hero_title: form.hero_title, 
+                  hero_subtitle: form.hero_subtitle, 
+                  hero_cta_text: form.hero_cta_text, 
+                  hero_cta_link: form.hero_cta_link,
+                  hero_cta2_text: form.hero_cta2_text,
+                  hero_cta2_link: form.hero_cta2_link,
+                  hero_image_url: form.hero_image_url
+                })} disabled={saveMutation.isPending} className="rounded-xl">
                   {saveMutation.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
                   Simpan
                 </Button>
@@ -199,12 +215,31 @@ export default function LandingPage() {
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="grid gap-2">
-                  <Label>Teks CTA</Label>
+                  <Label>Teks CTA 1</Label>
                   <Input value={form.hero_cta_text} onChange={(e) => setForm({ ...form, hero_cta_text: e.target.value })} placeholder="Mulai Gratis" />
                 </div>
                 <div className="grid gap-2">
-                  <Label>Link CTA</Label>
+                  <Label>Link CTA 1</Label>
                   <Input value={form.hero_cta_link} onChange={(e) => setForm({ ...form, hero_cta_link: e.target.value })} placeholder="/register" />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-2">
+                  <Label>Teks CTA 2</Label>
+                  <Input value={form.hero_cta2_text} onChange={(e) => setForm({ ...form, hero_cta2_text: e.target.value })} placeholder="Hubungi Sales" />
+                </div>
+                <div className="grid gap-2">
+                  <Label>Link CTA 2</Label>
+                  <Input value={form.hero_cta2_link} onChange={(e) => setForm({ ...form, hero_cta2_link: e.target.value })} placeholder="/contact" />
+                </div>
+              </div>
+              <div className="grid gap-2">
+                <Label>Gambar Hero</Label>
+                <div className="flex gap-2">
+                  <Input value={form.hero_image_url} onChange={(e) => setForm({ ...form, hero_image_url: e.target.value })} placeholder="/hero_3d.png" />
+                  <Button variant="outline" onClick={() => setActivePicker("hero_image")}>
+                    Pilih Media
+                  </Button>
                 </div>
               </div>
             </CardContent>
@@ -361,6 +396,17 @@ export default function LandingPage() {
           </Card>
         </div>
       </div>
+
+      <MediaPicker
+        open={activePicker !== null}
+        onOpenChange={(open) => !open && setActivePicker(null)}
+        onSelect={(url) => {
+          if (activePicker === "hero_image") {
+            setForm({ ...form, hero_image_url: url });
+          }
+        }}
+        type="gallery"
+      />
     </div>
   );
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import { motion } from "motion/react";
 import { Search, Mail, MessageCircle, Phone, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,8 +8,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import Link from "next/link";
 import { usePlatformSettings } from "@/hooks/use-platform-settings";
 import { PageTitle } from "@/components/shared/page-title";
-
 import { iconMap } from "@/components/ui/icon-picker";
+
+const fadeUpVariant = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] as const } },
+};
+
 const defaultChannels: any[] = [];
 const defaultArticles: string[] = [];
 
@@ -37,69 +43,77 @@ export default function BantuanPage() {
   } catch {}
 
   return (
-    <main className="min-h-screen bg-background">
+    <main className="min-h-screen bg-background pt-32 pb-24">
       <PageTitle title="Pusat Bantuan - TeamVora" />
 
-      <section className="relative pt-32 pb-20 bg-primary/5 overflow-hidden border-b border-border/50">
-        <div className="absolute inset-0 bg-grid-black/[0.02] dark:bg-grid-white/[0.02]" />
-        <div className="container mx-auto px-6 relative z-10 text-center max-w-2xl">
-          <h1 className="text-4xl md:text-5xl font-extrabold tracking-tight mb-6">
-            Pusat Bantuan
-          </h1>
-          <p className="text-lg text-muted-foreground mb-8">
+      <section className="container mx-auto px-6 max-w-3xl mb-24 text-center">
+        <motion.div
+            initial="hidden"
+            animate="visible"
+            variants={fadeUpVariant}
+            className="space-y-8"
+        >
+          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tighter">Pusat Bantuan</h1>
+          <p className="text-xl text-muted-foreground leading-relaxed">
             Punya pertanyaan atau mengalami kendala? Kami di sini siap membantu Anda kapan pun dibutuhkan.
           </p>
           <div className="relative max-w-xl mx-auto">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground w-5 h-5" />
-            <Input type="text" placeholder="Cari solusi atau artikel panduan..." className="w-full pl-10 pr-4 py-6 rounded-full text-base shadow-sm border-border" />
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground w-5 h-5" />
+            <Input type="text" placeholder="Cari solusi atau artikel panduan..." className="w-full pl-12 pr-6 py-8 rounded-full text-base shadow-sm border-border" />
           </div>
-        </div>
+        </motion.div>
       </section>
 
       {channels.length > 0 && (
-        <section className="py-16">
-          <div className="container mx-auto px-6 max-w-5xl">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {channels.map((channel: any, idx: number) => {
-                const IconComp = iconMap[channel.icon] || Mail;
-                return (
-                  <Card key={idx} className="border-border/50 text-center hover:border-primary/50 transition-colors">
-                    <CardHeader>
-                      <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4 text-primary">
-                        <IconComp className="w-5 h-5" />
-                      </div>
-                      <CardTitle>{channel.title}</CardTitle>
-                      <CardDescription className="mt-2">{channel.description}</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <Button variant="outline" className="w-full" asChild>
-                        <Link href={channel.link}>{channel.action}</Link>
-                      </Button>
-                    </CardContent>
-                  </Card>
-                );
-              })}
-            </div>
+        <section className="container mx-auto px-6 max-w-5xl mb-24">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {channels.map((channel: any, idx: number) => {
+              const IconComp = iconMap[channel.icon] || Mail;
+              return (
+                <motion.div
+                    key={idx}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: idx * 0.1, ease: [0.16, 1, 0.3, 1] }}
+                >
+                    <Card className="h-full border-border/50 text-center hover:border-primary/50 transition-all rounded-3xl p-6 shadow-sm">
+                        <CardHeader className="p-0 mb-6">
+                            <div className="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-6 text-primary">
+                            <IconComp className="w-7 h-7" />
+                            </div>
+                            <CardTitle className="text-2xl tracking-tight">{channel.title}</CardTitle>
+                            <CardDescription className="mt-2 text-base">{channel.description}</CardDescription>
+                        </CardHeader>
+                        <CardContent className="p-0">
+                            <Button variant="outline" className="w-full rounded-xl py-6 font-bold" asChild>
+                                <Link href={channel.link}>{channel.action}</Link>
+                            </Button>
+                        </CardContent>
+                    </Card>
+                </motion.div>
+              );
+            })}
           </div>
         </section>
       )}
 
       {articles.length > 0 && (
-        <section className="py-16 bg-muted/20 border-t border-border/50">
+        <section className="py-24 bg-muted/20 border-t border-border/50">
           <div className="container mx-auto px-6 max-w-4xl text-center">
-            <h2 className="text-2xl font-bold mb-8">Artikel Populer</h2>
+            <h2 className="text-3xl md:text-5xl font-bold mb-12 tracking-tighter">Artikel Populer</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
               {articles.map((article: string, i: number) => (
-                <Link key={i} href="/panduan" className="flex items-center justify-between p-4 rounded-xl bg-background border border-border/50 hover:border-primary/50 transition-colors group">
-                  <span className="font-medium text-sm">{article}</span>
-                  <ArrowRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                <Link key={i} href="/panduan" className="flex items-center justify-between p-6 rounded-2xl bg-card border border-border/50 hover:border-primary/50 transition-all group shadow-sm">
+                  <span className="font-semibold text-base">{article}</span>
+                  <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
                 </Link>
               ))}
             </div>
-            <div className="mt-12">
-              <Button size="lg" asChild>
+            <div className="mt-16">
+              <Button size="lg" className="rounded-full px-8 py-6 text-base font-bold" asChild>
                 <Link href="/panduan">
-                  Lihat Semua Panduan <ArrowRight className="ml-2 w-4 h-4" />
+                  Lihat Semua Panduan <ArrowRight className="ml-2 w-5 h-5" />
                 </Link>
               </Button>
             </div>

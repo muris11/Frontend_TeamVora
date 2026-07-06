@@ -20,6 +20,7 @@ import { Save, Mail, ImageIcon, Loader2, Server, Info, Send, Palette } from "luc
 import { toast } from "sonner";
 import api from "@/lib/api";
 import { ColorPicker } from "@/components/ui/color-picker";
+import { MediaPicker } from "@/components/shared/media-picker";
 
 interface EmailSettings {
   email_logo_url: string;
@@ -32,6 +33,14 @@ interface EmailSettings {
 
 interface PlatformSettings {
   general?: { site_name?: string; logo_url?: string };
+  email?: {
+    email_logo_url?: string;
+    email_sender_name?: string;
+    email_reply_to?: string;
+    email_button_color?: string;
+    email_primary_color?: string;
+    email_footer_text?: string;
+  };
 }
 
 export default function EmailSettingsPage() {
@@ -62,12 +71,13 @@ export default function EmailSettingsPage() {
 
   useEffect(() => {
     if (emailSettings) {
-      setLogoUrl(emailSettings.general?.logo_url ?? "");
-      setSenderName((emailSettings as any).email_sender_name ?? "TeamVora");
-      setReplyTo((emailSettings as any).email_reply_to ?? "");
-      setButtonColor((emailSettings as any).email_button_color ?? "blue");
-      setPrimaryColor((emailSettings as any).email_primary_color ?? "blue");
-      setFooterText((emailSettings as any).email_footer_text ?? "");
+      const emailGroup = (emailSettings as any).email || {};
+      setLogoUrl(emailGroup.email_logo_url ?? emailSettings.general?.logo_url ?? "");
+      setSenderName(emailGroup.email_sender_name ?? "TeamVora");
+      setReplyTo(emailGroup.email_reply_to ?? "");
+      setButtonColor(emailGroup.email_button_color ?? "blue");
+      setPrimaryColor(emailGroup.email_primary_color ?? "blue");
+      setFooterText(emailGroup.email_footer_text ?? "");
     }
   }, [emailSettings]);
 
@@ -127,8 +137,8 @@ export default function EmailSettingsPage() {
     amber: "#d97706",
   };
 
-  const actualButtonColor = buttonColorHex[buttonColor] || "#2563eb";
-
+  const actualButtonColor = buttonColorHex[buttonColor] || buttonColor;
+  const actualPrimaryColor = buttonColorHex[primaryColor] || primaryColor;
   if (isLoading) {
     return (
       <div className="space-y-6">
@@ -145,7 +155,7 @@ export default function EmailSettingsPage() {
   }
 
   return (
-    <div className="space-y-8 pb-10">
+    <div className="max-w-6xl mx-auto space-y-8 pb-10">
       <div className="flex flex-col gap-4">
         <PageTitle title="Pengaturan Email | TeamVora Admin" />
         <div>
@@ -171,11 +181,10 @@ export default function EmailSettingsPage() {
             <CardContent className="space-y-4">
               <div className="grid gap-2">
                 <Label htmlFor="email_logo_url">URL Logo</Label>
-                <Input
-                  id="email_logo_url"
+                <MediaPicker
                   value={logoUrl}
-                  onChange={(e) => setLogoUrl(e.target.value)}
-                  placeholder="https://example.com/logo.png"
+                  onChange={setLogoUrl}
+                  placeholder="Pilih atau upload logo"
                 />
               </div>
               <div className="grid gap-2">

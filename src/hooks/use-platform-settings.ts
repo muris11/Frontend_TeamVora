@@ -31,6 +31,9 @@ export interface PlatformSettings {
     hero_subtitle?: string;
     hero_cta_text?: string;
     hero_cta_link?: string;
+    hero_cta2_text?: string;
+    hero_cta2_link?: string;
+    hero_image_url?: string;
     features_title?: string;
     features?: string;
     testimonials_title?: string;

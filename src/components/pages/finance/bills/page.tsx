@@ -9,10 +9,10 @@ import api from "@/lib/api";
 import { SplitBill } from "@/types";
 import { formatCurrency, formatDate } from "@/lib/format";
 import { PageTitle } from "@/components/shared/page-title";
-import { DataTable } from "@/components/shared/data-table";
 import { EmptyState } from "@/components/shared/empty-state";
 import { StatusBadge } from "@/components/shared/status-badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export function BillsPage({ basePath }: { basePath: string }) {
   const router = useRouter();
@@ -81,42 +81,106 @@ export function BillsPage({ basePath }: { basePath: string }) {
         </Button>
       </div>
 
-      <div className="flex items-center gap-2">
-        <select
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          className="flex h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-        >
-          <option value="all">Semua Status</option>
-          <option value="unpaid">Belum Bayar</option>
-          <option value="pending_verification">Verifikasi</option>
-          <option value="paid">Lunas</option>
-        </select>
-      </div>
+      <div className="flex gap-6 overflow-x-auto pb-4 snap-x">
+        {/* Unpaid Column */}
+        <div className="flex-1 min-w-[300px] snap-center">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider">Belum Bayar</h3>
+            <span className="bg-muted px-2 py-0.5 rounded-full text-xs font-medium">
+              {items.filter(i => i.status === 'unpaid').length}
+            </span>
+          </div>
+          <div className="space-y-4">
+            {items.filter(i => i.status === 'unpaid').map(item => (
+              <Card key={item.id} className="cursor-pointer hover:border-primary/50 transition-colors" onClick={() => router.push(`${basePath}/finance/bills/${item.id}`)}>
+                <CardContent className="p-4">
+                  <div className="flex justify-between items-start mb-2">
+                    <h4 className="font-semibold text-sm line-clamp-2">{item.title}</h4>
+                  </div>
+                  <div className="text-xl font-bold text-primary mb-2">
+                    {formatCurrency(item.total_amount)}
+                  </div>
+                  <div className="flex justify-between items-center text-xs text-muted-foreground mt-4 pt-3 border-t">
+                    <span>{formatDate(item.due_date)}</span>
+                    <span className="truncate max-w-[100px]">{item.creator?.name}</span>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+            {items.filter(i => i.status === 'unpaid').length === 0 && (
+              <div className="border border-dashed rounded-xl p-8 text-center text-muted-foreground text-sm">
+                Kosong
+              </div>
+            )}
+          </div>
+        </div>
 
-      {items.length === 0 && !isLoading ? (
-        <EmptyState
-          title="Belum ada tagihan"
-          description="Buat tagihan pertama untuk membagi biaya."
-          action={
-            <Button asChild size="sm">
-              <Link href={`${basePath}/finance/bills/create`}>
-                <Plus className="w-4 h-4 mr-2" />
-                Tambah Baru
-              </Link>
-            </Button>
-          }
-        />
-      ) : (
-        <DataTable
-          columns={columns}
-          data={items}
-          isLoading={isLoading}
-          onRowClick={(item) =>
-            router.push(`${basePath}/finance/bills/${item.id}`)
-          }
-        />
-      )}
+        {/* Pending Verification Column */}
+        <div className="flex-1 min-w-[300px] snap-center">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider">Verifikasi</h3>
+            <span className="bg-muted px-2 py-0.5 rounded-full text-xs font-medium">
+              {items.filter(i => i.status === 'pending_verification').length}
+            </span>
+          </div>
+          <div className="space-y-4">
+            {items.filter(i => i.status === 'pending_verification').map(item => (
+              <Card key={item.id} className="cursor-pointer hover:border-primary/50 transition-colors" onClick={() => router.push(`${basePath}/finance/bills/${item.id}`)}>
+                <CardContent className="p-4">
+                  <div className="flex justify-between items-start mb-2">
+                    <h4 className="font-semibold text-sm line-clamp-2">{item.title}</h4>
+                  </div>
+                  <div className="text-xl font-bold text-primary mb-2">
+                    {formatCurrency(item.total_amount)}
+                  </div>
+                  <div className="flex justify-between items-center text-xs text-muted-foreground mt-4 pt-3 border-t">
+                    <span>{formatDate(item.due_date)}</span>
+                    <span className="truncate max-w-[100px]">{item.creator?.name}</span>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+            {items.filter(i => i.status === 'pending_verification').length === 0 && (
+              <div className="border border-dashed rounded-xl p-8 text-center text-muted-foreground text-sm">
+                Kosong
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Paid Column */}
+        <div className="flex-1 min-w-[300px] snap-center">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-semibold text-sm text-muted-foreground uppercase tracking-wider">Lunas</h3>
+            <span className="bg-muted px-2 py-0.5 rounded-full text-xs font-medium">
+              {items.filter(i => i.status === 'paid').length}
+            </span>
+          </div>
+          <div className="space-y-4">
+            {items.filter(i => i.status === 'paid').map(item => (
+              <Card key={item.id} className="cursor-pointer hover:border-primary/50 opacity-75 transition-colors" onClick={() => router.push(`${basePath}/finance/bills/${item.id}`)}>
+                <CardContent className="p-4">
+                  <div className="flex justify-between items-start mb-2">
+                    <h4 className="font-semibold text-sm line-clamp-2">{item.title}</h4>
+                  </div>
+                  <div className="text-xl font-bold text-primary mb-2">
+                    {formatCurrency(item.total_amount)}
+                  </div>
+                  <div className="flex justify-between items-center text-xs text-muted-foreground mt-4 pt-3 border-t">
+                    <span>{formatDate(item.due_date)}</span>
+                    <span className="truncate max-w-[100px]">{item.creator?.name}</span>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+            {items.filter(i => i.status === 'paid').length === 0 && (
+              <div className="border border-dashed rounded-xl p-8 text-center text-muted-foreground text-sm">
+                Kosong
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

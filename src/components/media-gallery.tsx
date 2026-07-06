@@ -32,7 +32,7 @@ export function MediaGallery({ title, description, role }: { title: string, desc
     setIsLoading(true);
     try {
       const endpoint = activeTab === 'gallery' ? '/media/gallery' : '/media/documents';
-      const response = await api.get(endpoint);
+      const response = await api.get(endpoint, { params: { role } });
       setMedia(response.data.data);
     } catch (error) {
       toast.error("Gagal memuat media");
@@ -58,6 +58,7 @@ export function MediaGallery({ title, description, role }: { title: string, desc
     formData.append("file", file);
     formData.append("name", file.name);
     formData.append("type", activeTab === 'gallery' ? 'gallery' : 'document');
+    formData.append("role", role);
 
     setIsUploading(true);
     try {

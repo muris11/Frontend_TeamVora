@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -18,6 +18,7 @@ import { PageTitle } from "@/components/shared/page-title";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
+import { MediaPicker } from "@/components/shared/media-picker";
 
 const teamSchema = z.object({
   name: z.string().min(2, "Nama tim minimal 2 karakter"),
@@ -29,6 +30,7 @@ type TeamForm = z.infer<typeof teamSchema>;
 export default function TeamProfilePage() {
   const { user, setAuth, token } = useAuthStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [showMediaPicker, setShowMediaPicker] = useState(false);
   const queryClient = useQueryClient();
 
   const teamForm = useForm<TeamForm>({
@@ -37,7 +39,7 @@ export default function TeamProfilePage() {
   });
 
   const updateTeamMutation = useMutation({
-    mutationFn: (data: TeamForm) => api.put("/teams/settings", data),
+    mutationFn: (data: TeamForm & { logo_url?: string }) => api.put("/teams/settings", data),
     onSuccess: (res) => {
       const updatedTeam = res.data.data || res.data;
       if (user && token) {
@@ -47,6 +49,14 @@ export default function TeamProfilePage() {
     },
     onError: () => toast.error("Gagal memperbarui profil tim"),
   });
+
+  const handleMediaSelect = (url: string) => {
+    updateTeamMutation.mutate({
+      name: teamForm.getValues("name"),
+      description: teamForm.getValues("description"),
+      logo_url: url
+    });
+  };
 
   const uploadLogoMutation = useMutation({
     mutationFn: async (file: File) => {
@@ -90,49 +100,66 @@ export default function TeamProfilePage() {
         {/* Kolom Kiri: Info Singkat */}
         <div className="lg:col-span-1 space-y-6">
           <Card>
-            <CardContent className="pt-6">
-              <div className="flex flex-col items-center space-y-4">
-                <div className="relative group">
-                  <Avatar className="h-32 w-32 border-4 border-background shadow-md">
-                    <AvatarImage src={user.team.logo_url || ""} alt={user.team.name} className="object-cover" />
-                    <AvatarFallback className="text-4xl bg-primary/10 text-primary">{initials}</AvatarFallback>
+            <CardContent className="pt-8 relative px-6 pb-6 text-center">
+              <div className="flex flex-col items-center mb-4">
+                <div className="relative group cursor-pointer mb-4">
+                  <Avatar className="w-24 h-24 border-4 border-background shadow-sm rounded-xl">
+                    <AvatarImage src={user?.team?.logo_url || ""} />
+                    <AvatarFallback className="text-2xl font-bold bg-primary/10 text-primary rounded-xl">
+                      {user?.team?.name?.substring(0, 2).toUpperCase()}
+                    </AvatarFallback>
                   </Avatar>
-                  <div 
-                    className="absolute inset-0 bg-black/40 rounded-full opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center cursor-pointer"
+                  <div className="absolute -bottom-2 -right-2">
+                    <Button 
+                      variant="secondary" 
+                      size="icon" 
+                      className="rounded-full shadow-sm w-8 h-8 relative"
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                    >
+                      <Camera className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    type="button"
                     onClick={() => fileInputRef.current?.click()}
+                    disabled={uploadLogoMutation.isPending}
                   >
-                    <div className="flex flex-col items-center text-white">
-                      {uploadLogoMutation.isPending ? (
-                        <Loader2 className="h-6 w-6 animate-spin" />
-                      ) : (
-                        <>
-                          <Camera className="h-6 w-6 mb-1" />
-                          <span className="text-xs font-medium">Ubah Logo</span>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                  <input
-                    type="file"
-                    ref={fileInputRef}
-                    className="hidden"
-                    accept="image/*"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        uploadLogoMutation.mutate(file);
-                      }
-                    }}
-                  />
+                    {uploadLogoMutation.isPending ? "Mengunggah..." : "Upload Logo"}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    type="button"
+                    onClick={() => setShowMediaPicker(true)}
+                    disabled={uploadLogoMutation.isPending}
+                  >
+                    Pilih dari Media
+                  </Button>
                 </div>
-
-                <div className="text-center space-y-1">
-                  <h3 className="font-semibold text-xl">{user.team.name}</h3>
-                  <div className="flex items-center justify-center text-sm text-muted-foreground">
-                    <ShieldCheck className="h-4 w-4 mr-1 text-primary" />
-                    Ketua: {user.name}
-                  </div>
-                </div>
+                <input 
+                  type="file" 
+                  className="hidden" 
+                  ref={fileInputRef} 
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      uploadLogoMutation.mutate(file);
+                    }
+                    e.target.value = '';
+                  }}
+                />
+              </div>
+              <h2 className="text-xl font-bold">{user?.team?.name}</h2>
+              <p className="text-muted-foreground text-sm mb-3">ID: {user?.team?.id}</p>
+              <div className="flex items-center justify-center text-sm text-muted-foreground">
+                <ShieldCheck className="h-4 w-4 mr-1 text-primary" />
+                Ketua: {user.name}
               </div>
 
               <Separator className="my-6" />
@@ -213,6 +240,12 @@ export default function TeamProfilePage() {
           </Card>
         </div>
       </div>
+      
+      <MediaPicker 
+        open={showMediaPicker} 
+        onOpenChange={setShowMediaPicker} 
+        onSelect={handleMediaSelect} 
+      />
     </div>
   );
 }

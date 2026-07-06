@@ -134,11 +134,6 @@ export default function LoginPage() {
           Daftar sekarang
         </Link>
       </div>
-      <div className="text-center text-sm text-muted-foreground">
-        <Link href="/admin-login" className="font-medium text-muted-foreground hover:text-foreground hover:underline underline-offset-4">
-          Login sebagai Admin
-        </Link>
-      </div>
     </div>
   );
 }

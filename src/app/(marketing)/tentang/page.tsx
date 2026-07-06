@@ -46,9 +46,9 @@ export default function TentangPage() {
     }
   } catch {}
 
-  const stats = aboutContent.stats.map((s) => ({ ...s, icon: iconMap[s.icon] || Users }));
-  const values = aboutContent.values.map((v) => ({ ...v, icon: iconMap[v.icon] || Target }));
-  const team = aboutContent.team;
+  const stats = (aboutContent.stats || []).map((s) => ({ ...s, icon: iconMap[s.icon] || Users }));
+  const values = (aboutContent.values || []).map((v) => ({ ...v, icon: iconMap[v.icon] || Target }));
+  const team = aboutContent.team || [];
 
   return (
     <>

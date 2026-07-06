@@ -115,7 +115,7 @@ export default function AdminTeamsPage() {
             <Users className="mr-1 h-3 w-3" /> Kelola
           </Button>
           <Link
-            href={`/admin/teams/${item.id}/edit`}
+            href={`/admin/teams/${item.slug}/edit`}
             className="inline-flex items-center justify-center rounded-md p-2 hover:bg-accent"
           >
             <Pencil className="h-4 w-4" />
@@ -129,7 +129,7 @@ export default function AdminTeamsPage() {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="max-w-6xl mx-auto space-y-6">
       <PageTitle title="Kelola Tim" />
       <div className="flex items-center justify-between">
         <div>

@@ -8,10 +8,10 @@ import { ArrowLeft, Loader2 } from "lucide-react";
 import api from "@/lib/api";
 import { PageTitle } from "@/components/shared/page-title";
 import { FileUpload } from "@/components/shared/file-upload";
+import { RichTextEditor } from "@/components/shared/rich-text-editor";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 
@@ -89,13 +89,9 @@ export function DailyLogCreatePage({ basePath }: { basePath: string }) {
 
             <div className="space-y-2">
               <Label htmlFor="content">Konten</Label>
-              <Textarea
-                id="content"
+              <RichTextEditor
                 value={content}
-                onChange={(e) => setContent(e.target.value)}
-                placeholder="Tulis konten daily log di sini..."
-                rows={8}
-                required
+                onChange={setContent}
               />
             </div>
 

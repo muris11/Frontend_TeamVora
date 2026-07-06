@@ -5,11 +5,17 @@ import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowLeft, Clock, User, ChevronRight } from "lucide-react";
+import { motion } from "motion/react";
 import api from "@/lib/api";
 import { Blog } from "@/types";
 import { formatDate } from "@/lib/format";
 import { PageTitle } from "@/components/shared/page-title";
 import { SEOHead } from "@/components/shared/seo-head";
+
+const fadeUpVariant = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] as const } },
+};
 
 export default function BlogDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = use(params);
@@ -37,11 +43,11 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
   if (isLoading) {
     return (
       <div className="pt-32 pb-24 min-h-screen bg-background">
-        <div className="container mx-auto px-4 max-w-7xl">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
+        <div className="container mx-auto px-6 max-w-7xl">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-16">
             <div className="lg:col-span-8 animate-pulse space-y-8">
               <div className="h-6 bg-muted/60 rounded w-32" />
-              <div className="h-12 bg-muted/60 rounded w-3/4" />
+              <div className="h-16 bg-muted/60 rounded w-3/4" />
               <div className="flex gap-4">
                 <div className="h-12 w-12 bg-muted/60 rounded-full" />
                 <div className="space-y-2 flex-1">
@@ -89,59 +95,68 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
       <PageTitle title={blog.title} />
 
       {/* Hero Section */}
-      <section className="pt-32 pb-12 bg-gradient-to-b from-primary/5 to-background border-b border-border/20">
-        <div className="container mx-auto px-4 max-w-7xl">
-          <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground mb-8">
-            <Link href="/blog" className="hover:text-primary transition-colors">Blog</Link>
-            <ChevronRight className="w-4 h-4" />
-            <span className="text-foreground truncate max-w-[200px] sm:max-w-xs">{blog.title}</span>
-          </div>
+      <section className="pt-32 pb-16 bg-muted/20 border-b border-border/20">
+        <div className="container mx-auto px-6 max-w-7xl">
+          <motion.div 
+            initial="hidden"
+            animate="visible"
+            variants={fadeUpVariant}
+          >
+            <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground mb-8">
+                <Link href="/blog" className="hover:text-primary transition-colors">Blog</Link>
+                <ChevronRight className="w-4 h-4" />
+                <span className="text-foreground truncate max-w-[200px] sm:max-w-xs">{blog.title}</span>
+            </div>
 
-          <div className="max-w-4xl">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight mb-8 leading-tight text-foreground">
-              {blog.title}
+            <h1 className="text-4xl md:text-6xl font-extrabold tracking-tighter mb-8 leading-[1.1] text-foreground">
+                {blog.title}
             </h1>
             
             <div className="flex flex-wrap items-center gap-6 text-base">
-              <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3">
                 {blog.author?.avatar_url ? (
-                  <Image src={blog.author.avatar_url} alt={blog.author.name} width={48} height={48} className="rounded-full shadow-sm border border-border/50" />
+                    <Image src={blog.author.avatar_url} alt={blog.author.name} width={48} height={48} className="rounded-full shadow-sm border border-border/50" />
                 ) : (
-                  <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary">
                     <User className="w-6 h-6" />
-                  </div>
+                    </div>
                 )}
                 <div>
-                  <p className="font-semibold text-foreground">{blog.author?.name || "Tim Editorial"}</p>
-                  <p className="text-sm text-muted-foreground">Author</p>
+                    <p className="font-semibold text-foreground">{blog.author?.name || "Tim Editorial"}</p>
+                    <p className="text-sm text-muted-foreground">Author</p>
                 </div>
-              </div>
-              
-              <div className="h-8 w-px bg-border hidden sm:block" />
-              
-              <div>
+                </div>
+                
+                <div className="h-8 w-px bg-border hidden sm:block" />
+                
+                <div>
                 <div className="flex items-center text-muted-foreground font-medium mb-1">
-                  <Clock className="h-4 w-4 mr-2" />
-                  {formatDate(blog.published_at || blog.created_at)}
+                    <Clock className="h-4 w-4 mr-2" />
+                    {formatDate(blog.published_at || blog.created_at)}
                 </div>
                 <p className="text-sm text-muted-foreground">Dipublikasikan</p>
-              </div>
+                </div>
             </div>
-          </div>
+          </motion.div>
         </div>
       </section>
 
       {/* Main Content Layout */}
-      <section className="pt-12">
-        <div className="container mx-auto px-4 max-w-7xl">
+      <section className="pt-16">
+        <div className="container mx-auto px-6 max-w-7xl">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-16">
             
             {/* Left Column: Article Content */}
             <div className="lg:col-span-8">
-              <article>
+              <motion.article
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, margin: "-100px" }}
+                variants={fadeUpVariant}
+              >
                 {/* Featured Image */}
                 {blog.featured_image && (
-                  <div className="relative rounded-[2rem] overflow-hidden mb-12 h-[300px] sm:h-[400px] md:h-[500px] shadow-lg border border-border/20">
+                  <div className="relative rounded-3xl overflow-hidden mb-16 h-[300px] sm:h-[400px] md:h-[500px] shadow-lg border border-border/20">
                     <Image
                       src={blog.featured_image}
                       alt={blog.title}
@@ -153,19 +168,19 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
                 )}
 
                 {/* Content */}
-                <div className="prose prose-lg md:prose-xl dark:prose-invert max-w-none prose-headings:font-bold prose-headings:tracking-tight prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-img:rounded-2xl prose-img:shadow-md">
+                <div className="prose prose-lg md:prose-xl dark:prose-invert max-w-none prose-headings:font-bold prose-headings:tracking-tighter prose-a:text-primary prose-a:no-underline hover:prose-a:underline prose-img:rounded-3xl prose-img:shadow-md">
                   <div className="whitespace-pre-wrap text-muted-foreground leading-loose" dangerouslySetInnerHTML={{ __html: blog.content }} />
                 </div>
-              </article>
+              </motion.article>
 
               {/* Footer Actions */}
               <div className="mt-16 pt-8 border-t border-border/40 flex items-center justify-between">
                 <Link
                   href="/blog"
-                  className="inline-flex items-center gap-2 text-foreground hover:text-primary font-medium transition-colors bg-muted/30 px-5 py-2.5 rounded-full"
+                  className="inline-flex items-center gap-2 text-foreground hover:text-primary font-bold transition-all hover:bg-muted px-6 py-3 rounded-full"
                 >
-                  <ArrowLeft className="h-4 w-4" />
-                  Kembali ke Artikel Lainnya
+                  <ArrowLeft className="h-5 w-5" />
+                  Kembali ke Artikel
                 </Link>
               </div>
             </div>
@@ -174,13 +189,13 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
             <div className="lg:col-span-4">
               <div className="sticky top-32 space-y-8">
                 {/* Related / Latest Blogs */}
-                <div className="bg-card rounded-3xl border border-border/40 p-8 shadow-sm">
-                  <h3 className="text-xl font-bold mb-6 text-foreground flex items-center gap-2">
+                <div className="bg-card rounded-3xl border border-border/50 p-8 shadow-sm">
+                  <h3 className="text-xl font-bold mb-8 text-foreground flex items-center gap-2">
                     <span className="w-1.5 h-6 rounded-full bg-primary inline-block"></span>
                     Artikel Terbaru
                   </h3>
                   
-                  <div className="space-y-6">
+                  <div className="space-y-8">
                     {latestBlogs.length > 0 ? (
                       latestBlogs.map((latestBlog) => (
                         <Link 
@@ -188,9 +203,9 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
                           key={latestBlog.id}
                           className="group block"
                         >
-                          <div className="flex gap-4">
+                          <div className="flex gap-5">
                             {latestBlog.featured_image && (
-                              <div className="relative w-24 h-24 rounded-xl overflow-hidden flex-shrink-0 border border-border/20 group-hover:border-primary/30 transition-colors">
+                              <div className="relative w-28 h-28 rounded-2xl overflow-hidden flex-shrink-0 border border-border/20 group-hover:border-primary/30 transition-colors shadow-sm">
                                 <Image
                                   src={latestBlog.featured_image}
                                   alt={latestBlog.title}
@@ -200,11 +215,11 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
                               </div>
                             )}
                             <div className="flex flex-col justify-center">
-                              <h4 className="text-sm font-bold text-foreground group-hover:text-primary transition-colors line-clamp-2 leading-snug mb-2">
+                              <h4 className="text-base font-bold text-foreground group-hover:text-primary transition-colors line-clamp-2 leading-snug mb-2">
                                 {latestBlog.title}
                               </h4>
-                              <div className="flex items-center text-xs text-muted-foreground">
-                                <Clock className="w-3 h-3 mr-1" />
+                              <div className="flex items-center text-xs text-muted-foreground font-medium">
+                                <Clock className="w-3.5 h-3.5 mr-1.5" />
                                 {formatDate(latestBlog.published_at || latestBlog.created_at)}
                               </div>
                             </div>
@@ -217,22 +232,22 @@ export default function BlogDetailPage({ params }: { params: Promise<{ slug: str
                   </div>
 
                   {latestBlogs.length > 0 && (
-                    <div className="mt-8 pt-6 border-t border-border/40">
-                      <Link href="/blog" className="text-sm font-medium text-primary hover:underline flex items-center justify-center gap-1">
+                    <div className="mt-10 pt-6 border-t border-border/50">
+                      <Link href="/blog" className="text-base font-bold text-primary hover:underline flex items-center justify-center gap-2">
                         Lihat Semua Artikel <ChevronRight className="w-4 h-4" />
                       </Link>
                     </div>
                   )}
                 </div>
 
-                {/* Optional: CTA Widget */}
+                {/* CTA Widget */}
                 <div className="bg-gradient-to-br from-primary/10 to-primary/5 rounded-3xl border border-primary/20 p-8 text-center relative overflow-hidden">
                   <div className="absolute top-0 right-0 -mt-4 -mr-4 w-24 h-24 bg-primary/10 rounded-full blur-2xl" />
                   <h3 className="text-xl font-bold mb-3 text-foreground">Tingkatkan Produktivitas Tim Anda</h3>
-                  <p className="text-sm text-muted-foreground mb-6 leading-relaxed">
+                  <p className="text-base text-muted-foreground mb-8 leading-relaxed">
                     Mulai gunakan TeamVora hari ini dan ubah cara tim Anda bekerja.
                   </p>
-                  <Link href="/register" className="inline-block w-full bg-primary text-primary-foreground font-medium rounded-xl py-3 shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all">
+                  <Link href="/register" className="inline-block w-full bg-primary text-primary-foreground font-bold rounded-2xl py-4 shadow-md hover:shadow-lg hover:scale-105 transition-all">
                     Coba Gratis Sekarang
                   </Link>
                 </div>

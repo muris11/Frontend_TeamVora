@@ -117,7 +117,7 @@ export default function SyaratPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="max-w-6xl mx-auto space-y-6">
       <PageTitle title="Syarat & Ketentuan | TeamVora Admin" />
 
       <div className="flex items-center justify-between">

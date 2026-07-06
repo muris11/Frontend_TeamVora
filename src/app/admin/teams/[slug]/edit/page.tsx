@@ -1,7 +1,8 @@
 "use client";
 
+import { useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -15,7 +16,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
 import { PageTitle } from "@/components/shared/page-title";
 
 const teamSchema = z.object({
@@ -29,15 +29,8 @@ type TeamForm = z.infer<typeof teamSchema>;
 export default function AdminTeamEditPage() {
   const router = useRouter();
   const params = useParams();
-  const teamId = params.id as string;
-
-  const { data: team, isLoading: teamLoading } = useQuery({
-    queryKey: ["admin-team", teamId],
-    queryFn: async () => {
-      const res = await api.get(`/teams/${teamId}`);
-      return res.data.data || res.data;
-    },
-  });
+  const slug = params.slug as string;
+  const queryClient = useQueryClient();
 
   const { data: users } = useQuery({
     queryKey: ["all-users"],
@@ -47,49 +40,45 @@ export default function AdminTeamEditPage() {
     },
   });
 
-  const form = useForm<TeamForm>({
-    resolver: zodResolver(teamSchema),
-    defaultValues: {
-      name: "",
-      description: "",
-      leader_id: 0,
+  const { data: team, isLoading: teamLoading } = useQuery({
+    queryKey: ["team", slug],
+    queryFn: async () => {
+      const res = await api.get(`/teams/${slug}`);
+      return res.data.data;
     },
-    values: team
-      ? {
-          name: team.name || "",
-          description: team.description || "",
-          leader_id: team.leader?.id || 0,
-        }
-      : undefined,
   });
 
+  const form = useForm<TeamForm>({
+    resolver: zodResolver(teamSchema),
+    defaultValues: { name: "", description: "", leader_id: 0 },
+  });
+
+  useEffect(() => {
+    if (team) {
+      form.reset({
+        name: team.name,
+        description: team.description || "",
+        leader_id: team.leader?.id || 0,
+      });
+    }
+  }, [team, form]);
+
   const updateMutation = useMutation({
-    mutationFn: (data: TeamForm) => api.put(`/teams/${teamId}`, data),
+    mutationFn: (data: TeamForm) => api.put(`/teams/${slug}`, data),
     onSuccess: () => {
       toast.success("Tim berhasil diperbarui");
+      queryClient.invalidateQueries({ queryKey: ["admin-teams"] });
       router.push("/admin/teams");
     },
     onError: () => toast.error("Gagal memperbarui tim"),
   });
 
   if (teamLoading) {
-    return (
-      <div className="space-y-4">
-        <PageTitle title="Edit Tim" />
-        <Skeleton className="h-8 w-48" />
-        <Card>
-          <CardContent className="p-6 space-y-4">
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-20 w-full" />
-            <Skeleton className="h-10 w-full" />
-          </CardContent>
-        </Card>
-      </div>
-    );
+    return <div className="p-8 text-center text-muted-foreground">Memuat data tim...</div>;
   }
 
   return (
-    <div className="space-y-4">
+    <div className="max-w-6xl mx-auto space-y-4">
       <PageTitle title="Edit Tim" />
       <div className="flex items-center gap-4">
         <Link href="/admin/teams">
@@ -102,7 +91,7 @@ export default function AdminTeamEditPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Form Tim</CardTitle>
+          <CardTitle>Form Edit Tim</CardTitle>
         </CardHeader>
         <CardContent>
           <Form {...form}>

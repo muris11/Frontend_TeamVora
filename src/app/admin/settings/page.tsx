@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Save, Globe } from "lucide-react";
+import { Save, Globe, Image as ImageIcon, Search } from "lucide-react";
 import api from "@/lib/api";
 import { toast } from "sonner";
 import { PageTitle } from "@/components/shared/page-title";
@@ -16,7 +16,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
+import { MediaPicker } from "@/components/shared/media-picker";
 
 interface PlatformSettings {
   general: {
@@ -25,17 +27,29 @@ interface PlatformSettings {
     favicon_url: string;
     logo_url: string;
   };
+  seo: {
+    seo_title: string;
+    seo_description: string;
+    seo_keywords: string;
+    og_image_url: string;
+  };
 }
 
 export default function AdminSettingsPage() {
   const queryClient = useQueryClient();
 
-  const [general, setGeneral] = useState({
+  const [settingsForm, setSettingsForm] = useState({
     site_name: "",
     tagline: "",
     favicon_url: "",
     logo_url: "",
+    seo_title: "",
+    seo_description: "",
+    seo_keywords: "",
+    og_image_url: "",
   });
+
+  const [activePicker, setActivePicker] = useState<"favicon" | "logo" | "og_image" | null>(null);
 
   const { data: settings, isLoading: settingsLoading } = useQuery({
     queryKey: ["platform-settings"],
@@ -47,145 +61,230 @@ export default function AdminSettingsPage() {
 
   useEffect(() => {
     if (settings) {
-      setGeneral({
+      setSettingsForm({
         site_name: settings.general?.site_name ?? "",
         tagline: settings.general?.tagline ?? "",
         favicon_url: settings.general?.favicon_url ?? "",
         logo_url: settings.general?.logo_url ?? "",
+        seo_title: settings.seo?.seo_title ?? "",
+        seo_description: settings.seo?.seo_description ?? "",
+        seo_keywords: settings.seo?.seo_keywords ?? "",
+        og_image_url: settings.seo?.og_image_url ?? "",
       });
     }
   }, [settings]);
 
-  const generalMutation = useMutation({
+  const updateMutation = useMutation({
     mutationFn: (data: Record<string, string>) =>
       api.put("/admin/platform-settings", { settings: data }),
     onSuccess: () => {
-      toast.success("Pengaturan umum berhasil disimpan");
+      toast.success("Pengaturan berhasil disimpan");
       queryClient.invalidateQueries({ queryKey: ["platform-settings"] });
     },
-    onError: () => toast.error("Gagal menyimpan pengaturan umum"),
+    onError: () => toast.error("Gagal menyimpan pengaturan"),
   });
 
   return (
-    <div className="space-y-6">
+    <div className="max-w-6xl mx-auto space-y-8 pb-10">
       <PageTitle title="Pengaturan Umum | TeamVora Admin" />
 
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Pengaturan Umum</h1>
-        <p className="text-muted-foreground">
-          Pengaturan dasar untuk identitas dan branding platform.
+        <p className="text-muted-foreground mt-2">
+          Kelola informasi platform, branding, logo, dan pengaturan SEO secara lengkap.
         </p>
       </div>
 
-      <Card className="border-border/50 shadow-sm max-w-2xl">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Globe className="w-5 h-5" />
-            Informasi Platform
-          </CardTitle>
-          <CardDescription>
-            Nama, tagline, dan aset visual platform.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          {settingsLoading ? (
-            <div className="space-y-6">
-              {[...Array(4)].map((_, i) => (
-                <div key={i} className="space-y-2">
-                  <Skeleton className="h-4 w-24" />
-                  <Skeleton className="h-8 w-full" />
-                </div>
-              ))}
-            </div>
-          ) : (
-            <>
-              <div className="grid gap-2">
-                <Label htmlFor="site_name">Nama Situs</Label>
-                <Input
-                  id="site_name"
-                  value={general.site_name}
-                  onChange={(e) =>
-                    setGeneral({ ...general, site_name: e.target.value })
-                  }
-                  placeholder="TeamVora"
-                />
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <Card className="border-border/50 shadow-sm">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Globe className="w-5 h-5 text-primary" />
+              Identitas Platform
+            </CardTitle>
+            <CardDescription>
+              Nama, tagline, dan logo visual platform.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {settingsLoading ? (
+              <div className="space-y-6">
+                {[...Array(4)].map((_, i) => (
+                  <div key={i} className="space-y-2">
+                    <Skeleton className="h-4 w-24" />
+                    <Skeleton className="h-10 w-full" />
+                  </div>
+                ))}
               </div>
-              <div className="grid gap-2">
-                <Label htmlFor="tagline">Tagline</Label>
-                <Input
-                  id="tagline"
-                  value={general.tagline}
-                  onChange={(e) =>
-                    setGeneral({ ...general, tagline: e.target.value })
-                  }
-                  placeholder="Platform Manajemen Tim"
-                />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="favicon_url">URL Favicon</Label>
-                <div className="flex items-center gap-3">
+            ) : (
+              <>
+                <div className="grid gap-2">
+                  <Label htmlFor="site_name">Nama Situs</Label>
                   <Input
-                    id="favicon_url"
-                    value={general.favicon_url}
-                    onChange={(e) =>
-                      setGeneral({
-                        ...general,
-                        favicon_url: e.target.value,
-                      })
-                    }
-                    placeholder="https://example.com/favicon.ico"
-                    className="flex-1"
+                    id="site_name"
+                    value={settingsForm.site_name}
+                    onChange={(e) => setSettingsForm({ ...settingsForm, site_name: e.target.value })}
+                    placeholder="TeamVora"
                   />
-                  {general.favicon_url && (
-                    <img
-                      src={general.favicon_url}
-                      alt="Favicon preview"
-                      className="w-8 h-8 rounded border border-border/50 object-contain"
-                      onError={(e) =>
-                        (e.currentTarget.style.display = "none")
-                      }
-                    />
-                  )}
                 </div>
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="logo_url">URL Logo</Label>
-                <div className="flex items-center gap-3">
+                <div className="grid gap-2">
+                  <Label htmlFor="tagline">Tagline</Label>
                   <Input
-                    id="logo_url"
-                    value={general.logo_url}
-                    onChange={(e) =>
-                      setGeneral({ ...general, logo_url: e.target.value })
-                    }
-                    placeholder="https://example.com/logo.png"
-                    className="flex-1"
+                    id="tagline"
+                    value={settingsForm.tagline}
+                    onChange={(e) => setSettingsForm({ ...settingsForm, tagline: e.target.value })}
+                    placeholder="Platform Manajemen Tim Terbaik"
                   />
-                  {general.logo_url && (
-                    <img
-                      src={general.logo_url}
-                      alt="Logo preview"
-                      className="w-8 h-8 rounded border border-border/50 object-contain"
-                      onError={(e) =>
-                        (e.currentTarget.style.display = "none")
-                      }
-                    />
-                  )}
                 </div>
+                
+                <div className="grid gap-2">
+                  <Label>Favicon</Label>
+                  <div className="flex items-center gap-3">
+                    {settingsForm.favicon_url ? (
+                      <img src={settingsForm.favicon_url} alt="Favicon" className="w-10 h-10 rounded border object-contain bg-muted" />
+                    ) : (
+                      <div className="w-10 h-10 rounded border bg-muted flex items-center justify-center">
+                        <ImageIcon className="w-4 h-4 text-muted-foreground" />
+                      </div>
+                    )}
+                    <Input
+                      value={settingsForm.favicon_url}
+                      onChange={(e) => setSettingsForm({ ...settingsForm, favicon_url: e.target.value })}
+                      placeholder="URL Favicon"
+                      className="flex-1"
+                    />
+                    <Button variant="outline" onClick={() => setActivePicker("favicon")}>
+                      Pilih Media
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="grid gap-2">
+                  <Label>Logo Platform</Label>
+                  <div className="flex items-center gap-3">
+                    {settingsForm.logo_url ? (
+                      <img src={settingsForm.logo_url} alt="Logo" className="w-12 h-12 rounded border object-contain bg-muted" />
+                    ) : (
+                      <div className="w-12 h-12 rounded border bg-muted flex items-center justify-center">
+                        <ImageIcon className="w-5 h-5 text-muted-foreground" />
+                      </div>
+                    )}
+                    <Input
+                      value={settingsForm.logo_url}
+                      onChange={(e) => setSettingsForm({ ...settingsForm, logo_url: e.target.value })}
+                      placeholder="URL Logo"
+                      className="flex-1"
+                    />
+                    <Button variant="outline" onClick={() => setActivePicker("logo")}>
+                      Pilih Media
+                    </Button>
+                  </div>
+                </div>
+              </>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card className="border-border/50 shadow-sm">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Search className="w-5 h-5 text-emerald-500" />
+              Pengaturan SEO
+            </CardTitle>
+            <CardDescription>
+              Optimasi mesin pencari dan metadata sosial (Open Graph).
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {settingsLoading ? (
+              <div className="space-y-6">
+                {[...Array(4)].map((_, i) => (
+                  <div key={i} className="space-y-2">
+                    <Skeleton className="h-4 w-24" />
+                    <Skeleton className="h-10 w-full" />
+                  </div>
+                ))}
               </div>
-              <div className="flex justify-end">
-                <Button
-                  onClick={() => generalMutation.mutate(general)}
-                  disabled={generalMutation.isPending}
-                  className="rounded-xl"
-                >
-                  <Save className="w-4 h-4" />
-                  {generalMutation.isPending ? "Menyimpan..." : "Simpan"}
-                </Button>
-              </div>
-            </>
-          )}
-        </CardContent>
-      </Card>
+            ) : (
+              <>
+                <div className="grid gap-2">
+                  <Label htmlFor="seo_title">SEO Title (Default)</Label>
+                  <Input
+                    id="seo_title"
+                    value={settingsForm.seo_title}
+                    onChange={(e) => setSettingsForm({ ...settingsForm, seo_title: e.target.value })}
+                    placeholder="TeamVora - Kolaborasi Tanpa Batas"
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="seo_description">SEO Description</Label>
+                  <Textarea
+                    id="seo_description"
+                    value={settingsForm.seo_description}
+                    onChange={(e) => setSettingsForm({ ...settingsForm, seo_description: e.target.value })}
+                    placeholder="Deskripsi singkat yang akan muncul di hasil pencarian..."
+                    rows={3}
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="seo_keywords">SEO Keywords (pisahkan dengan koma)</Label>
+                  <Input
+                    id="seo_keywords"
+                    value={settingsForm.seo_keywords}
+                    onChange={(e) => setSettingsForm({ ...settingsForm, seo_keywords: e.target.value })}
+                    placeholder="team, manajemen, kolaborasi, produktivitas"
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label>Open Graph Image (OG Image)</Label>
+                  <div className="flex items-center gap-3">
+                    {settingsForm.og_image_url ? (
+                      <img src={settingsForm.og_image_url} alt="OG Image" className="w-16 h-10 rounded border object-cover bg-muted" />
+                    ) : (
+                      <div className="w-16 h-10 rounded border bg-muted flex items-center justify-center">
+                        <ImageIcon className="w-4 h-4 text-muted-foreground" />
+                      </div>
+                    )}
+                    <Input
+                      value={settingsForm.og_image_url}
+                      onChange={(e) => setSettingsForm({ ...settingsForm, og_image_url: e.target.value })}
+                      placeholder="URL Gambar OG"
+                      className="flex-1"
+                    />
+                    <Button variant="outline" onClick={() => setActivePicker("og_image")}>
+                      Pilih Media
+                    </Button>
+                  </div>
+                  <p className="text-xs text-muted-foreground">Gambar yang muncul ketika link website dibagikan di sosial media (Rekomendasi: 1200x630px).</p>
+                </div>
+              </>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="flex justify-end pt-4">
+        <Button
+          onClick={() => updateMutation.mutate(settingsForm)}
+          disabled={updateMutation.isPending || settingsLoading}
+          size="lg"
+          className="rounded-xl px-8 shadow-md"
+        >
+          <Save className="w-4 h-4 mr-2" />
+          {updateMutation.isPending ? "Menyimpan..." : "Simpan Semua Pengaturan"}
+        </Button>
+      </div>
+
+      <MediaPicker
+        open={activePicker !== null}
+        onOpenChange={(open) => !open && setActivePicker(null)}
+        onSelect={(url) => {
+          if (activePicker === "favicon") setSettingsForm({ ...settingsForm, favicon_url: url });
+          if (activePicker === "logo") setSettingsForm({ ...settingsForm, logo_url: url });
+          if (activePicker === "og_image") setSettingsForm({ ...settingsForm, og_image_url: url });
+        }}
+        type="gallery"
+      />
     </div>
   );
 }

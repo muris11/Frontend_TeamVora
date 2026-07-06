@@ -1,10 +1,11 @@
 "use client";
 
+import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { LogIn } from "lucide-react";
 import api from "@/lib/api";
-import { User } from "@/types";
+import { User, Team } from "@/types";
 import { formatDate } from "@/lib/format";
 import { DataTable } from "@/components/shared/data-table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -31,12 +32,23 @@ export default function AdminUsersPage() {
   const queryClient = useQueryClient();
   const router = useRouter();
   const { setAuth } = useAuthStore();
+  
+  const [filterRole, setFilterRole] = useState<string>("all");
+  const [filterTeam, setFilterTeam] = useState<string>("all");
 
   const { data: users, isLoading } = useQuery({
     queryKey: ["admin-users"],
     queryFn: async () => {
       const res = await api.get("/members");
       return res.data.users || res.data.data || [];
+    },
+  });
+
+  const { data: teams } = useQuery({
+    queryKey: ["admin-teams"],
+    queryFn: async () => {
+      const res = await api.get("/teams");
+      return res.data.data || [];
     },
   });
 
@@ -66,6 +78,15 @@ export default function AdminUsersPage() {
     },
     onError: () => toast.error("Gagal masuk sebagai user ini"),
   });
+
+  const filteredUsers = useMemo(() => {
+    if (!users) return [];
+    return users.filter((u: User) => {
+      const matchRole = filterRole === "all" || u.role === filterRole;
+      const matchTeam = filterTeam === "all" || String(u.team_id) === filterTeam;
+      return matchRole && matchTeam;
+    });
+  }, [users, filterRole, filterTeam]);
 
   const columns = [
     {
@@ -139,16 +160,43 @@ export default function AdminUsersPage() {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="max-w-6xl mx-auto space-y-6">
       <PageTitle title="Kelola User" />
-      <div>
-        <h1 className="text-2xl font-bold">Kelola User</h1>
-        <p className="text-sm text-muted-foreground">Kelola seluruh user dalam platform</p>
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold">Kelola User</h1>
+          <p className="text-sm text-muted-foreground">Kelola seluruh user dalam platform dan ubah peran mereka.</p>
+        </div>
+        
+        <div className="flex items-center gap-2">
+          <Select value={filterRole} onValueChange={(val) => setFilterRole(val || "all")}>
+            <SelectTrigger className="w-40">
+              <SelectValue placeholder="Filter Role" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Semua Role</SelectItem>
+              <SelectItem value="super_admin">Super Admin</SelectItem>
+              <SelectItem value="team_leader">Team Leader</SelectItem>
+              <SelectItem value="member">Member</SelectItem>
+            </SelectContent>
+          </Select>
+          <Select value={filterTeam} onValueChange={(val) => setFilterTeam(val || "all")}>
+            <SelectTrigger className="w-40">
+              <SelectValue placeholder="Filter Tim" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Semua Tim</SelectItem>
+              {(teams || []).map((t: Team) => (
+                <SelectItem key={t.id} value={String(t.id)}>{t.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       <DataTable
         columns={columns}
-        data={users || []}
+        data={filteredUsers || []}
         isLoading={isLoading}
         emptyMessage="Belum ada user"
       />

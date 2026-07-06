@@ -121,6 +121,7 @@ export interface Task {
   creator?: Pick<User, "id" | "name">;
   priority: "low" | "medium" | "high";
   status: "todo" | "in_progress" | "done";
+  position: number;
   due_date: string | null;
   created_at: string;
 }
@@ -162,6 +163,7 @@ export interface RecurringBill {
   status: string;
   start_date: string;
   end_date: string | null;
+  next_date?: string;
   assignee_ids: number[] | null;
   notify_days_before_due: number | null;
   next_generation_at: string | null;
@@ -192,7 +194,7 @@ export interface CashBook {
 
 export interface DailyLog {
   id: number;
-  user?: Pick<User, "id" | "name">;
+  user?: Pick<User, "id" | "name" | "avatar_url">;
   title: string;
   log_date: string;
   content: string;
@@ -388,6 +390,10 @@ export interface UpdateTaskRequest {
 
 export interface UpdateTaskStatusRequest {
   status: "todo" | "in_progress" | "done";
+}
+
+export interface ReorderTasksRequest {
+  tasks: { id: string | number; position: number }[];
 }
 
 // Task index returns tasks + users list
@@ -653,6 +659,9 @@ export interface DashboardStatsResponse {
   };
   unpaid_bills: BillItem[];
   active_tasks: Task[];
+  recent_logs?: DailyLog[];
+  upcoming_recurring_bills?: RecurringBill[];
+  team_members_count?: number;
 }
 
 export interface MemberDashboard {

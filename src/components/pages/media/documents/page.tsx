@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
-import { FileText, Upload, Download, Search, Trash2, Copy } from "lucide-react";
+import { FileText, Upload, Download, Search, Trash2, Copy, Edit } from "lucide-react";
 import { toast } from "sonner";
 import api from "@/lib/api";
 import { TeamMedia } from "@/types";
@@ -16,6 +16,8 @@ import { formatFileSize, formatDate } from "@/lib/format";
 
 export function DocumentsPage({ basePath }: { basePath: string }) {
   const [search, setSearch] = useState("");
+  const [editingId, setEditingId] = useState<number | string | null>(null);
+  const [editName, setEditName] = useState("");
   const queryClient = useQueryClient();
 
   const { data, isLoading } = useQuery({
@@ -38,6 +40,29 @@ export function DocumentsPage({ basePath }: { basePath: string }) {
   const handleDelete = (id: string | number) => {
     if (confirm("Yakin ingin menghapus dokumen ini?")) {
       deleteMutation.mutate(id);
+    }
+  };
+
+  const updateMutation = useMutation({
+    mutationFn: ({ id, name }: { id: string | number; name: string }) => 
+      api.put(`/media/${id}`, { name }),
+    onSuccess: () => {
+      toast.success("Nama dokumen berhasil diperbarui");
+      setEditingId(null);
+      queryClient.invalidateQueries({ queryKey: ["media", "document"] });
+    },
+    onError: () => toast.error("Gagal memperbarui nama dokumen"),
+  });
+
+  const handleEdit = (doc: TeamMedia) => {
+    setEditingId(doc.id);
+    setEditName(doc.name);
+  };
+
+  const submitEdit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (editingId && editName.trim()) {
+      updateMutation.mutate({ id: editingId, name: editName });
     }
   };
 
@@ -141,6 +166,17 @@ export function DocumentsPage({ basePath }: { basePath: string }) {
                     className="w-8 h-8 shrink-0 hover:bg-muted"
                     onClick={(e) => {
                       e.stopPropagation();
+                      handleEdit(doc);
+                    }}
+                  >
+                    <Edit className="w-4 h-4 text-muted-foreground" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="w-8 h-8 shrink-0 hover:bg-muted"
+                    onClick={(e) => {
+                      e.stopPropagation();
                       handleCopyUrl(doc.file_path);
                     }}
                   >
@@ -162,6 +198,28 @@ export function DocumentsPage({ basePath }: { basePath: string }) {
               </CardContent>
             </Card>
           ))}
+        </div>
+      )}
+
+      {/* Simple Edit Modal */}
+      {editingId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4">
+          <div className="bg-background rounded-lg p-6 max-w-sm w-full">
+            <h3 className="text-lg font-semibold mb-4">Edit Nama Dokumen</h3>
+            <form onSubmit={submitEdit}>
+              <input
+                type="text"
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 mb-4"
+                autoFocus
+              />
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" type="button" onClick={() => setEditingId(null)}>Batal</Button>
+                <Button type="submit" disabled={updateMutation.isPending}>Simpan</Button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
     </div>

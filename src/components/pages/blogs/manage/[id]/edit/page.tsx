@@ -22,7 +22,7 @@ import { RichTextEditor } from "@/components/shared/rich-text-editor";
 export function BlogEditPage({ basePath }: { basePath: string }) {
   const router = useRouter();
   const params = useParams();
-  const id = params.id as string;
+  const id = (params.id || params.slug) as string;
 
   const [form, setForm] = useState({
     title: "",
