@@ -1,117 +1,104 @@
-"use client";
-
-import { motion } from "motion/react";
-import { Book, FileText, ChevronRight } from "lucide-react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { usePlatformSettings } from "@/hooks/use-platform-settings";
-import { PageTitle } from "@/components/shared/page-title";
-import { iconMap } from "@/components/ui/icon-picker";
-
-const fadeUpVariant = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] as const } },
-};
-
-const defaultCategories: any[] = [];
-const defaultFaqs: any[] = [];
+import { SEOHead } from "@/components/shared/seo-head";
+import { BookOpen, Search, ArrowRight, PlayCircle, FileText, CheckCircle2 } from "lucide-react";
+import Link from "next/link";
 
 export default function PanduanPage() {
-  const { data: settings } = usePlatformSettings();
-
-  let categories = defaultCategories;
-  let faqs = defaultFaqs;
-
-  try {
-    const raw = settings?.marketing?.guide_content;
-    if (raw) {
-      const parsed = JSON.parse(raw);
-      if (parsed?.categories?.length) {
-        categories = parsed.categories.map((c: any) => ({
-          title: c.title || "",
-          icon: c.icon || "Book",
-          description: c.description || "",
-          articles: c.articles?.length ? c.articles : [""],
-        }));
-      }
-      if (parsed?.faqs?.length) {
-        faqs = parsed.faqs.map((f: any) => ({ question: f.question || "", answer: f.answer || "" }));
-      }
-    }
-  } catch {}
+  const guides = [
+    { title: "Cara Mulai Cepat (Quick Start)", icon: <PlayCircle className="w-5 h-5"/>, time: "5 min baca" },
+    { title: "Mengatur Proyek Pertama Anda", icon: <FileText className="w-5 h-5"/>, time: "8 min baca" },
+    { title: "Mengundang & Mengelola Anggota Tim", icon: <Users className="w-5 h-5"/>, time: "4 min baca" },
+    { title: "Otomatisasi dengan Workflow", icon: <Settings className="w-5 h-5"/>, time: "12 min baca" },
+    { title: "Menghubungkan TeamVora ke Slack", icon: <LinkIcon className="w-5 h-5"/>, time: "3 min baca" },
+    { title: "Praktik Terbaik: Manajemen Waktu", icon: <CheckCircle2 className="w-5 h-5"/>, time: "6 min baca" },
+  ];
 
   return (
-    <main className="min-h-screen bg-background pt-32 pb-24">
-      <PageTitle title="Panduan Pengguna - TeamVora" />
+    <>
+      <SEOHead title="Panduan & Tutorial - TeamVora" description="Pelajari cara menggunakan TeamVora secara maksimal." />
+      
+      <main className="bg-white min-h-screen text-[#111111] overflow-hidden font-sans pt-32 pb-20">
+        
+        {/* Header */}
+        <section className="bg-[#FAFAFA] border-b border-[#ECECEC] py-24 mb-24">
+          <div className="container mx-auto px-6 max-w-[800px] text-center">
+            <h1 className="text-[48px] md:text-[64px] font-[800] leading-[1.1] tracking-[-0.02em] mb-6">
+              Panduan Pengguna
+            </h1>
+            <p className="text-[18px] text-[#666666] leading-[1.6] mb-12">
+              Kuasai TeamVora dengan tutorial langkah demi langkah, video pelatihan, dan praktik terbaik industri.
+            </p>
+            
+            <div className="relative max-w-[600px] mx-auto text-left">
+              <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-[#999999]" />
+              <input 
+                type="text" 
+                placeholder="Cari tutorial (cth: 'cara buat proyek')..." 
+                className="w-full h-14 pl-14 pr-6 rounded-xl border border-[#ECECEC] bg-white text-[16px] shadow-sm focus:outline-none focus:border-[#111111] transition-colors"
+              />
+            </div>
+          </div>
+        </section>
 
-      <section className="container mx-auto px-6 max-w-5xl">
-        <motion.div 
-            initial="hidden"
-            animate="visible"
-            variants={fadeUpVariant}
-            className="text-center max-w-3xl mx-auto mb-20"
-        >
-          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tighter mb-6">Panduan Pengguna</h1>
-          <p className="text-xl text-muted-foreground leading-relaxed">
-            Pelajari semua fitur dan praktik terbaik untuk mengoptimalkan operasional tim Anda bersama TeamVora.
-          </p>
-        </motion.div>
+        {/* Content */}
+        <section className="container mx-auto px-6 max-w-[1200px]">
+          <div className="flex flex-col lg:flex-row gap-16">
+            
+            {/* Sidebar */}
+            <div className="lg:w-1/4">
+              <div className="sticky top-32">
+                <h3 className="font-bold text-[14px] uppercase tracking-wider mb-6 text-[#999999]">Kategori Topik</h3>
+                <ul className="space-y-4 text-[16px] font-medium text-[#666666]">
+                  <li><a href="#" className="text-[#111111] block">Mulai Cepat (Getting Started)</a></li>
+                  <li><a href="#" className="hover:text-[#111111] transition-colors block">Manajemen Tugas & Proyek</a></li>
+                  <li><a href="#" className="hover:text-[#111111] transition-colors block">Kolaborasi Tim</a></li>
+                  <li><a href="#" className="hover:text-[#111111] transition-colors block">Otomatisasi & AI</a></li>
+                  <li><a href="#" className="hover:text-[#111111] transition-colors block">Penagihan & Akun</a></li>
+                  <li><a href="#" className="hover:text-[#111111] transition-colors block">Integrasi (API & Webhook)</a></li>
+                </ul>
+              </div>
+            </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-24">
-            {categories.map((category: any, idx: number) => {
-              const IconComp = iconMap[category.icon] || Book;
-              return (
-                <motion.div
-                    key={idx}
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: idx * 0.1, ease: [0.16, 1, 0.3, 1] }}
-                >
-                    <Card className="h-full border-border/50 shadow-sm hover:border-primary/20 transition-all rounded-3xl p-6">
-                        <CardHeader className="p-0 mb-6">
-                            <div className="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center mb-6">
-                            <IconComp className="w-7 h-7 text-primary" />
-                            </div>
-                            <CardTitle className="text-2xl tracking-tight">{category.title}</CardTitle>
-                            <CardDescription className="text-base mt-2">{category.description}</CardDescription>
-                        </CardHeader>
-                        <CardContent className="p-0">
-                            <ul className="space-y-3">
-                            {category.articles.map((article: string, i: number) => (
-                                <li key={i} className="flex items-start gap-3 text-base text-muted-foreground hover:text-primary transition-colors cursor-pointer group">
-                                <FileText className="w-5 h-5 mt-0.5 shrink-0 text-primary/50" />
-                                <span>{article}</span>
-                                <ChevronRight className="w-4 h-4 ml-auto opacity-0 group-hover:opacity-100 transition-opacity" />
-                                </li>
-                            ))}
-                            </ul>
-                        </CardContent>
-                    </Card>
-                </motion.div>
-              );
-            })}
-        </div>
-
-        {faqs.length > 0 && (
-            <motion.div 
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                className="max-w-3xl mx-auto bg-card p-8 md:p-12 rounded-3xl border border-border/50"
-            >
-              <h2 className="text-3xl font-bold mb-10 text-center tracking-tight">Frequently Asked Questions</h2>
-              <Accordion type="single" collapsible className="w-full">
-                {faqs.map((faq: any, idx: number) => (
-                  <AccordionItem key={idx} value={`item-${idx}`}>
-                    <AccordionTrigger className="text-left font-semibold">{faq.question}</AccordionTrigger>
-                    <AccordionContent className="text-muted-foreground leading-relaxed">{faq.answer}</AccordionContent>
-                  </AccordionItem>
+            {/* Main Content */}
+            <div className="lg:w-3/4">
+              <h2 className="text-[32px] font-[700] mb-8 tracking-[-0.02em]">Artikel Populer</h2>
+              
+              <div className="grid md:grid-cols-2 gap-6">
+                {guides.map((guide, i) => (
+                  <Link key={i} href="#" className="group p-6 rounded-2xl border border-[#ECECEC] hover:border-[#111111] bg-white transition-all">
+                    <div className="flex items-start gap-4">
+                      <div className="w-10 h-10 rounded-lg bg-[#FAFAFA] flex items-center justify-center shrink-0 text-[#111111] border border-[#ECECEC]">
+                        {guide.icon}
+                      </div>
+                      <div>
+                        <h3 className="text-[18px] font-[700] mb-2 leading-snug group-hover:text-blue-600 transition-colors">{guide.title}</h3>
+                        <p className="text-[14px] text-[#999999]">{guide.time}</p>
+                      </div>
+                    </div>
+                  </Link>
                 ))}
-              </Accordion>
-            </motion.div>
-          )}
-      </section>
-    </main>
+              </div>
+
+              {/* Video CTA */}
+              <div className="mt-16 bg-[#111111] rounded-3xl p-10 md:p-12 text-white flex flex-col md:flex-row items-center justify-between gap-8">
+                <div>
+                  <h3 className="text-[24px] font-[700] mb-3">Lebih suka menonton?</h3>
+                  <p className="text-[16px] text-[#999999] max-w-[400px]">Kami memiliki puluhan kursus video di TeamVora Academy yang gratis untuk semua pengguna.</p>
+                </div>
+                <button className="h-12 px-6 rounded-full bg-white text-[#111111] font-semibold hover:bg-[#FAFAFA] shrink-0 inline-flex items-center gap-2">
+                  <PlayCircle className="w-5 h-5" /> Mulai Menonton
+                </button>
+              </div>
+
+            </div>
+          </div>
+        </section>
+
+      </main>
+    </>
   );
 }
+
+// Dummy icons since some aren't imported above directly
+function Users(props:any) { return <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg> }
+function Settings(props:any) { return <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg> }
+function LinkIcon(props:any) { return <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> }

@@ -149,6 +149,7 @@ export interface SplitBill {
   creator?: Pick<User, "id" | "name">;
   items?: BillItem[];
   parent_recurring_bill_id: number | null;
+  user_status?: "unpaid" | "pending_verification" | "paid" | "none";
   created_at: string;
 }
 
@@ -205,14 +206,28 @@ export interface DailyLog {
 export interface Blog {
   id: number;
   team_id: number | null;
+  category_id: number | null;
   author_id: number;
   title: string;
   slug: string;
   excerpt: string | null;
   content: string;
-  status: "draft" | "published";
+  status: "draft" | "published" | "scheduled";
   featured_image: string | null;
   published_at: string | null;
+  category?: {
+    id: number;
+    name: string;
+    slug: string;
+  } | null;
+  tags: string[];
+  focus_keyword: string | null;
+  seo_title: string | null;
+  seo_description: string | null;
+  seo_keywords: string[] | null;
+  canonical_url: string | null;
+  og_image: string | null;
+  twitter_card: "summary" | "summary_large_image";
   author?: Pick<User, "id" | "name" | "avatar_url">;
   team?: Team;
   created_at: string;

@@ -1,101 +1,59 @@
-"use client";
-
-import { motion } from "motion/react";
-import { usePlatformSettings } from "@/hooks/use-platform-settings";
-import { PageTitle } from "@/components/shared/page-title";
-
-interface PrivacySection {
-  title: string;
-  content: string;
-}
-
-interface PrivacyContent {
-  last_updated: string;
-  contact_email: string;
-  sections: PrivacySection[];
-}
-
-function safeJsonParse<T>(str: string | undefined, fallback: T): T {
-  if (!str) return fallback;
-  try {
-    const parsed = JSON.parse(str);
-    return parsed && typeof parsed === "object" ? parsed : fallback;
-  } catch {
-    return fallback;
-  }
-}
+import { SEOHead } from "@/components/shared/seo-head";
 
 export default function PrivasiPage() {
-  const { data: settings } = usePlatformSettings();
-
-  let content: PrivacyContent = {
-    last_updated: "2026-07-04",
-    contact_email: "",
-    sections: []
-  };
-
-  if (settings?.marketing?.privacy_content) {
-    const parsed = safeJsonParse(settings.marketing.privacy_content, null);
-    if (parsed) {
-      content = parsed;
-    } else {
-      content.sections = [
-        { title: "Kebijakan Privasi", content: settings.marketing.privacy_content }
-      ];
-    }
-  }
-
   return (
-    <main className="min-h-screen bg-background pt-32 pb-24">
-      <PageTitle title="Kebijakan Privasi - TeamVora" />
+    <>
+      <SEOHead title="Kebijakan Privasi - TeamVora" description="Dokumen kebijakan privasi dan perlindungan data." />
+      
+      <main className="bg-white min-h-screen text-[#111111] overflow-hidden font-sans pt-32 pb-20">
+        <section className="container mx-auto px-6 max-w-[800px]">
+          <h1 className="text-[48px] font-[800] leading-[1.1] tracking-[-0.02em] mb-4">Kebijakan Privasi</h1>
+          <p className="text-[16px] text-[#666666] mb-12">Pembaruan Terakhir: 15 Oktober 2026</p>
 
-      <div className="container mx-auto px-6 max-w-4xl">
-        <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-center mb-16"
-        >
-          <h1 className="text-4xl md:text-5xl font-extrabold tracking-tighter mb-4">Kebijakan Privasi</h1>
-          <p className="text-muted-foreground">Terakhir diperbarui: {content.last_updated || "3 Juli 2026"}</p>
-        </motion.div>
+          <div className="prose prose-lg prose-neutral max-w-none text-[#444444] leading-relaxed">
+            <p>
+              Di TeamVora, kami sangat menjaga privasi dan keamanan data Anda. Kebijakan Privasi ini menjelaskan bagaimana kami mengumpulkan, menggunakan, dan melindungi informasi pribadi Anda saat menggunakan platform kami.
+            </p>
 
-        <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="space-y-12 bg-card p-8 md:p-12 rounded-3xl border border-border/50 shadow-sm"
-        >
-          {content.sections.length === 0 ? (
-            <div className="text-center text-muted-foreground py-12">
-              Konten kebijakan privasi sedang diperbarui.
+            <h3 className="text-[24px] font-[700] text-[#111111] mt-12 mb-4">1. Informasi yang Kami Kumpulkan</h3>
+            <p>
+              Kami hanya mengumpulkan informasi yang diperlukan untuk memberikan layanan terbaik kepada Anda:
+            </p>
+            <ul className="list-disc pl-6 mb-6 space-y-2">
+              <li><strong>Informasi Akun:</strong> Nama, alamat email, dan kata sandi (dienkripsi) saat Anda mendaftar.</li>
+              <li><strong>Data Konten:</strong> Tugas, komentar, proyek, dan file yang Anda unggah ke platform.</li>
+              <li><strong>Data Penggunaan:</strong> Interaksi Anda dengan aplikasi (log akses, tipe perangkat, dan alamat IP untuk tujuan keamanan).</li>
+            </ul>
+
+            <h3 className="text-[24px] font-[700] text-[#111111] mt-12 mb-4">2. Bagaimana Kami Menggunakan Informasi Anda</h3>
+            <p>Informasi yang terkumpul digunakan murni untuk operasional aplikasi:</p>
+            <ul className="list-disc pl-6 mb-6 space-y-2">
+              <li>Menyediakan, memelihara, dan meningkatkan fungsi aplikasi.</li>
+              <li>Mendeteksi dan mencegah aktivitas penipuan atau akses tidak sah.</li>
+              <li>Mengirimkan notifikasi transaksional (seperti reset password atau update sistem penting).</li>
+            </ul>
+            <p><strong>Kami tidak akan pernah menjual data pribadi Anda kepada pihak ketiga untuk tujuan periklanan.</strong></p>
+
+            <h3 className="text-[24px] font-[700] text-[#111111] mt-12 mb-4">3. Penyimpanan dan Perlindungan Data</h3>
+            <p>
+              Seluruh data pelanggan kami disimpan di pusat data tersertifikasi (AWS/GCP) dengan enkripsi <strong>AES-256</strong> (data at rest) dan <strong>TLS 1.3</strong> (data in transit). Akses ke infrastruktur data dibatasi hanya untuk engineer senior dengan otentikasi multi-faktor (MFA) yang ketat.
+            </p>
+
+            <h3 className="text-[24px] font-[700] text-[#111111] mt-12 mb-4">4. Hak Anda (Kepatuhan GDPR)</h3>
+            <p>Anda memiliki kendali penuh atas data Anda. Kapan saja, Anda berhak untuk:</p>
+            <ul className="list-disc pl-6 mb-6 space-y-2">
+              <li>Meminta salinan penuh dari semua data yang kami simpan tentang Anda.</li>
+              <li>Memperbarui atau mengoreksi informasi yang salah.</li>
+              <li>Meminta penghapusan permanen akun dan seluruh data terkait (Right to be Forgotten).</li>
+            </ul>
+
+            <div className="bg-[#FAFAFA] p-8 rounded-2xl border border-[#ECECEC] mt-12">
+              <h4 className="font-bold mb-2 text-[#111111]">Punya pertanyaan tentang privasi?</h4>
+              <p className="text-[15px]">Hubungi Data Protection Officer kami di <a href="mailto:privacy@teamvora.com" className="text-[#111111] underline font-medium">privacy@teamvora.com</a>.</p>
             </div>
-          ) : (
-            content.sections.map((section, idx) => (
-              <div key={idx} className="space-y-4">
-                {section.title && (
-                  <h2 className="text-2xl font-bold tracking-tight">{section.title}</h2>
-                )}
-                <div
-                  className="prose prose-slate dark:prose-invert max-w-none leading-relaxed"
-                  dangerouslySetInnerHTML={{ __html: section.content }}
-                />
-              </div>
-            ))
-          )}
-
-          {content.contact_email && (
-            <div className="pt-8 border-t border-border/50">
-              <h3 className="text-xl font-bold mb-4">Hubungi Kami</h3>
-              <p className="text-muted-foreground">
-                Jika Anda memiliki pertanyaan mengenai Kebijakan Privasi ini, silakan hubungi kami di:{" "}
-                <a href={`mailto:${content.contact_email}`} className="text-primary hover:underline font-semibold">
-                  {content.contact_email}
-                </a>
-              </p>
-            </div>
-          )}
-        </motion.div>
-      </div>
-    </main>
+          </div>
+        </section>
+      </main>
+    </>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import { usePlatformSettings } from "@/hooks/use-platform-settings";
 
 export function MarketingFooter() {
@@ -8,100 +9,100 @@ export function MarketingFooter() {
 
   const siteName = settings?.general?.site_name || "TeamVora";
   const logoUrl = settings?.general?.logo_url || "/icon.png";
-  const tagline = settings?.general?.tagline || "Satu platform untuk seluruh operasional tim Anda. Dari melacak kehadiran hingga mengelola keuangan perusahaan dengan efisien.";
-  const contactEmail = settings?.contact?.contact_email || "";
-  const socialTwitter = settings?.social?.twitter_url || "";
-  const socialLinkedin = settings?.social?.linkedin_url || "";
-  const footerText = settings?.marketing?.footer_text || tagline;
-
-  const parsedNavLinks: Array<{ label: string; href: string }> = (() => {
-    if (!settings?.marketing?.nav_links) return [];
-    try { return JSON.parse(settings.marketing.nav_links); } catch { return []; }
-  })();
 
   return (
-    <footer className="border-t border-border/50 bg-muted/20 relative z-10 pt-16 pb-8">
-      <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 gap-8 lg:gap-12 mb-12">
+    <footer className="bg-white border-t border-[#ECECEC] pt-24 pb-12 relative z-10 font-sans">
+      <div className="container mx-auto px-6 max-w-[1280px]">
+        
+        {/* Footer Top */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-12 lg:gap-8 mb-24">
+          
+          {/* Brand & Newsletter */}
           <div className="lg:col-span-2">
-            <Link href="/" className="flex items-center gap-2 mb-4">
-              <img src={logoUrl} alt={siteName} className="h-12 w-12 object-contain" />
-              <span className="font-bold text-xl tracking-tight">{siteName}</span>
+            <Link href="/" className="flex items-center gap-2 mb-6 group inline-flex">
+              <img src={logoUrl} alt={siteName} className="h-10 w-10 object-contain transition-transform group-hover:scale-105" />
+              <span className="font-extrabold text-[22px] tracking-tight text-[#111111]">{siteName}</span>
             </Link>
-            <p className="text-muted-foreground mb-6 max-w-sm">
-              {footerText}
+            <p className="text-[16px] text-[#666666] mb-8 max-w-sm leading-relaxed">
+              Sistem operasi bisnis yang bersih dan responsif. Dirancang untuk tim modern yang mengutamakan kecepatan.
             </p>
-            <div className="flex items-center gap-4 text-muted-foreground">
-              {socialTwitter && (
-                <a href={socialTwitter} target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full border border-border flex items-center justify-center hover:text-primary hover:border-primary transition-colors">
-                  X
-                </a>
-              )}
-              {socialLinkedin && (
-                <a href={socialLinkedin} target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full border border-border flex items-center justify-center hover:text-primary hover:border-primary transition-colors">
-                  in
-                </a>
-              )}
-              {!socialTwitter && !socialLinkedin && (
-                <>
-                  <div className="w-10 h-10 rounded-full border border-border flex items-center justify-center hover:text-primary hover:border-primary transition-colors cursor-pointer">
-                    X
-                  </div>
-                  <div className="w-10 h-10 rounded-full border border-border flex items-center justify-center hover:text-primary hover:border-primary transition-colors cursor-pointer">
-                    in
-                  </div>
-                </>
-              )}
+            <div className="mb-4">
+              <h4 className="font-bold text-[#111111] mb-4 text-[14px] uppercase tracking-wider">Berlangganan Newsletter</h4>
+              <div className="flex items-center">
+                <input 
+                  type="email" 
+                  placeholder="Email Anda..." 
+                  className="h-12 w-full md:w-64 px-4 rounded-l-xl border border-[#ECECEC] bg-[#FAFAFA] text-[#111111] placeholder:text-[#999999] focus:outline-none focus:border-[#111111] transition-colors"
+                />
+                <button className="h-12 px-5 rounded-r-xl bg-[#111111] text-white flex items-center justify-center hover:bg-[#000000] transition-colors">
+                  <ArrowRight className="w-5 h-5" />
+                </button>
+              </div>
             </div>
           </div>
 
-          {parsedNavLinks.length > 0 ? (
-            <div className="lg:col-span-3">
-              <h4 className="font-semibold mb-4">Tautan</h4>
-              <div className="flex flex-wrap gap-3 text-sm text-muted-foreground">
-                {parsedNavLinks.map((link, i) => (
-                  <Link key={i} href={link.href} className="hover:text-foreground transition-colors">{link.label}</Link>
-                ))}
-              </div>
+          {/* Company */}
+          <div>
+            <h4 className="font-bold text-[#111111] mb-6 text-[14px] uppercase tracking-wider">Perusahaan</h4>
+            <div className="flex flex-col gap-4 text-[16px] text-[#666666]">
+              <Link href="/tentang" className="hover:text-[#111111] transition-colors">Tentang Kami</Link>
+              <Link href="/kontak" className="hover:text-[#111111] transition-colors">Hubungi Kami</Link>
+              <Link href="/blog" className="hover:text-[#111111] transition-colors">Berita</Link>
             </div>
-          ) : (
-            <>
-              <div>
-                <h4 className="font-semibold mb-4">Produk</h4>
-                <div className="flex flex-col gap-3 text-sm text-muted-foreground">
-                  <Link href="/fitur" className="hover:text-foreground transition-colors">Fitur</Link>
-                  <Link href="/blog" className="hover:text-foreground transition-colors">Blog</Link>
-                  <Link href="/tentang" className="hover:text-foreground transition-colors">Tentang Kami</Link>
-                </div>
-              </div>
+          </div>
 
-              <div>
-                <h4 className="font-semibold mb-4">Perusahaan</h4>
-                <div className="flex flex-col gap-3 text-sm text-muted-foreground">
-                  <Link href="/kontak" className="hover:text-foreground transition-colors">Hubungi Kami</Link>
-                </div>
-              </div>
+          {/* Product */}
+          <div>
+            <h4 className="font-bold text-[#111111] mb-6 text-[14px] uppercase tracking-wider">Produk</h4>
+            <div className="flex flex-col gap-4 text-[16px] text-[#666666]">
+              <Link href="/fitur" className="hover:text-[#111111] transition-colors">Fitur</Link>
+              <Link href="/harga" className="hover:text-[#111111] transition-colors">Harga</Link>
+              <Link href="/changelog" className="hover:text-[#111111] transition-colors">Changelog</Link>
+              <Link href="/integrasi" className="hover:text-[#111111] transition-colors">Integrasi</Link>
+            </div>
+          </div>
 
-              <div>
-                <h4 className="font-semibold mb-4">Sumber Daya</h4>
-                <div className="flex flex-col gap-3 text-sm text-muted-foreground">
-                  <Link href="/blog" className="hover:text-foreground transition-colors">Blog & Artikel</Link>
-                  <Link href="/panduan" className="hover:text-foreground transition-colors">Panduan Pengguna</Link>
-                  <Link href="/bantuan" className="hover:text-foreground transition-colors">Pusat Bantuan</Link>
-                  <a href="https://docs.teamvora.web.id" target="_blank" rel="noopener noreferrer" className="hover:text-foreground transition-colors">Dokumentasi API</a>
-                </div>
-              </div>
-            </>
-          )}
+          {/* Resources */}
+          <div>
+            <h4 className="font-bold text-[#111111] mb-6 text-[14px] uppercase tracking-wider">Sumber Daya</h4>
+            <div className="flex flex-col gap-4 text-[16px] text-[#666666]">
+              <Link href="/panduan" className="hover:text-[#111111] transition-colors">Panduan</Link>
+              <Link href="/bantuan" className="hover:text-[#111111] transition-colors">Pusat Bantuan</Link>
+              <a href="https://docs.teamvora.web.id" target="_blank" rel="noopener noreferrer" className="hover:text-[#111111] transition-colors">Dokumentasi API</a>
+              <Link href="/komunitas" className="hover:text-[#111111] transition-colors">Komunitas</Link>
+            </div>
+          </div>
+
+          {/* Legal */}
+          <div>
+            <h4 className="font-bold text-[#111111] mb-6 text-[14px] uppercase tracking-wider">Legal</h4>
+            <div className="flex flex-col gap-4 text-[16px] text-[#666666]">
+              <Link href="/privasi" className="hover:text-[#111111] transition-colors">Kebijakan Privasi</Link>
+              <Link href="/syarat" className="hover:text-[#111111] transition-colors">Syarat Ketentuan</Link>
+              <Link href="/keamanan" className="hover:text-[#111111] transition-colors">Keamanan</Link>
+            </div>
+          </div>
+
         </div>
 
-        <div className="pt-8 border-t border-border/50 flex flex-col md:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} {siteName}. All rights reserved.</p>
-          <div className="flex items-center gap-6">
-            <Link href="/privasi" className="hover:text-foreground transition-colors">Kebijakan Privasi</Link>
-            <Link href="/syarat" className="hover:text-foreground transition-colors">Syarat & Ketentuan</Link>
+        <div className="pt-8 border-t border-[#ECECEC] flex flex-col md:flex-row items-center justify-between gap-6">
+          <p className="text-[14px] text-[#999999]">
+            &copy; {new Date().getFullYear()} {siteName} Inc. Hak Cipta Dilindungi.
+          </p>
+          
+          <div className="flex items-center gap-6 text-[#999999] text-[14px]">
+            <a href="#" aria-label="Twitter" className="hover:text-[#111111] transition-colors">
+              Twitter
+            </a>
+            <a href="#" aria-label="LinkedIn" className="hover:text-[#111111] transition-colors">
+              LinkedIn
+            </a>
+            <a href="#" aria-label="Instagram" className="hover:text-[#111111] transition-colors">
+              Instagram
+            </a>
           </div>
         </div>
+
       </div>
     </footer>
   );

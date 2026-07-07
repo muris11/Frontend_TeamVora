@@ -1,125 +1,76 @@
-"use client";
-
-import { motion } from "motion/react";
-import { Search, Mail, MessageCircle, Phone, ArrowRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { SEOHead } from "@/components/shared/seo-head";
+import { MessageCircle, FileText, PhoneCall, HelpCircle } from "lucide-react";
 import Link from "next/link";
-import { usePlatformSettings } from "@/hooks/use-platform-settings";
-import { PageTitle } from "@/components/shared/page-title";
-import { iconMap } from "@/components/ui/icon-picker";
-
-const fadeUpVariant = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] as const } },
-};
-
-const defaultChannels: any[] = [];
-const defaultArticles: string[] = [];
 
 export default function BantuanPage() {
-  const { data: settings } = usePlatformSettings();
-
-  let channels = defaultChannels;
-  let articles = defaultArticles;
-  try {
-    const raw = settings?.marketing?.help_content;
-    if (raw) {
-      const parsed = JSON.parse(raw);
-      if (parsed?.articles?.length) {
-        channels = parsed.articles.map((a: any) => ({
-          title: a.title || "",
-          icon: a.icon || "Mail",
-          description: a.description || "",
-          action: a.action || "",
-          link: a.link || "#",
-        }));
-      }
-      if (parsed?.popular_articles?.length) {
-        articles = parsed.popular_articles;
-      }
-    }
-  } catch {}
-
   return (
-    <main className="min-h-screen bg-background pt-32 pb-24">
-      <PageTitle title="Pusat Bantuan - TeamVora" />
-
-      <section className="container mx-auto px-6 max-w-3xl mb-24 text-center">
-        <motion.div
-            initial="hidden"
-            animate="visible"
-            variants={fadeUpVariant}
-            className="space-y-8"
-        >
-          <h1 className="text-5xl md:text-7xl font-extrabold tracking-tighter">Pusat Bantuan</h1>
-          <p className="text-xl text-muted-foreground leading-relaxed">
-            Punya pertanyaan atau mengalami kendala? Kami di sini siap membantu Anda kapan pun dibutuhkan.
+    <>
+      <SEOHead title="Pusat Bantuan - TeamVora" description="Bantuan dan dukungan untuk pengguna TeamVora." />
+      
+      <main className="bg-white min-h-screen text-[#111111] overflow-hidden font-sans pt-32 pb-20">
+        
+        {/* Header */}
+        <section className="container mx-auto px-6 max-w-[800px] text-center mb-24">
+          <div className="w-16 h-16 rounded-2xl bg-[#FAFAFA] border border-[#ECECEC] flex items-center justify-center mx-auto mb-8 text-[#111111]">
+            <HelpCircle className="w-8 h-8" />
+          </div>
+          <h1 className="text-[48px] md:text-[64px] font-[800] leading-[1.1] tracking-[-0.02em] mb-6">
+            Pusat Bantuan
+          </h1>
+          <p className="text-[18px] md:text-[22px] text-[#666666] leading-[1.6]">
+            Bagaimana kami bisa membantu Anda hari ini?
           </p>
-          <div className="relative max-w-xl mx-auto">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground w-5 h-5" />
-            <Input type="text" placeholder="Cari solusi atau artikel panduan..." className="w-full pl-12 pr-6 py-8 rounded-full text-base shadow-sm border-border" />
-          </div>
-        </motion.div>
-      </section>
+        </section>
 
-      {channels.length > 0 && (
-        <section className="container mx-auto px-6 max-w-5xl mb-24">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {channels.map((channel: any, idx: number) => {
-              const IconComp = iconMap[channel.icon] || Mail;
-              return (
-                <motion.div
-                    key={idx}
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: idx * 0.1, ease: [0.16, 1, 0.3, 1] }}
-                >
-                    <Card className="h-full border-border/50 text-center hover:border-primary/50 transition-all rounded-3xl p-6 shadow-sm">
-                        <CardHeader className="p-0 mb-6">
-                            <div className="w-14 h-14 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-6 text-primary">
-                            <IconComp className="w-7 h-7" />
-                            </div>
-                            <CardTitle className="text-2xl tracking-tight">{channel.title}</CardTitle>
-                            <CardDescription className="mt-2 text-base">{channel.description}</CardDescription>
-                        </CardHeader>
-                        <CardContent className="p-0">
-                            <Button variant="outline" className="w-full rounded-xl py-6 font-bold" asChild>
-                                <Link href={channel.link}>{channel.action}</Link>
-                            </Button>
-                        </CardContent>
-                    </Card>
-                </motion.div>
-              );
-            })}
+        {/* Support Options */}
+        <section className="container mx-auto px-6 max-w-[1000px] mb-32">
+          <div className="grid md:grid-cols-3 gap-8">
+            <Link href="/panduan" className="bg-[#FAFAFA] border border-[#ECECEC] rounded-3xl p-8 hover:border-[#111111] transition-colors group">
+              <FileText className="w-8 h-8 mb-6 text-[#111111]" />
+              <h2 className="text-[20px] font-[700] mb-3">Dokumentasi & Panduan</h2>
+              <p className="text-[15px] text-[#666666] leading-[1.6]">
+                Cari jawaban instan melalui ribuan artikel bantuan komprehensif kami.
+              </p>
+            </Link>
+            
+            <Link href="/kontak" className="bg-[#FAFAFA] border border-[#ECECEC] rounded-3xl p-8 hover:border-[#111111] transition-colors group">
+              <MessageCircle className="w-8 h-8 mb-6 text-[#111111]" />
+              <h2 className="text-[20px] font-[700] mb-3">Buat Tiket (Email)</h2>
+              <p className="text-[15px] text-[#666666] leading-[1.6]">
+                Tim dukungan kami akan merespon email Anda dalam waktu 24 jam kerja.
+              </p>
+            </Link>
+            
+            <Link href="/kontak" className="bg-[#111111] text-white rounded-3xl p-8 hover:bg-[#000000] transition-colors group">
+              <PhoneCall className="w-8 h-8 mb-6 text-white" />
+              <h2 className="text-[20px] font-[700] mb-3">Dukungan Prioritas</h2>
+              <p className="text-[15px] text-[#999999] leading-[1.6]">
+                Telepon dan bantuan live chat 24/7 (Khusus pengguna paket Enterprise).
+              </p>
+            </Link>
           </div>
         </section>
-      )}
 
-      {articles.length > 0 && (
-        <section className="py-24 bg-muted/20 border-t border-border/50">
-          <div className="container mx-auto px-6 max-w-4xl text-center">
-            <h2 className="text-3xl md:text-5xl font-bold mb-12 tracking-tighter">Artikel Populer</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
-              {articles.map((article: string, i: number) => (
-                <Link key={i} href="/panduan" className="flex items-center justify-between p-6 rounded-2xl bg-card border border-border/50 hover:border-primary/50 transition-all group shadow-sm">
-                  <span className="font-semibold text-base">{article}</span>
-                  <ArrowRight className="w-5 h-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all" />
-                </Link>
-              ))}
-            </div>
-            <div className="mt-16">
-              <Button size="lg" className="rounded-full px-8 py-6 text-base font-bold" asChild>
-                <Link href="/panduan">
-                  Lihat Semua Panduan <ArrowRight className="ml-2 w-5 h-5" />
-                </Link>
-              </Button>
-            </div>
+        {/* Top FAQs */}
+        <section className="container mx-auto px-6 max-w-[800px] mb-20">
+          <h2 className="text-[32px] font-[700] mb-8 tracking-[-0.02em]">Pertanyaan yang Sering Diajukan</h2>
+          
+          <div className="space-y-4">
+            {[
+              { q: "Bagaimana cara mereset password akun saya?", a: "Pergi ke halaman login, klik 'Lupa Password', dan masukkan alamat email yang terdaftar. Kami akan mengirimkan tautan reset password." },
+              { q: "Apakah saya bisa membatalkan langganan kapan saja?", a: "Ya. Anda dapat membatalkan langganan kapan pun melalui Pengaturan Akun > Penagihan. Langganan Anda akan tetap aktif hingga akhir periode pembayaran." },
+              { q: "Bagaimana cara mengubah email yang terdaftar?", a: "Masuk ke Pengaturan Akun, pilih tab Profil, lalu klik ikon pensil di sebelah email Anda untuk mengubahnya." },
+              { q: "Di mana saya bisa melihat faktur/invoice bulanan?", a: "Faktur dapat diunduh kapan saja di menu Pengaturan Akun > Penagihan > Riwayat Faktur." }
+            ].map((faq, i) => (
+              <div key={i} className="border border-[#ECECEC] rounded-2xl p-6 bg-white">
+                <h3 className="font-bold text-[16px] mb-3">{faq.q}</h3>
+                <p className="text-[15px] text-[#666666] leading-[1.6]">{faq.a}</p>
+              </div>
+            ))}
           </div>
         </section>
-      )}
-    </main>
+
+      </main>
+    </>
   );
 }

@@ -10,9 +10,7 @@ export default function MarketingLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="relative min-h-screen bg-background overflow-hidden selection:bg-primary/20">
-      {/* Noise Overlay */}
-      <div className="noise" />
+    <div className="relative min-h-screen bg-white overflow-hidden selection:bg-blue-500/20 font-sans text-[#111111]">
 
       {/* Navigation (Sticky & Responsive) */}
       <MarketingNavbar />

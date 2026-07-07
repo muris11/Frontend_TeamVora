@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { AuthProvider } from "@/providers/auth-provider";
 import { AppLayout } from "@/components/layout/app-layout";
+import { PushNotificationSetup } from "@/components/push-notification-setup";
 import { useAuthStore } from "@/stores/auth-store";
 
 export default function LeadLayout({ children }: { children: React.ReactNode }) {
@@ -21,6 +22,7 @@ export default function LeadLayout({ children }: { children: React.ReactNode }) 
 
   return (
     <AuthProvider>
+      <PushNotificationSetup />
       <AppLayout>{children}</AppLayout>
     </AuthProvider>
   );

@@ -18,6 +18,7 @@ import {
   Search,
   Activity,
   BookOpen,
+  KeyRound,
 } from "lucide-react";
 import {
   Sidebar,
@@ -55,6 +56,7 @@ const navGroups = [
     items: [
       { title: "Kelola Tim", href: "/admin/teams", icon: FolderKanban },
       { title: "Kelola User", href: "/admin/users", icon: Users },
+      { title: "Hak Akses (RBAC)", href: "/admin/rbac", icon: KeyRound },
     ],
   },
   {
@@ -117,7 +119,7 @@ export function AdminSidebar() {
     <Sidebar className="border-r-0">
       <SidebarHeader className="pb-0">
         <div className="flex flex-col items-center px-3 pt-4 pb-2">
-          <img src={logoUrl} alt={siteName} className="w-12 h-12 object-contain mb-2" />
+          <img src={logoUrl} alt={siteName} width="48" height="48" className="w-12 h-12 object-contain mb-2" />
           <span className="font-bold text-lg tracking-tight mb-1">{siteName}</span>
           <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-medium">Super Admin</p>
         </div>

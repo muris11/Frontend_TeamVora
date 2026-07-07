@@ -191,12 +191,14 @@ export function BillDetailPage({ basePath }: { basePath: string }) {
           <h1 className="text-2xl font-bold tracking-tight">{bill.title}</h1>
           <p className="text-sm text-muted-foreground">Detail tagihan</p>
         </div>
-        <Button variant="outline" asChild>
-          <Link href={`${basePath}/finance/bills/${id}/edit`}>
-            <Edit className="w-4 h-4 mr-2" />
-            Edit
-          </Link>
-        </Button>
+        {basePath !== "/member" && (
+          <Button variant="outline" asChild>
+            <Link href={`${basePath}/finance/bills/${id}/edit`}>
+              <Edit className="w-4 h-4 mr-2" />
+              Edit
+            </Link>
+          </Button>
+        )}
       </div>
 
       {/* Bill Info Cards */}

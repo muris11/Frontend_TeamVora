@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { ArrowLeft, Save, ImageIcon, X } from "lucide-react";
 import api from "@/lib/api";
@@ -16,19 +16,44 @@ import { FileUpload } from "@/components/shared/file-upload";
 import { MediaPicker } from "@/components/shared/media-picker";
 import { PageTitle } from "@/components/shared/page-title";
 import { RichTextEditor } from "@/components/shared/rich-text-editor";
+import { SeoAnalyzerCard } from "@/components/shared/seo-analyzer";
+import { slugify } from "@/lib/format";
 
 export function BlogCreatePage({ basePath }: { basePath: string }) {
   const router = useRouter();
   const [form, setForm] = useState({
     title: "",
+    slug: "",
     excerpt: "",
     content: "",
     status: "draft",
     published_at: "",
+    category_id: "",
+    tags: "",
+    focus_keyword: "",
+    seo_title: "",
+    seo_description: "",
+    seo_keywords: [] as string[],
+    canonical_url: "",
   });
   const [file, setFile] = useState<File | null>(null);
   const [mediaPickerOpen, setMediaPickerOpen] = useState(false);
   const [existingImageUrl, setExistingImageUrl] = useState<string>("");
+  const [isSlugManual, setIsSlugManual] = useState(false);
+
+  const { data: categories } = useQuery({
+    queryKey: ["categories"],
+    queryFn: async () => {
+      const res = await api.get("/categories");
+      return res.data.data || [];
+    },
+  });
+
+  useEffect(() => {
+    if (!isSlugManual && form.title) {
+      setForm((prev) => ({ ...prev, slug: slugify(form.title) }));
+    }
+  }, [form.title, isSlugManual]);
 
   const { mutate, isPending } = useMutation({
     mutationFn: async () => {
@@ -37,9 +62,18 @@ export function BlogCreatePage({ basePath }: { basePath: string }) {
       formData.append("excerpt", form.excerpt);
       formData.append("content", form.content);
       formData.append("status", form.status);
-      if (form.published_at) {
-        formData.append("published_at", form.published_at);
+      if (form.slug) formData.append("slug", form.slug);
+      if (form.published_at) formData.append("published_at", form.published_at);
+      if (form.category_id) formData.append("category_id", form.category_id);
+      if (form.tags) {
+        const tagsArr = form.tags.split(",").map((t) => t.trim()).filter(Boolean);
+        if (tagsArr.length) formData.append("tags", JSON.stringify(tagsArr));
       }
+      if (form.focus_keyword) formData.append("focus_keyword", form.focus_keyword);
+      if (form.seo_title) formData.append("seo_title", form.seo_title);
+      if (form.seo_description) formData.append("seo_description", form.seo_description);
+      if (form.seo_keywords.length) formData.append("seo_keywords", JSON.stringify(form.seo_keywords));
+      if (form.canonical_url) formData.append("canonical_url", form.canonical_url);
       if (file) formData.append("featured_image", file);
       else if (existingImageUrl) formData.append("featured_image", existingImageUrl);
       const res = await api.post("/blogs", formData, {
@@ -55,6 +89,18 @@ export function BlogCreatePage({ basePath }: { basePath: string }) {
       toast.error(err.response?.data?.message || "Gagal membuat blog.");
     },
   });
+
+  const seoValues = {
+    title: form.title,
+    slug: form.slug,
+    excerpt: form.excerpt,
+    content: form.content,
+    featured_image: existingImageUrl || null,
+    focus_keyword: form.focus_keyword || null,
+    seo_title: form.seo_title || null,
+    seo_description: form.seo_description || null,
+    canonical_url: form.canonical_url || null,
+  };
 
   return (
     <div className="space-y-6 pb-10">
@@ -86,6 +132,46 @@ export function BlogCreatePage({ basePath }: { basePath: string }) {
                 onChange={(e) => setForm({ ...form, title: e.target.value })}
                 placeholder="Judul blog"
               />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="slug">Slug URL</Label>
+              <Input
+                id="slug"
+                value={form.slug}
+                onChange={(e) => {
+                  setIsSlugManual(true);
+                  setForm({ ...form, slug: e.target.value });
+                }}
+                placeholder="slug-url-artikel"
+              />
+              <p className="text-xs text-muted-foreground">Auto-generate dari judul. Edit manual mematikan auto-sync.</p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="category_id">Kategori</Label>
+                <select
+                  id="category_id"
+                  value={form.category_id}
+                  onChange={(e) => setForm({ ...form, category_id: e.target.value })}
+                  className="w-full rounded-lg border bg-transparent px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
+                >
+                  <option value="">Pilih kategori</option>
+                  {categories?.map((cat: any) => (
+                    <option key={cat.id} value={String(cat.id)}>
+                      {cat.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="tags">Tag (pisahkan dengan koma)</Label>
+                <Input
+                  id="tags"
+                  value={form.tags}
+                  onChange={(e) => setForm({ ...form, tags: e.target.value })}
+                  placeholder="marketing, fintech, tips"
+                />
+              </div>
             </div>
             <div className="space-y-2">
               <Label htmlFor="excerpt">Excerpt</Label>
@@ -174,6 +260,17 @@ export function BlogCreatePage({ basePath }: { basePath: string }) {
               </div>
             </CardContent>
           </Card>
+
+          <SeoAnalyzerCard
+            values={seoValues}
+            onChange={(patch) => {
+              const flat: Record<string, string> = {};
+              for (const [k, v] of Object.entries(patch)) {
+                flat[k] = v == null ? "" : String(v);
+              }
+              setForm((prev) => ({ ...prev, ...flat }));
+            }}
+          />
 
           <Button
             onClick={() => mutate()}

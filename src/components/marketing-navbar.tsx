@@ -23,8 +23,8 @@ export function MarketingNavbar() {
     : [
         { label: "Tentang", href: "/tentang" },
         { label: "Fitur", href: "/fitur" },
+        { label: "Harga", href: "/harga" },
         { label: "Blog", href: "/blog" },
-        { label: "Kontak", href: "/kontak" },
         { label: "Dokumentasi", href: "https://docs.teamvora.web.id" },
       ];
 
@@ -39,10 +39,10 @@ export function MarketingNavbar() {
 
   return (
     <header
-      className={`fixed top-0 w-full z-50 transition-all duration-300 ${
+      className={`fixed top-0 w-full z-50 transition-all duration-300 h-[88px] flex items-center ${
         isScrolled
-          ? "bg-background/70 backdrop-blur-md border-b border-border/40 shadow-sm py-3"
-          : "bg-transparent py-5"
+          ? "bg-white/70 backdrop-blur-[20px] border-b border-[#ECECEC]"
+          : "bg-transparent"
       }`}
     >
       <div className="container mx-auto px-6 flex items-center justify-between">
@@ -57,10 +57,11 @@ export function MarketingNavbar() {
         </Link>
 
         {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-6 lg:gap-8 text-sm font-medium text-muted-foreground">
+        <nav className="hidden md:flex items-center gap-6 lg:gap-8 text-[15px] font-medium text-[#666666]">
           {navItems.map((item, i) => (
-            <Link key={i} href={item.href} className="hover:text-foreground transition-colors">
+            <Link key={i} href={item.href} className="hover:text-[#111111] transition-colors relative group">
               {item.label}
+              <span className="absolute -bottom-1 left-0 w-0 h-[2px] bg-[#111111] transition-all group-hover:w-full rounded-full"></span>
             </Link>
           ))}
         </nav>
@@ -69,15 +70,15 @@ export function MarketingNavbar() {
         <div className="hidden md:flex items-center gap-4">
           <Link
             href="/login"
-            className="text-sm font-medium hover:text-foreground transition-colors"
+            className="text-[15px] font-medium text-[#666666] hover:text-[#111111] transition-colors"
           >
             Masuk
           </Link>
           <Link
             href="/register"
-            className="h-9 px-4 inline-flex items-center justify-center rounded-full bg-primary text-primary-foreground text-sm font-medium shadow transition-colors hover:bg-primary/90"
+            className="h-[56px] px-8 inline-flex items-center justify-center rounded-full bg-[#111111] text-white text-[15px] font-semibold transition-all hover:bg-[#000000] hover:-translate-y-[2px]"
           >
-            Daftar
+            Mulai Gratis
           </Link>
         </div>
 
@@ -103,7 +104,7 @@ export function MarketingNavbar() {
           <Link
             key={i}
             href={item.href}
-            className="hover:text-primary transition-colors"
+            className="hover:text-[#111111] text-[#666666] transition-colors"
             onClick={() => setIsMobileMenuOpen(false)}
           >
             {item.label}
@@ -112,17 +113,17 @@ export function MarketingNavbar() {
         <div className="flex flex-col gap-4 mt-4 w-48">
           <Link
             href="/login"
-            className="h-12 flex items-center justify-center rounded-full border border-border bg-background hover:bg-accent transition-colors"
+            className="h-12 flex items-center justify-center rounded-full border border-[#ECECEC] bg-white hover:bg-[#FAFAFA] text-[#111111] transition-colors"
             onClick={() => setIsMobileMenuOpen(false)}
           >
             Masuk
           </Link>
           <Link
             href="/register"
-            className="h-12 flex items-center justify-center rounded-full bg-primary text-primary-foreground shadow transition-colors hover:bg-primary/90"
+            className="h-12 flex items-center justify-center rounded-full bg-[#111111] text-white shadow-md transition-colors hover:bg-[#000000]"
             onClick={() => setIsMobileMenuOpen(false)}
           >
-            Daftar Gratis
+            Mulai Gratis
           </Link>
         </div>
       </div>

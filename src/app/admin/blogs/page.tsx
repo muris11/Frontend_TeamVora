@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2, Eye, EyeOff } from "lucide-react";
+import { Plus, Pencil, Trash2, Eye, EyeOff, FolderOpen } from "lucide-react";
 import api from "@/lib/api";
 import { Blog } from "@/types";
 import { formatDate } from "@/lib/format";
@@ -117,13 +117,22 @@ export default function AdminBlogsPage() {
       <PageTitle title="Kelola Blog" />
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold">Kelola Blog</h1>
-        <Link
-          href="/admin/blogs/create"
-          className="inline-flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-        >
-          <Plus className="mr-2 h-4 w-4" />
-          Tambah Blog
-        </Link>
+        <div className="flex gap-2">
+          <Link
+            href="/admin/blogs/categories"
+            className="inline-flex items-center justify-center gap-2 rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground px-4 py-2 text-sm font-medium"
+          >
+            <FolderOpen className="mr-2 h-4 w-4" />
+            Kategori
+          </Link>
+          <Link
+            href="/admin/blogs/create"
+            className="inline-flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            Tambah Blog
+          </Link>
+        </div>
       </div>
 
       <DataTable

@@ -16,6 +16,7 @@ import {
   ChevronDown,
   PenTool,
   ShieldCheck,
+  MessageCircle,
 } from "lucide-react";
 import {
   Sidebar,
@@ -57,6 +58,7 @@ export function AppSidebar() {
       label: "Menu",
       items: [
         { title: "Dashboard", href: `${basePath}/dashboard`, icon: LayoutDashboard, permissions: ["view_dashboard"] },
+        { title: "Chat Tim", href: `${basePath}/chat`, icon: MessageCircle, permissions: [] },
       ],
     },
     {
@@ -132,7 +134,7 @@ export function AppSidebar() {
       <SidebarHeader className="pb-0">
         <div className="flex flex-col items-center px-3 pt-4 pb-2">
           {/* Logo & Site Name handled by layout but if we want to show here */}
-          <img src={logoUrl} alt={siteName} className="w-12 h-12 object-contain mb-2" />
+          <img src={logoUrl} alt={siteName} width="48" height="48" className="w-12 h-12 object-contain mb-2" />
           <span className="font-bold text-lg tracking-tight mb-1">{siteName}</span>
           <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-medium">{roleLabel}</p>
         </div>

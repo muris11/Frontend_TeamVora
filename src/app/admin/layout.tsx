@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { AuthProvider } from "@/providers/auth-provider";
 import { AdminLayout } from "@/components/layout/admin-layout";
+import { PushNotificationSetup } from "@/components/push-notification-setup";
 import { useAuthStore } from "@/stores/auth-store";
 
 export default function AdminRootLayout({ children }: { children: React.ReactNode }) {
@@ -26,6 +27,7 @@ export default function AdminRootLayout({ children }: { children: React.ReactNod
 
   return (
     <AuthProvider>
+      <PushNotificationSetup />
       <AdminLayout>{children}</AdminLayout>
     </AuthProvider>
   );

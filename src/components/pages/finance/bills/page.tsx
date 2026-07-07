@@ -73,12 +73,14 @@ export function BillsPage({ basePath }: { basePath: string }) {
             Kelola tagihan dan pembagian biaya
           </p>
         </div>
-        <Button asChild className="rounded-xl">
-          <Link href={`${basePath}/finance/bills/create`}>
-            <Plus className="w-4 h-4 mr-2" />
-            Tambah Baru
-          </Link>
-        </Button>
+        {basePath !== "/member" && (
+          <Button asChild className="rounded-xl">
+            <Link href={`${basePath}/finance/bills/create`}>
+              <Plus className="w-4 h-4 mr-2" />
+              Tambah Baru
+            </Link>
+          </Button>
+        )}
       </div>
 
       <div className="flex gap-6 overflow-x-auto pb-4 snap-x">

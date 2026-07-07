@@ -227,7 +227,7 @@ export default function AdminSettingsPage() {
                     <Label>Zona Waktu</Label>
                     <Select
                       value={settingsForm.timezone}
-                      onValueChange={(val) => setSettingsForm({ ...settingsForm, timezone: val })}
+                      onValueChange={(val) => setSettingsForm({ ...settingsForm, timezone: val ?? "" })}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Pilih Zona Waktu" />
@@ -245,7 +245,7 @@ export default function AdminSettingsPage() {
                     <Label>Bahasa Default</Label>
                     <Select
                       value={settingsForm.language}
-                      onValueChange={(val) => setSettingsForm({ ...settingsForm, language: val })}
+                      onValueChange={(val) => setSettingsForm({ ...settingsForm, language: val ?? "" })}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Pilih Bahasa" />
@@ -261,7 +261,7 @@ export default function AdminSettingsPage() {
                     <Label>Mata Uang</Label>
                     <Select
                       value={settingsForm.currency}
-                      onValueChange={(val) => setSettingsForm({ ...settingsForm, currency: val })}
+                      onValueChange={(val) => setSettingsForm({ ...settingsForm, currency: val ?? "" })}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Pilih Mata Uang" />

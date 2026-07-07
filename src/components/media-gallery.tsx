@@ -171,7 +171,7 @@ export function MediaGallery({ title, description, role, combined }: { title: st
               <div className="aspect-square bg-muted flex items-center justify-center p-2 relative overflow-hidden">
                 {item.type === 'gallery' || item.mime_type?.startsWith('image/') ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={item.file_path} alt={item.name} className="object-cover w-full h-full rounded-md" />
+                  <img src={item.file_path} alt={item.name} loading="lazy" className="object-cover w-full h-full rounded-md" />
                 ) : (
                   <FileText className="w-12 h-12 text-muted-foreground" />
                 )}

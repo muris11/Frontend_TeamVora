@@ -211,7 +211,7 @@ export function AppHeader() {
                   Tidak ada notifikasi
                 </div>
               ) : (
-                <div className="max-h-80 overflow-y-auto">
+                <div className="max-h-80 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                   {notifications.slice(0, 10).map((notification) => (
                     <DropdownMenuItem
                       key={notification.id}

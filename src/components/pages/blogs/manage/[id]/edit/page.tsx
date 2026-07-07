@@ -18,6 +18,8 @@ import { PageTitle } from "@/components/shared/page-title";
 import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { RichTextEditor } from "@/components/shared/rich-text-editor";
+import { SeoAnalyzerCard } from "@/components/shared/seo-analyzer";
+import { slugify } from "@/lib/format";
 
 export function BlogEditPage({ basePath }: { basePath: string }) {
   const router = useRouter();
@@ -26,15 +28,32 @@ export function BlogEditPage({ basePath }: { basePath: string }) {
 
   const [form, setForm] = useState({
     title: "",
+    slug: "",
     excerpt: "",
     content: "",
     status: "draft",
     published_at: "",
+    category_id: "",
+    tags: "",
+    focus_keyword: "",
+    seo_title: "",
+    seo_description: "",
+    seo_keywords: [] as string[],
+    canonical_url: "",
   });
   const [file, setFile] = useState<File | null>(null);
   const [existingImage, setExistingImage] = useState<string>("");
   const [showDelete, setShowDelete] = useState(false);
   const [mediaPickerOpen, setMediaPickerOpen] = useState(false);
+  const [isSlugManual, setIsSlugManual] = useState(true); // default true for edit page
+
+  const { data: categories } = useQuery({
+    queryKey: ["categories"],
+    queryFn: async () => {
+      const res = await api.get("/categories");
+      return res.data.data || [];
+    },
+  });
 
   const { data: blog, isLoading } = useQuery({
     queryKey: ["blog", id],
@@ -45,13 +64,27 @@ export function BlogEditPage({ basePath }: { basePath: string }) {
   });
 
   useEffect(() => {
+    if (!isSlugManual && form.title) {
+      setForm((prev) => ({ ...prev, slug: slugify(form.title) }));
+    }
+  }, [form.title, isSlugManual]);
+
+  useEffect(() => {
     if (blog) {
       setForm({
         title: blog.title || "",
+        slug: blog.slug || "",
         excerpt: blog.excerpt || "",
         content: blog.content || "",
         status: blog.status || "draft",
         published_at: blog.published_at ? new Date(blog.published_at).toISOString().slice(0, 16) : "",
+        category_id: blog.category_id ? String(blog.category_id) : "",
+        tags: Array.isArray(blog.tags) ? blog.tags.join(", ") : "",
+        focus_keyword: blog.focus_keyword || "",
+        seo_title: blog.seo_title || "",
+        seo_description: blog.seo_description || "",
+        seo_keywords: Array.isArray(blog.seo_keywords) ? blog.seo_keywords : [],
+        canonical_url: blog.canonical_url || "",
       });
       if (blog.featured_image) {
         setExistingImage(blog.featured_image);
@@ -67,9 +100,20 @@ export function BlogEditPage({ basePath }: { basePath: string }) {
       formData.append("excerpt", form.excerpt);
       formData.append("content", form.content);
       formData.append("status", form.status);
+      if (form.slug) formData.append("slug", form.slug);
       if (form.published_at) {
         formData.append("published_at", form.published_at);
       }
+      if (form.category_id) formData.append("category_id", form.category_id);
+      if (form.tags) {
+        const tagsArr = form.tags.split(",").map((t) => t.trim()).filter(Boolean);
+        if (tagsArr.length) formData.append("tags", JSON.stringify(tagsArr));
+      }
+      if (form.focus_keyword) formData.append("focus_keyword", form.focus_keyword);
+      if (form.seo_title) formData.append("seo_title", form.seo_title);
+      if (form.seo_description) formData.append("seo_description", form.seo_description);
+      if (form.seo_keywords.length) formData.append("seo_keywords", JSON.stringify(form.seo_keywords));
+      if (form.canonical_url) formData.append("canonical_url", form.canonical_url);
       if (file) formData.append("featured_image", file);
       const res = await api.post(`/blogs/${id}`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
@@ -84,6 +128,18 @@ export function BlogEditPage({ basePath }: { basePath: string }) {
       toast.error(err.response?.data?.message || "Gagal memperbarui blog.");
     },
   });
+
+  const seoValues = {
+    title: form.title,
+    slug: form.slug,
+    excerpt: form.excerpt,
+    content: form.content,
+    featured_image: existingImage || null,
+    focus_keyword: form.focus_keyword || null,
+    seo_title: form.seo_title || null,
+    seo_description: form.seo_description || null,
+    canonical_url: form.canonical_url || null,
+  };
 
   const deleteMutation = useMutation({
     mutationFn: async () => {
@@ -147,6 +203,46 @@ export function BlogEditPage({ basePath }: { basePath: string }) {
                   onChange={(e) => setForm({ ...form, title: e.target.value })}
                   placeholder="Judul blog"
                 />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="slug">Slug URL</Label>
+                <Input
+                  id="slug"
+                  value={form.slug}
+                  onChange={(e) => {
+                    setIsSlugManual(true);
+                    setForm({ ...form, slug: e.target.value });
+                  }}
+                  placeholder="slug-url-artikel"
+                />
+                <p className="text-xs text-muted-foreground">Auto-generate dari judul. Edit manual mematikan auto-sync.</p>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="category_id">Kategori</Label>
+                  <select
+                    id="category_id"
+                    value={form.category_id}
+                    onChange={(e) => setForm({ ...form, category_id: e.target.value })}
+                    className="w-full rounded-lg border bg-transparent px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-ring"
+                  >
+                    <option value="">Pilih kategori</option>
+                    {categories?.map((cat: any) => (
+                      <option key={cat.id} value={String(cat.id)}>
+                        {cat.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="tags">Tag (pisahkan dengan koma)</Label>
+                  <Input
+                    id="tags"
+                    value={form.tags}
+                    onChange={(e) => setForm({ ...form, tags: e.target.value })}
+                    placeholder="marketing, fintech, tips"
+                  />
+                </div>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="excerpt">Excerpt</Label>
@@ -248,6 +344,17 @@ export function BlogEditPage({ basePath }: { basePath: string }) {
               <Save className="w-4 h-4 mr-2" />
               {updateMutation.isPending ? "Menyimpan..." : "Simpan Perubahan"}
             </Button>
+
+            <SeoAnalyzerCard
+              values={seoValues}
+              onChange={(patch) => {
+                const flat: Record<string, string> = {};
+                for (const [k, v] of Object.entries(patch)) {
+                  flat[k] = v == null ? "" : String(v);
+                }
+                setForm((prev) => ({ ...prev, ...flat }));
+              }}
+            />
           </div>
         </div>
       )}

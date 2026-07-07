@@ -1,192 +1,106 @@
-"use client";
-
-import { motion } from "motion/react";
-import { Users, Globe2, Trophy, Target, ArrowRight, Zap, Shield, HeartHandshake } from "lucide-react";
-import Link from "next/link";
-import { PageTitle } from "@/components/shared/page-title";
-import { Button } from "@/components/ui/button";
-import { usePlatformSettings } from "@/hooks/use-platform-settings";
 import { SEOHead } from "@/components/shared/seo-head";
-import { iconMap } from "@/components/ui/icon-picker";
-import { cn } from "@/lib/utils";
-
-const staggerContainer = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { staggerChildren: 0.1, delayChildren: 0.1 },
-  },
-};
-
-const fadeUpVariant = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] as const } },
-};
+import Image from "next/image";
+import { ArrowRight, CheckCircle2, Users, Globe2, Zap } from "lucide-react";
+import Link from "next/link";
 
 export default function TentangPage() {
-  const { data: settings } = usePlatformSettings();
-  const siteName = settings?.general?.site_name || "TeamVora";
-
-  const defaultStats: any[] = [];
-  const defaultValues: any[] = [];
-  const defaultTeam: any[] = [];
-
-  let aboutContent: { stats: any[]; values: any[]; team: any[] } = { stats: defaultStats, values: defaultValues, team: defaultTeam };
-  try {
-    const raw = settings?.marketing?.about_content;
-    if (raw) {
-      const parsed = JSON.parse(raw);
-      if (parsed?.stats?.length || parsed?.values?.length || parsed?.team?.length) {
-        aboutContent = {
-          stats: parsed.stats?.length ? parsed.stats : defaultStats,
-          values: parsed.values?.length ? parsed.values : defaultValues,
-          team: parsed.team?.length ? parsed.team : defaultTeam,
-        };
-      }
-    }
-  } catch {}
-
-  const stats = (aboutContent.stats || []).map((s) => ({ ...s, icon: iconMap[s.icon] || Users }));
-  const values = (aboutContent.values || []).map((v) => ({ ...v, icon: iconMap[v.icon] || Target }));
-  const team = aboutContent.team || [];
-
   return (
     <>
-      <SEOHead
-        title={`Tentang Kami | ${siteName}`}
-        description="Kenali tim di balik TeamVora dan misi kami membantu bisnis Indonesia mengelola operasional tim secara efisien."
-        keywords="tentang TeamVora, tim, visi misi, perusahaan, manajemen tim"
-        ogUrl="https://teamvora.coded.my.id/tentang"
-      />
-      <PageTitle title={`Tentang Kami | ${siteName}`} />
+      <SEOHead title="Tentang Kami - TeamVora" description="Mengenal lebih dekat visi, misi, dan tim di balik TeamVora." />
       
-      {/* Hero Section */}
-      <section className="pt-32 pb-20 bg-background relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 blur-[100px] rounded-full pointer-events-none -translate-y-1/2 translate-x-1/2" />
+      <main className="bg-white min-h-screen text-[#111111] overflow-hidden font-sans pt-32 pb-20">
         
-        <div className="container mx-auto px-6 text-center max-w-4xl relative z-10">
-          <motion.div
-            initial="hidden"
-            animate="visible"
-            variants={staggerContainer}
-            className="space-y-6"
-          >
-            <motion.h1 variants={fadeUpVariant} className="text-5xl md:text-7xl font-extrabold tracking-tighter mb-6 leading-[1.1]">
-              Membangun Masa Depan <br className="hidden md:block"/> 
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary to-primary/60">
-                Kolaborasi Kerja
-              </span>
-            </motion.h1>
-            <motion.p variants={fadeUpVariant} className="text-xl text-muted-foreground text-balance mx-auto leading-relaxed max-w-2xl">
-              {siteName} didirikan dengan satu misi sederhana: menghapus kekacauan dari manajemen operasional perusahaan, sehingga Anda bisa fokus pada hal yang benar-benar penting.
-            </motion.p>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Stats Section */}
-      {stats.length > 0 && (
-        <section className="py-20 border-y border-border/50 bg-muted/20">
-          <div className="container mx-auto px-6">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-              {stats.map((stat, idx) => (
-                <motion.div 
-                  key={idx}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: idx * 0.1, duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-                  className="text-center space-y-3"
-                >
-                  <div className="w-12 h-12 mx-auto rounded-2xl bg-primary/10 flex items-center justify-center text-primary mb-4">
-                    <stat.icon className="w-6 h-6" />
-                  </div>
-                  <h3 className="text-4xl md:text-5xl font-bold tracking-tighter">{stat.value}</h3>
-                  <p className="text-muted-foreground font-medium">{stat.label}</p>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* Core Values Bento Grid */}
-      {values.length > 0 && (
-        <section className="py-24 bg-background">
-          <div className="container mx-auto px-6 max-w-6xl">
-            <div className="max-w-3xl mb-16">
-              <h2 className="text-3xl md:text-5xl font-bold tracking-tighter mb-4">Nilai Inti Kami</h2>
-              <p className="text-lg text-muted-foreground leading-relaxed">Prinsip yang membimbing setiap baris kode yang kami tulis.</p>
-            </div>
-            
-            <div className="grid md:grid-cols-3 gap-6">
-              {values.map((value, idx) => (
-                <motion.div 
-                  key={idx}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: idx * 0.1, ease: [0.16, 1, 0.3, 1] }}
-                  className="p-8 rounded-3xl border border-border/50 bg-card hover:border-primary/20 transition-all shadow-sm group"
-                >
-                  <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center text-primary mb-6 group-hover:scale-105 transition-transform">
-                    <value.icon className="w-7 h-7" />
-                  </div>
-                  <h3 className="text-2xl font-bold mb-4 tracking-tight">{value.title}</h3>
-                  <p className="text-muted-foreground leading-relaxed">{value.description}</p>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* Team Section */}
-      {team.length > 0 && (
-        <section className="py-24 bg-muted/20 border-t border-border/50">
-          <div className="container mx-auto px-6 max-w-6xl">
-            <div className="max-w-3xl mb-16">
-                <h2 className="text-3xl md:text-5xl font-bold tracking-tighter mb-4">Bertemu dengan Tim</h2>
-                <p className="text-lg text-muted-foreground">Orang-orang berdedikasi di balik platform {siteName}.</p>
-            </div>
-            
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-              {team.map((member, idx) => (
-                <motion.div 
-                  key={idx}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: idx * 0.1, ease: [0.16, 1, 0.3, 1] }}
-                  className="group p-6 text-center rounded-3xl bg-card border border-border/50 hover:border-primary/50 transition-all cursor-pointer"
-                >
-                  <div className="w-24 h-24 mx-auto rounded-full bg-secondary flex items-center justify-center text-2xl font-bold mb-6 group-hover:scale-105 transition-transform text-secondary-foreground">
-                    {member.initials}
-                  </div>
-                  <h4 className="text-xl font-bold mb-1 tracking-tight">{member.name}</h4>
-                  <p className="text-sm text-muted-foreground">{member.role}</p>
-                </motion.div>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* CTA Line */}
-      <section className="border-t border-border/50 bg-primary text-primary-foreground py-20 relative overflow-hidden">
-        <div className="absolute inset-0 bg-[url('/noise.png')] opacity-10 mix-blend-overlay pointer-events-none" />
-        <div className="container mx-auto px-6 text-center relative z-10">
-          <h2 className="text-3xl md:text-5xl font-bold tracking-tighter mb-6">Jadilah Bagian dari Perjalanan Kami</h2>
-          <p className="text-xl text-primary-foreground/80 mb-8 max-w-2xl mx-auto leading-relaxed">
-            Gunakan {siteName} untuk mengelola bisnis Anda dan rasakan perbedaannya.
+        {/* Hero Section */}
+        <section className="container mx-auto px-6 max-w-[1000px] text-center mb-32">
+          <h1 className="text-[48px] md:text-[72px] font-[800] leading-[1.1] tracking-[-0.02em] mb-8">
+            Membangun Masa Depan <br className="hidden md:block"/> Kerja Kolaboratif
+          </h1>
+          <p className="text-[18px] md:text-[22px] text-[#666666] leading-[1.6] max-w-[800px] mx-auto mb-12">
+            TeamVora didirikan dengan satu tujuan sederhana: menghapus kerumitan dalam bekerja bersama. Kami merancang alat bantu yang sangat bersih, cepat, dan tangguh agar tim Anda bisa fokus pada hal yang paling penting.
           </p>
-          <Link href="/register">
-            <Button size="lg" variant="secondary" className="h-14 px-8 rounded-full text-base font-bold shadow-xl hover:scale-105 transition-transform">
-              Mulai Gratis Sekarang <ArrowRight className="ml-2 w-5 h-5" />
-            </Button>
-          </Link>
-        </div>
-      </section>
+        </section>
+
+        {/* Story Section */}
+        <section className="container mx-auto px-6 max-w-[1000px] mb-32">
+          <div className="grid md:grid-cols-2 gap-16 items-center">
+            <div>
+              <h2 className="text-[36px] font-[700] mb-6 tracking-[-0.02em]">Kisah Kami</h2>
+              <div className="space-y-4 text-[16px] md:text-[18px] text-[#666666] leading-[1.7]">
+                <p>
+                  Pada tahun 2024, kami menyadari bahwa sebagian besar alat manajemen proyek modern terlalu kompleks, lambat, dan memaksa pengguna beradaptasi dengan cara kerja alat tersebut, alih-alih sebaliknya.
+                </p>
+                <p>
+                  Kami memutuskan untuk merombak ulang konsep ruang kerja digital. Tidak ada lagi menu yang berantakan, notifikasi yang mengganggu, atau waktu muat yang lama. Yang tersisa hanyalah fungsionalitas murni yang dibalut dalam desain minimalis.
+                </p>
+                <p>
+                  Kini, TeamVora digunakan oleh ribuan tim dari berbagai skala perusahaan—mulai dari startup yang baru dirintis hingga korporasi multinasional—untuk merencanakan, membangun, dan meluncurkan produk hebat.
+                </p>
+              </div>
+            </div>
+            <div className="h-[500px] bg-[#F5F5F5] rounded-3xl overflow-hidden border border-[#ECECEC] relative">
+               <Image src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80" alt="Tim TeamVora sedang berkolaborasi" width={1000} height={667} loading="lazy" className="w-full h-full object-cover grayscale opacity-90" />
+            </div>
+          </div>
+        </section>
+
+        {/* Values Section */}
+        <section className="bg-[#FAFAFA] border-y border-[#ECECEC] py-32 mb-32">
+          <div className="container mx-auto px-6 max-w-[1200px]">
+            <div className="text-center mb-20">
+              <h2 className="text-[36px] md:text-[48px] font-[700] tracking-[-0.02em] mb-6">Nilai Inti Kami</h2>
+              <p className="text-[18px] text-[#666666] max-w-[600px] mx-auto">
+                Prinsip yang membimbing setiap keputusan produk dan bisnis kami.
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-8">
+              {[
+                {
+                  icon: <Zap className="w-6 h-6" />,
+                  title: "Kecepatan di Atas Segalanya",
+                  desc: "Setiap interaksi harus terasa instan. Kami terobsesi dengan milidetik karena kecepatan adalah pengalaman pengguna terbaik."
+                },
+                {
+                  icon: <CheckCircle2 className="w-6 h-6" />,
+                  title: "Desain yang Bertujuan",
+                  desc: "Kesederhanaan bukanlah ketiadaan fitur, melainkan ketiadaan gangguan. Kami mendesain untuk kejernihan berpikir."
+                },
+                {
+                  icon: <Globe2 className="w-6 h-6" />,
+                  title: "Kerja Tanpa Batas",
+                  desc: "Mendukung tim lintas waktu dan geografi. Alat kami dirancang untuk kolaborasi asinkron yang sempurna."
+                }
+              ].map((val, idx) => (
+                <div key={idx} className="bg-white p-10 rounded-3xl border border-[#ECECEC] hover:shadow-xl transition-all duration-300 group">
+                  <div className="w-12 h-12 rounded-xl bg-[#F5F5F5] flex items-center justify-center mb-8 text-[#111111] group-hover:scale-110 transition-transform">
+                    {val.icon}
+                  </div>
+                  <h3 className="text-[22px] font-[700] mb-4">{val.title}</h3>
+                  <p className="text-[16px] text-[#666666] leading-[1.6]">
+                    {val.desc}
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* CTA */}
+        <section className="container mx-auto px-6 max-w-[800px] text-center">
+          <h2 className="text-[36px] md:text-[48px] font-[700] tracking-[-0.02em] mb-8">
+            Siap mengubah cara kerja tim Anda?
+          </h2>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <Link href="/register" className="h-[56px] px-8 inline-flex items-center justify-center rounded-full bg-[#111111] text-white text-[16px] font-semibold transition-all hover:bg-[#000000] hover:-translate-y-[2px] w-full sm:w-auto">
+              Mulai Gratis Sekarang
+            </Link>
+            <Link href="/kontak" className="h-[56px] px-8 inline-flex items-center justify-center rounded-full bg-white border border-[#ECECEC] text-[#111111] text-[16px] font-semibold transition-all hover:bg-[#FAFAFA] w-full sm:w-auto">
+              Hubungi Penjualan
+            </Link>
+          </div>
+        </section>
+
+      </main>
     </>
   );
 }

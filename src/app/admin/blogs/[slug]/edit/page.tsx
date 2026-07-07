@@ -20,14 +20,25 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { PageTitle } from "@/components/shared/page-title";
 import { RichTextEditor } from "@/components/shared/rich-text-editor";
 import { MediaPicker } from "@/components/shared/media-picker";
+import { SeoAnalyzerCard } from "@/components/shared/seo-analyzer";
+import type { SeoInput } from "@/lib/seo";
+import { slugify } from "@/lib/format";
 
 const blogSchema = z.object({
   title: z.string().min(2, "Judul minimal 2 karakter"),
+  slug: z.string().min(1, "Slug URL wajib diisi"),
   excerpt: z.string().optional(),
   content: z.string().min(10, "Konten minimal 10 karakter"),
   status: z.enum(["draft", "published", "scheduled"]),
   featured_image: z.any().optional(),
   published_at: z.string().optional(),
+  category_id: z.string().optional(),
+  tags: z.string().optional(),
+  focus_keyword: z.string().optional(),
+  seo_title: z.string().optional(),
+  seo_description: z.string().optional(),
+  seo_keywords: z.array(z.string()).optional(),
+  canonical_url: z.string().optional(),
 });
 
 type BlogForm = z.infer<typeof blogSchema>;
@@ -39,6 +50,15 @@ export default function AdminBlogEditPage() {
   const queryClient = useQueryClient();
 
   const [isMediaPickerOpen, setIsMediaPickerOpen] = useState(false);
+  const [isSlugManual, setIsSlugManual] = useState(true); // default to true on edit pages so we don't overwrite on load
+
+  const { data: categories } = useQuery({
+    queryKey: ["categories"],
+    queryFn: async () => {
+      const res = await api.get("/categories");
+      return res.data.data || [];
+    },
+  });
 
   const { data: blog, isLoading: blogLoading } = useQuery({
     queryKey: ["admin-blog", blogSlug],
@@ -52,23 +72,46 @@ export default function AdminBlogEditPage() {
     resolver: zodResolver(blogSchema),
     defaultValues: {
       title: "",
+      slug: "",
       excerpt: "",
       content: "",
       status: "draft",
       featured_image: "",
       published_at: "",
+      category_id: "",
+      tags: "",
+      focus_keyword: "",
+      seo_title: "",
+      seo_description: "",
+      seo_keywords: [],
+      canonical_url: "",
     },
   });
+
+  const titleVal = form.watch("title");
+  useEffect(() => {
+    if (!isSlugManual && titleVal) {
+      form.setValue("slug", slugify(titleVal));
+    }
+  }, [titleVal, isSlugManual, form]);
 
   useEffect(() => {
     if (blog) {
       form.reset({
         title: blog.title || "",
+        slug: blog.slug || "",
         excerpt: blog.excerpt || "",
         content: blog.content || "",
         status: blog.status || "draft",
         featured_image: blog.featured_image || "",
         published_at: blog.published_at ? new Date(blog.published_at).toISOString().slice(0, 16) : "",
+        category_id: blog.category_id ? String(blog.category_id) : "",
+        tags: Array.isArray(blog.tags) ? blog.tags.join(", ") : "",
+        focus_keyword: blog.focus_keyword || "",
+        seo_title: blog.seo_title || "",
+        seo_description: blog.seo_description || "",
+        seo_keywords: Array.isArray(blog.seo_keywords) ? blog.seo_keywords : [],
+        canonical_url: blog.canonical_url || "",
       });
     }
   }, [blog, form]);
@@ -77,9 +120,17 @@ export default function AdminBlogEditPage() {
     mutationFn: async (data: BlogForm) => {
       const formData = new FormData();
       Object.entries(data).forEach(([key, value]) => {
-        if (value !== undefined && value !== null && value !== "") {
-          formData.append(key, value as string | Blob);
+        if (value === undefined || value === null || value === "") return;
+        if (key === "seo_keywords" && Array.isArray(value)) {
+          if (value.length) formData.append(key, JSON.stringify(value));
+          return;
         }
+        if (key === "tags" && typeof value === "string") {
+          const tagsArr = value.split(",").map((t) => t.trim()).filter(Boolean);
+          if (tagsArr.length) formData.append(key, JSON.stringify(tagsArr));
+          return;
+        }
+        formData.append(key, value as string | Blob);
       });
       formData.append('_method', 'PUT');
       return api.post(`/blogs/${blogSlug}`, formData, {
@@ -93,6 +144,19 @@ export default function AdminBlogEditPage() {
     },
     onError: () => toast.error("Gagal memperbarui blog"),
   });
+
+  const featuredRaw = form.watch("featured_image");
+  const seoValues: SeoInput = {
+    title: form.watch("title"),
+    slug: form.watch("slug"),
+    excerpt: form.watch("excerpt"),
+    content: form.watch("content"),
+    featured_image: typeof featuredRaw === "string" ? featuredRaw : null,
+    focus_keyword: form.watch("focus_keyword"),
+    seo_title: form.watch("seo_title"),
+    seo_description: form.watch("seo_description"),
+    canonical_url: form.watch("canonical_url"),
+  };
 
   if (blogLoading) {
     return (
@@ -148,6 +212,66 @@ export default function AdminBlogEditPage() {
                       </FormItem>
                     )}
                   />
+                  <FormField
+                    control={form.control}
+                    name="slug"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Slug URL</FormLabel>
+                        <FormControl>
+                          <Input 
+                            placeholder="slug-url-artikel" 
+                            {...field} 
+                            onChange={(e) => {
+                              setIsSlugManual(true);
+                              field.onChange(e);
+                            }}
+                          />
+                        </FormControl>
+                        <p className="text-xs text-muted-foreground">Auto-generate dari judul. Edit manual akan mematikan auto-sync.</p>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="category_id"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Kategori</FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Pilih kategori" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {categories?.map((cat: any) => (
+                                <SelectItem key={cat.id} value={String(cat.id)}>
+                                  {cat.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="tags"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Tag (pisahkan dengan koma)</FormLabel>
+                          <FormControl>
+                            <Input placeholder="marketing, fintech, tips" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
                   <FormField
                     control={form.control}
                     name="excerpt"
@@ -283,6 +407,15 @@ export default function AdminBlogEditPage() {
               </Form>
             </CardContent>
           </Card>
+
+          <SeoAnalyzerCard
+            values={seoValues}
+            onChange={(patch) => {
+              (Object.keys(patch) as (keyof SeoInput)[]).forEach((k) => {
+                form.setValue(k as keyof BlogForm, patch[k] as never, { shouldDirty: true });
+              });
+            }}
+          />
         </div>
       </div>
       
