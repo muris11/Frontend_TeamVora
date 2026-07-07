@@ -63,7 +63,7 @@ export default function AdminBlogCreatePage() {
   });
 
   return (
-    <div className="space-y-4">
+    <div className="max-w-4xl mx-auto space-y-6">
       <PageTitle title="Buat Blog" />
       <div className="flex items-center gap-4">
         <Link href="/admin/blogs">
@@ -82,7 +82,7 @@ export default function AdminBlogCreatePage() {
           <Form {...form}>
             <form
               onSubmit={form.handleSubmit((d) => createMutation.mutate(d))}
-              className="space-y-4 max-w-2xl"
+              className="space-y-4"
             >
               <FormField
                 control={form.control}

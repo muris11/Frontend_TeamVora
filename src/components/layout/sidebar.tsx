@@ -77,8 +77,7 @@ export function AppSidebar() {
     {
       label: "Media",
       items: [
-        { title: "Dokumen", href: `${basePath}/media/documents`, icon: FileText, permissions: ["view_media"] },
-        { title: "Galeri", href: `${basePath}/media/gallery`, icon: Image, permissions: ["view_media"] },
+        { title: "Media Storage", href: `${basePath}/media`, icon: Image, permissions: ["view_media"] },
       ],
     },
     ...((isTeamLeader) ? [{
@@ -97,6 +96,12 @@ export function AppSidebar() {
         ] : []),
       ],
     },
+    ...(isTeamLeader ? [{
+      label: "Support",
+      items: [
+        { title: "Ticketing", href: `${basePath}/tickets`, icon: FileText, permissions: [] },
+      ],
+    }] : []),
   ];
 
   const visibleGroups = navGroups

@@ -75,7 +75,7 @@ export default function SystemStatusPage() {
       label: "Status Penyimpanan",
       value: status?.storage_status ?? "-",
       icon: HardDrive,
-      ok: status?.storage_status?.toLowerCase().includes("writable"),
+      ok: status?.storage_status?.toLowerCase().includes("available"),
     },
     {
       label: "Status Cache",

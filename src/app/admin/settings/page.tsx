@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Save, Globe, Image as ImageIcon, Search } from "lucide-react";
+import { Save, Globe, Image as ImageIcon, Search, Map, Wrench, Settings } from "lucide-react";
 import api from "@/lib/api";
 import { toast } from "sonner";
 import { PageTitle } from "@/components/shared/page-title";
@@ -19,6 +19,14 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import { MediaPicker } from "@/components/shared/media-picker";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 
 interface PlatformSettings {
   general: {
@@ -27,11 +35,14 @@ interface PlatformSettings {
     favicon_url: string;
     logo_url: string;
   };
-  seo: {
-    seo_title: string;
-    seo_description: string;
-    seo_keywords: string;
-    og_image_url: string;
+  regional: {
+    timezone: string;
+    language: string;
+    currency: string;
+  };
+  maintenance: {
+    maintenance_mode: string;
+    maintenance_message: string;
   };
 }
 
@@ -43,13 +54,14 @@ export default function AdminSettingsPage() {
     tagline: "",
     favicon_url: "",
     logo_url: "",
-    seo_title: "",
-    seo_description: "",
-    seo_keywords: "",
-    og_image_url: "",
+    timezone: "Asia/Jakarta",
+    language: "id",
+    currency: "IDR",
+    maintenance_mode: "false",
+    maintenance_message: "",
   });
 
-  const [activePicker, setActivePicker] = useState<"favicon" | "logo" | "og_image" | null>(null);
+  const [activePicker, setActivePicker] = useState<"favicon" | "logo" | null>(null);
 
   const { data: settings, isLoading: settingsLoading } = useQuery({
     queryKey: ["platform-settings"],
@@ -66,10 +78,11 @@ export default function AdminSettingsPage() {
         tagline: settings.general?.tagline ?? "",
         favicon_url: settings.general?.favicon_url ?? "",
         logo_url: settings.general?.logo_url ?? "",
-        seo_title: settings.seo?.seo_title ?? "",
-        seo_description: settings.seo?.seo_description ?? "",
-        seo_keywords: settings.seo?.seo_keywords ?? "",
-        og_image_url: settings.seo?.og_image_url ?? "",
+        timezone: settings.regional?.timezone ?? "Asia/Jakarta",
+        language: settings.regional?.language ?? "id",
+        currency: settings.regional?.currency ?? "IDR",
+        maintenance_mode: settings.maintenance?.maintenance_mode ?? "false",
+        maintenance_message: settings.maintenance?.maintenance_message ?? "",
       });
     }
   }, [settings]);
@@ -91,11 +104,12 @@ export default function AdminSettingsPage() {
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Pengaturan Umum</h1>
         <p className="text-muted-foreground mt-2">
-          Kelola informasi platform, branding, logo, dan pengaturan SEO secara lengkap.
+          Kelola informasi platform, branding, logo, dan pengaturan regional secara lengkap.
         </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Identitas Platform */}
         <Card className="border-border/50 shadow-sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -185,82 +199,131 @@ export default function AdminSettingsPage() {
           </CardContent>
         </Card>
 
-        <Card className="border-border/50 shadow-sm">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Search className="w-5 h-5 text-emerald-500" />
-              Pengaturan SEO
-            </CardTitle>
-            <CardDescription>
-              Optimasi mesin pencari dan metadata sosial (Open Graph).
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {settingsLoading ? (
-              <div className="space-y-6">
-                {[...Array(4)].map((_, i) => (
-                  <div key={i} className="space-y-2">
-                    <Skeleton className="h-4 w-24" />
-                    <Skeleton className="h-10 w-full" />
+        <div className="space-y-8">
+          {/* Pengaturan Regional */}
+          <Card className="border-border/50 shadow-sm">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Map className="w-5 h-5 text-blue-500" />
+                Pengaturan Regional
+              </CardTitle>
+              <CardDescription>
+                Zona waktu, bahasa, dan mata uang default.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {settingsLoading ? (
+                <div className="space-y-4">
+                  {[...Array(3)].map((_, i) => (
+                    <div key={i} className="space-y-2">
+                      <Skeleton className="h-4 w-24" />
+                      <Skeleton className="h-10 w-full" />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <>
+                  <div className="grid gap-2">
+                    <Label>Zona Waktu</Label>
+                    <Select
+                      value={settingsForm.timezone}
+                      onValueChange={(val) => setSettingsForm({ ...settingsForm, timezone: val })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Pilih Zona Waktu" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Asia/Jakarta">Asia/Jakarta (WIB)</SelectItem>
+                        <SelectItem value="Asia/Makassar">Asia/Makassar (WITA)</SelectItem>
+                        <SelectItem value="Asia/Jayapura">Asia/Jayapura (WIT)</SelectItem>
+                        <SelectItem value="UTC">UTC</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
-                ))}
-              </div>
-            ) : (
-              <>
-                <div className="grid gap-2">
-                  <Label htmlFor="seo_title">SEO Title (Default)</Label>
-                  <Input
-                    id="seo_title"
-                    value={settingsForm.seo_title}
-                    onChange={(e) => setSettingsForm({ ...settingsForm, seo_title: e.target.value })}
-                    placeholder="TeamVora - Kolaborasi Tanpa Batas"
-                  />
+                  
+                  <div className="grid gap-2">
+                    <Label>Bahasa Default</Label>
+                    <Select
+                      value={settingsForm.language}
+                      onValueChange={(val) => setSettingsForm({ ...settingsForm, language: val })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Pilih Bahasa" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="id">Bahasa Indonesia</SelectItem>
+                        <SelectItem value="en">English</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="grid gap-2">
+                    <Label>Mata Uang</Label>
+                    <Select
+                      value={settingsForm.currency}
+                      onValueChange={(val) => setSettingsForm({ ...settingsForm, currency: val })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Pilih Mata Uang" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="IDR">IDR (Rupiah)</SelectItem>
+                        <SelectItem value="USD">USD (US Dollar)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Pengaturan Maintenance */}
+          <Card className="border-border/50 shadow-sm border-orange-500/20">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Wrench className="w-5 h-5 text-orange-500" />
+                Mode Maintenance
+              </CardTitle>
+              <CardDescription>
+                Aktifkan mode pemeliharaan untuk menutup akses publik.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {settingsLoading ? (
+                <div className="space-y-4">
+                  <Skeleton className="h-10 w-full" />
+                  <Skeleton className="h-20 w-full" />
                 </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="seo_description">SEO Description</Label>
-                  <Textarea
-                    id="seo_description"
-                    value={settingsForm.seo_description}
-                    onChange={(e) => setSettingsForm({ ...settingsForm, seo_description: e.target.value })}
-                    placeholder="Deskripsi singkat yang akan muncul di hasil pencarian..."
-                    rows={3}
-                  />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="seo_keywords">SEO Keywords (pisahkan dengan koma)</Label>
-                  <Input
-                    id="seo_keywords"
-                    value={settingsForm.seo_keywords}
-                    onChange={(e) => setSettingsForm({ ...settingsForm, seo_keywords: e.target.value })}
-                    placeholder="team, manajemen, kolaborasi, produktivitas"
-                  />
-                </div>
-                <div className="grid gap-2">
-                  <Label>Open Graph Image (OG Image)</Label>
-                  <div className="flex items-center gap-3">
-                    {settingsForm.og_image_url ? (
-                      <img src={settingsForm.og_image_url} alt="OG Image" className="w-16 h-10 rounded border object-cover bg-muted" />
-                    ) : (
-                      <div className="w-16 h-10 rounded border bg-muted flex items-center justify-center">
-                        <ImageIcon className="w-4 h-4 text-muted-foreground" />
-                      </div>
-                    )}
-                    <Input
-                      value={settingsForm.og_image_url}
-                      onChange={(e) => setSettingsForm({ ...settingsForm, og_image_url: e.target.value })}
-                      placeholder="URL Gambar OG"
-                      className="flex-1"
+              ) : (
+                <>
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <Label>Status Maintenance</Label>
+                      <p className="text-sm text-muted-foreground">Aktifkan untuk menampilkan halaman maintenance.</p>
+                    </div>
+                    <Switch
+                      checked={settingsForm.maintenance_mode === "true"}
+                      onCheckedChange={(checked) => setSettingsForm({ ...settingsForm, maintenance_mode: checked ? "true" : "false" })}
                     />
-                    <Button variant="outline" onClick={() => setActivePicker("og_image")}>
-                      Pilih Media
-                    </Button>
                   </div>
-                  <p className="text-xs text-muted-foreground">Gambar yang muncul ketika link website dibagikan di sosial media (Rekomendasi: 1200x630px).</p>
-                </div>
-              </>
-            )}
-          </CardContent>
-        </Card>
+
+                  {settingsForm.maintenance_mode === "true" && (
+                    <div className="grid gap-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                      <Label htmlFor="maintenance_message">Pesan Maintenance</Label>
+                      <Textarea
+                        id="maintenance_message"
+                        value={settingsForm.maintenance_message}
+                        onChange={(e) => setSettingsForm({ ...settingsForm, maintenance_message: e.target.value })}
+                        placeholder="Kami sedang melakukan pemeliharaan sistem. Silakan kembali lagi nanti."
+                        rows={3}
+                      />
+                    </div>
+                  )}
+                </>
+              )}
+            </CardContent>
+          </Card>
+        </div>
       </div>
 
       <div className="flex justify-end pt-4">
@@ -281,7 +344,6 @@ export default function AdminSettingsPage() {
         onSelect={(url) => {
           if (activePicker === "favicon") setSettingsForm({ ...settingsForm, favicon_url: url });
           if (activePicker === "logo") setSettingsForm({ ...settingsForm, logo_url: url });
-          if (activePicker === "og_image") setSettingsForm({ ...settingsForm, og_image_url: url });
         }}
         type="gallery"
       />

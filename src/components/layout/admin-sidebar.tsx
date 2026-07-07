@@ -65,6 +65,12 @@ const navGroups = [
     ],
   },
   {
+    label: "Support",
+    items: [
+      { title: "Ticketing", href: "/admin/tickets", icon: BookOpen },
+    ],
+  },
+  {
     label: "Pengaturan",
     items: [
       { title: "General", href: "/admin/settings", icon: Settings },

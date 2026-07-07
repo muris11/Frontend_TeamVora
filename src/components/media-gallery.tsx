@@ -22,7 +22,7 @@ type Media = {
   created_at: string;
 };
 
-export function MediaGallery({ title, description, role }: { title: string, description: string, role: 'admin' | 'lead' }) {
+export function MediaGallery({ title, description, role, combined }: { title: string, description: string, role: 'admin' | 'lead' | 'member', combined?: boolean }) {
   const [media, setMedia] = useState<Media[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
@@ -31,7 +31,7 @@ export function MediaGallery({ title, description, role }: { title: string, desc
   const fetchMedia = async () => {
     setIsLoading(true);
     try {
-      const endpoint = activeTab === 'gallery' ? '/media/gallery' : '/media/documents';
+      const endpoint = combined ? '/media' : (activeTab === 'gallery' ? '/media/gallery' : '/media/documents');
       const response = await api.get(endpoint, { params: { role } });
       setMedia(response.data.data);
     } catch (error) {
@@ -57,7 +57,11 @@ export function MediaGallery({ title, description, role }: { title: string, desc
     const formData = new FormData();
     formData.append("file", file);
     formData.append("name", file.name);
-    formData.append("type", activeTab === 'gallery' ? 'gallery' : 'document');
+    let uploadType = activeTab === 'gallery' ? 'gallery' : 'document';
+    if (combined) {
+      uploadType = file.type.startsWith('image/') ? 'gallery' : 'document';
+    }
+    formData.append("type", uploadType);
     formData.append("role", role);
 
     setIsUploading(true);
@@ -100,29 +104,31 @@ export function MediaGallery({ title, description, role }: { title: string, desc
           <p className="text-muted-foreground">{description}</p>
         </div>
         <div className="flex items-center gap-3">
-          <div className="bg-muted p-1 rounded-lg flex gap-1">
-            <Button 
-              variant={activeTab === 'gallery' ? 'default' : 'ghost'} 
-              size="sm" 
-              onClick={() => setActiveTab('gallery')}
-            >
-              <ImageIcon className="w-4 h-4 mr-2" /> Gallery
-            </Button>
-            <Button 
-              variant={activeTab === 'documents' ? 'default' : 'ghost'} 
-              size="sm" 
-              onClick={() => setActiveTab('documents')}
-            >
-              <FileText className="w-4 h-4 mr-2" /> Dokumen
-            </Button>
-          </div>
+          {!combined && (
+            <div className="bg-muted p-1 rounded-lg flex gap-1">
+              <Button 
+                variant={activeTab === 'gallery' ? 'default' : 'ghost'} 
+                size="sm" 
+                onClick={() => setActiveTab('gallery')}
+              >
+                <ImageIcon className="w-4 h-4 mr-2" /> Gallery
+              </Button>
+              <Button 
+                variant={activeTab === 'documents' ? 'default' : 'ghost'} 
+                size="sm" 
+                onClick={() => setActiveTab('documents')}
+              >
+                <FileText className="w-4 h-4 mr-2" /> Dokumen
+              </Button>
+            </div>
+          )}
           <div className="relative">
             <input 
               type="file" 
               className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
               onChange={handleFileUpload}
               disabled={isUploading}
-              accept={activeTab === 'gallery' ? 'image/*' : '.pdf,.doc,.docx,.xls,.xlsx'}
+              accept={combined ? 'image/*,.pdf,.doc,.docx,.xls,.xlsx' : (activeTab === 'gallery' ? 'image/*' : '.pdf,.doc,.docx,.xls,.xlsx')}
             />
             <Button disabled={isUploading}>
               {isUploading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <UploadCloud className="w-4 h-4 mr-2" />}
@@ -163,7 +169,7 @@ export function MediaGallery({ title, description, role }: { title: string, desc
                 </Button>
               </div>
               <div className="aspect-square bg-muted flex items-center justify-center p-2 relative overflow-hidden">
-                {activeTab === 'gallery' ? (
+                {item.type === 'gallery' || item.mime_type?.startsWith('image/') ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={item.file_path} alt={item.name} className="object-cover w-full h-full rounded-md" />
                 ) : (

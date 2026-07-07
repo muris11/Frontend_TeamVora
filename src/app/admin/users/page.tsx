@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { LogIn } from "lucide-react";
+import { LogIn, Plus, Pencil, Trash2 } from "lucide-react";
 import api from "@/lib/api";
 import { User, Team } from "@/types";
 import { formatDate } from "@/lib/format";
@@ -15,6 +15,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { PageTitle } from "@/components/shared/page-title";
 import { useAuthStore } from "@/stores/auth-store";
 import { useRouter } from "next/navigation";
+import { UserDialog } from "./components/user-dialog";
+import { ConfirmDialog } from "@/components/shared/confirm-dialog";
 
 const roleLabels: Record<string, string> = {
   super_admin: "Super Admin",
@@ -31,10 +33,16 @@ const roleBadgeColors: Record<string, string> = {
 export default function AdminUsersPage() {
   const queryClient = useQueryClient();
   const router = useRouter();
-  const { setAuth } = useAuthStore();
+  const { setAuth, user: currentUser } = useAuthStore();
   
   const [filterRole, setFilterRole] = useState<string>("all");
   const [filterTeam, setFilterTeam] = useState<string>("all");
+
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [userToDelete, setUserToDelete] = useState<User | null>(null);
 
   const { data: users, isLoading } = useQuery({
     queryKey: ["admin-users"],
@@ -78,6 +86,34 @@ export default function AdminUsersPage() {
     },
     onError: () => toast.error("Gagal masuk sebagai user ini"),
   });
+
+  const deleteMutation = useMutation({
+    mutationFn: (userId: number) => api.delete(`/members/${userId}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-users"] });
+      toast.success("User berhasil dihapus");
+      setIsDeleteDialogOpen(false);
+      setUserToDelete(null);
+    },
+    onError: (error: any) => {
+      toast.error(error.response?.data?.message || "Gagal menghapus user");
+    },
+  });
+
+  const handleEdit = (user: User) => {
+    setSelectedUser(user);
+    setIsDialogOpen(true);
+  };
+
+  const handleAdd = () => {
+    setSelectedUser(null);
+    setIsDialogOpen(true);
+  };
+
+  const handleDeleteClick = (user: User) => {
+    setUserToDelete(user);
+    setIsDeleteDialogOpen(true);
+  };
 
   const filteredUsers = useMemo(() => {
     if (!users) return [];
@@ -130,30 +166,32 @@ export default function AdminUsersPage() {
       render: (item: User) => (
         <div className="flex justify-end gap-1">
           <Button
+            size="icon"
+            variant="ghost"
+            className="h-8 w-8 text-blue-500 hover:text-blue-600 hover:bg-blue-50"
+            onClick={() => handleEdit(item)}
+          >
+            <Pencil className="h-4 w-4" />
+          </Button>
+          <Button
+            size="icon"
+            variant="ghost"
+            className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-50"
+            onClick={() => handleDeleteClick(item)}
+            disabled={currentUser?.id === item.id}
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+          <Button
             size="sm"
             variant="outline"
-            className="h-8 text-xs"
+            className="h-8 text-xs ml-1"
             onClick={() => impersonateMutation.mutate(item.id)}
-            disabled={impersonateMutation.isPending}
+            disabled={impersonateMutation.isPending || currentUser?.id === item.id}
           >
             <LogIn className="mr-1 h-3 w-3" />
             Impersonate
           </Button>
-          <Select
-            onValueChange={(val) => {
-              const v = String(val);
-              if (v) updateRoleMutation.mutate({ userId: item.id, role: v });
-            }}
-          >
-            <SelectTrigger className="w-32 h-8">
-              <SelectValue placeholder="Ubah Role" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="super_admin">Super Admin</SelectItem>
-              <SelectItem value="team_leader">Team Leader</SelectItem>
-              <SelectItem value="member">Member</SelectItem>
-            </SelectContent>
-          </Select>
         </div>
       ),
     },
@@ -168,9 +206,9 @@ export default function AdminUsersPage() {
           <p className="text-sm text-muted-foreground">Kelola seluruh user dalam platform dan ubah peran mereka.</p>
         </div>
         
-        <div className="flex items-center gap-2">
+        <div className="flex flex-col sm:flex-row items-center gap-2">
           <Select value={filterRole} onValueChange={(val) => setFilterRole(val || "all")}>
-            <SelectTrigger className="w-40">
+            <SelectTrigger className="w-full sm:w-40">
               <SelectValue placeholder="Filter Role" />
             </SelectTrigger>
             <SelectContent>
@@ -181,7 +219,7 @@ export default function AdminUsersPage() {
             </SelectContent>
           </Select>
           <Select value={filterTeam} onValueChange={(val) => setFilterTeam(val || "all")}>
-            <SelectTrigger className="w-40">
+            <SelectTrigger className="w-full sm:w-40">
               <SelectValue placeholder="Filter Tim" />
             </SelectTrigger>
             <SelectContent>
@@ -191,6 +229,9 @@ export default function AdminUsersPage() {
               ))}
             </SelectContent>
           </Select>
+          <Button onClick={handleAdd} className="w-full sm:w-auto">
+            <Plus className="h-4 w-4 mr-2" /> Tambah User
+          </Button>
         </div>
       </div>
 
@@ -199,6 +240,24 @@ export default function AdminUsersPage() {
         data={filteredUsers || []}
         isLoading={isLoading}
         emptyMessage="Belum ada user"
+      />
+
+      <UserDialog
+        open={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+        user={selectedUser}
+        teams={teams || []}
+      />
+
+      <ConfirmDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+        title="Hapus User"
+        description={`Apakah Anda yakin ingin menghapus user ${userToDelete?.name}? Tindakan ini tidak dapat dibatalkan.`}
+        onConfirm={() => userToDelete && deleteMutation.mutate(userToDelete.id)}
+        confirmLabel="Hapus"
+        cancelLabel="Batal"
+        variant="destructive"
       />
     </div>
   );
