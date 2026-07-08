@@ -56,16 +56,16 @@ export function WorkflowTimeline() {
           
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-10 lg:gap-4 relative z-10">
             {steps.map((step, idx) => (
-              <motion.div key={idx} variants={itemVariants} className="flex flex-col items-start lg:items-center relative">
+              <motion.div key={idx} variants={itemVariants} className="flex flex-col items-center relative">
                 {/* Number Badge */}
-                <div className="w-12 h-12 rounded-full bg-white border border-[#111111] flex items-center justify-center text-[16px] font-bold text-[#111111] shadow-[0_4px_12px_rgba(0,0,0,0.05)] mb-6 transition-transform hover:scale-110 cursor-default">
+                <div className="w-12 h-12 rounded-full bg-white border border-[#111111] flex items-center justify-center text-[16px] font-bold text-[#111111] shadow-[0_4px_12px_rgba(0,0,0,0.05)] mb-6 transition-transform hover:scale-110 cursor-default z-10">
                   {step.num}
                 </div>
                 
-                <h3 className="text-[18px] font-bold text-[#111111] mb-2 lg:text-center">
+                <h3 className="text-[18px] font-bold text-[#111111] mb-2 text-center">
                   {step.title}
                 </h3>
-                <p className="text-[14px] text-[#666666] leading-[1.6] lg:text-center">
+                <p className="text-[14px] text-[#666666] leading-[1.6] text-center">
                   {step.desc}
                 </p>
                 

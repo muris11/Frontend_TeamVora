@@ -45,7 +45,6 @@ export function HeroSection() {
             {/* Badge */}
             <motion.div variants={fadeUpVariants} className="mb-8">
               <span className="inline-flex items-center justify-center px-4 py-1.5 rounded-full border border-[#ECECEC] bg-white text-[14px] font-medium text-[#111111] shadow-sm">
-                <span className="w-2 h-2 rounded-full bg-green-500 mr-2 animate-pulse"></span>
                 TeamVora 2.0 Live
               </span>
             </motion.div>
@@ -112,61 +111,13 @@ export function HeroSection() {
             {/* Background Soft Gradient Blur */}
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[80%] bg-white rounded-full blur-[100px] opacity-60"></div>
             
-            {/* Main Dashboard UI Mockup */}
-            <div className="relative z-10 w-full max-w-[640px] bg-white rounded-[24px] border border-[#ECECEC] shadow-[0_20px_60px_rgba(0,0,0,0.06)] overflow-hidden flex flex-col">
-              {/* Header */}
-              <div className="h-[60px] border-b border-[#ECECEC] flex items-center justify-between px-6 bg-[#FAFAFA]/50 backdrop-blur-sm">
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full bg-[#ECECEC]"></div>
-                  <div className="w-3 h-3 rounded-full bg-[#ECECEC]"></div>
-                  <div className="w-3 h-3 rounded-full bg-[#ECECEC]"></div>
-                </div>
-                <div className="h-6 w-32 bg-[#ECECEC] rounded-md"></div>
-                <div className="w-8 h-8 rounded-full bg-[#ECECEC]"></div>
-              </div>
-              
-              {/* Body */}
-              <div className="p-6 grid grid-cols-3 gap-6 h-[400px]">
-                {/* Sidebar */}
-                <div className="col-span-1 space-y-4 border-r border-[#ECECEC] pr-4">
-                  <div className="h-4 w-24 bg-[#ECECEC] rounded"></div>
-                  <div className="h-8 w-full bg-[#FAFAFA] border border-[#ECECEC] rounded-lg"></div>
-                  <div className="h-8 w-full bg-transparent rounded-lg"></div>
-                  <div className="h-8 w-full bg-transparent rounded-lg"></div>
-                </div>
-                
-                {/* Content */}
-                <div className="col-span-2 space-y-6">
-                  <div className="flex items-center justify-between">
-                    <div className="h-6 w-32 bg-[#ECECEC] rounded"></div>
-                    <div className="h-8 w-24 bg-[#111111] rounded-full"></div>
-                  </div>
-                  
-                  {/* Cards inside Mockup */}
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="h-24 bg-[#FAFAFA] border border-[#ECECEC] rounded-xl p-4 flex flex-col justify-between">
-                      <div className="h-3 w-16 bg-[#ECECEC] rounded"></div>
-                      <div className="h-6 w-20 bg-[#111111] rounded"></div>
-                    </div>
-                    <div className="h-24 bg-[#FAFAFA] border border-[#ECECEC] rounded-xl p-4 flex flex-col justify-between">
-                      <div className="h-3 w-16 bg-[#ECECEC] rounded"></div>
-                      <div className="h-6 w-20 bg-[#111111] rounded"></div>
-                    </div>
-                  </div>
-                  
-                  {/* List items */}
-                  <div className="space-y-3">
-                    <div className="h-12 w-full bg-white border border-[#ECECEC] rounded-xl flex items-center px-4 gap-3">
-                      <div className="w-6 h-6 rounded bg-[#FAFAFA]"></div>
-                      <div className="h-3 w-40 bg-[#ECECEC] rounded"></div>
-                    </div>
-                    <div className="h-12 w-full bg-white border border-[#ECECEC] rounded-xl flex items-center px-4 gap-3">
-                      <div className="w-6 h-6 rounded bg-[#FAFAFA]"></div>
-                      <div className="h-3 w-32 bg-[#ECECEC] rounded"></div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+            {/* Main Dashboard Image */}
+            <div className="relative z-10 w-full max-w-[640px] px-4 md:px-0 mx-auto">
+              <img 
+                src="/hero_3d.png" 
+                alt="TeamVora Dashboard" 
+                className="w-full h-auto object-contain rounded-2xl drop-shadow-2xl hover:scale-[1.02] transition-transform duration-500"
+              />
             </div>
             
             {/* Floating Cards (Animated) */}

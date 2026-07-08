@@ -96,8 +96,10 @@ const permissionGroups = [
 ];
 
 const roleLabels: Record<string, { label: string; icon: any; color: string }> = {
-  super_admin: { label: "Super Admin", icon: ShieldCheck, color: "text-amber-500" },
-  team_leader: { label: "Team Leader", icon: Shield, color: "text-blue-500" },
+  super_admin: { label: "Superadmin", icon: ShieldCheck, color: "text-amber-500" },
+  admin: { label: "Superadmin", icon: ShieldCheck, color: "text-amber-500" },
+  team_leader: { label: "Lead", icon: Shield, color: "text-blue-500" },
+  lead: { label: "Lead", icon: Shield, color: "text-blue-500" },
   member: { label: "Member", icon: UserCheck, color: "text-gray-500" }
 };
 
@@ -201,8 +203,8 @@ export default function AdminRBACPage() {
         <div className="space-y-3">
           <p className="text-sm font-semibold text-muted-foreground uppercase tracking-wider px-2">Role Pengguna</p>
           <div className="flex flex-col gap-2">
-            {roles.map((role) => {
-              const info = roleLabels[role.name] || { label: role.name, icon: Shield, color: "text-gray-500" };
+            {roles.filter(role => ['super_admin', 'admin', 'team_leader', 'lead', 'member'].includes(role.name.toLowerCase())).map((role) => {
+              const info = roleLabels[role.name.toLowerCase()] || { label: role.name, icon: Shield, color: "text-gray-500" };
               const Icon = info.icon;
               const isSelected = role.name === selectedRoleName;
 

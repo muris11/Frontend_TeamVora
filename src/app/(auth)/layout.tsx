@@ -8,8 +8,8 @@ export default function AuthLayout({
 }) {
   return (
     <div className="grid min-h-svh lg:grid-cols-2">
-      <div className="flex flex-col gap-4 p-6 md:p-10">
-        <div className="flex justify-center gap-2 md:justify-start">
+      <div className="flex flex-col p-8 md:p-12 h-full">
+        <div className="flex justify-center md:justify-start">
           <Link href="/" className="flex items-center gap-2 font-medium group">
             <Image
               src="/icon.png"
@@ -21,13 +21,13 @@ export default function AuthLayout({
             <span className="text-xl font-bold tracking-tight">TeamVora</span>
           </Link>
         </div>
-        <div className="flex flex-1 items-center justify-center">
-          <div className="w-full max-w-sm">
+        <div className="flex flex-1 items-center justify-center mt-12 md:mt-0">
+          <div className="w-full max-w-[400px]">
             {children}
           </div>
         </div>
       </div>
-      <div className="relative hidden bg-muted lg:block overflow-hidden">
+      <div className="relative hidden lg:block overflow-hidden bg-zinc-950">
         {/* Dynamic decorative background */}
         <div className="absolute inset-0 bg-zinc-950">
           <div className="absolute left-1/4 top-1/4 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/20 blur-[120px]" />

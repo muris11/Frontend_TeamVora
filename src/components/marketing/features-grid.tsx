@@ -80,23 +80,24 @@ export function FeaturesGrid() {
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: "-100px" }}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
+          className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6"
         >
           {features.map((feature, idx) => (
             <motion.div 
               key={idx} 
               variants={cardVariants}
-              className="group p-8 rounded-[24px] bg-white border border-[#ECECEC] hover:shadow-[0_20px_60px_rgba(0,0,0,0.06)] hover:-translate-y-[8px] transition-all duration-300 flex flex-col items-start"
+              className="group p-4 md:p-8 rounded-[24px] bg-white border border-[#ECECEC] hover:shadow-[0_20px_60px_rgba(0,0,0,0.06)] hover:-translate-y-[8px] transition-all duration-300 flex flex-col items-center text-center"
             >
-              <div className="w-12 h-12 rounded-full bg-[#FAFAFA] border border-[#ECECEC] flex items-center justify-center mb-6 group-hover:bg-[#111111] transition-colors duration-300">
+              <div className="w-12 h-12 rounded-full bg-[#FAFAFA] border border-[#ECECEC] flex items-center justify-center mb-4 md:mb-6 group-hover:bg-[#111111] transition-colors duration-300">
                 <feature.icon className="w-5 h-5 text-[#111111] group-hover:text-white transition-colors duration-300" strokeWidth={1.75} />
               </div>
-              <h3 className="text-[22px] font-bold text-[#111111] mb-3 leading-[1.3]">{feature.title}</h3>
-              <p className="text-[16px] text-[#666666] leading-[1.6] mb-8 flex-1">
+              <h3 className="text-[16px] md:text-[22px] font-bold text-[#111111] mb-2 md:mb-3 leading-[1.3]">{feature.title}</h3>
+              <p className="text-[13px] md:text-[16px] text-[#666666] leading-[1.6] mb-4 md:mb-8 flex-1">
                 {feature.description}
               </p>
-              <button className="flex items-center text-[14px] font-semibold text-[#111111] group/btn">
-                Pelajari Lebih Lanjut
+              <button className="flex items-center text-[13px] md:text-[14px] font-semibold text-[#111111] group/btn">
+                <span className="hidden md:inline">Pelajari Lebih Lanjut</span>
+                <span className="md:hidden">Detail</span>
                 <ArrowRight className="w-4 h-4 ml-1.5 transition-transform group-hover/btn:translate-x-1" strokeWidth={2} />
               </button>
             </motion.div>

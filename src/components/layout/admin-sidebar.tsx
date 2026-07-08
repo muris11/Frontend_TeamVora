@@ -1,7 +1,9 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import type { LucideIcon } from "lucide-react";
 import {
   LayoutDashboard,
   Users,
@@ -12,12 +14,13 @@ import {
   ChevronDown,
   Shield,
   Mail,
-  Image,
+  ImageIcon,
   FileKey,
   Palette,
   Search,
   Activity,
   BookOpen,
+  FileText,
   KeyRound,
 } from "lucide-react";
 import {
@@ -35,21 +38,31 @@ import {
   SidebarMenuSubButton,
   SidebarFooter,
 } from "@/components/ui/sidebar";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
-import { useAuthStore } from "@/stores/auth-store";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useQuery } from "@tanstack/react-query";
 import api from "@/lib/api";
 
-const navGroups = [
+interface AdminNavSubItem {
+  title: string;
+  href: string;
+}
+
+interface AdminNavItem {
+  title: string;
+  href: string;
+  icon: LucideIcon;
+  subItems?: AdminNavSubItem[];
+}
+
+interface AdminNavGroup {
+  label: string;
+  items: AdminNavItem[];
+}
+
+const navGroups: AdminNavGroup[] = [
   {
     label: "Menu",
-    items: [
-      { title: "Dashboard", href: "/admin", icon: LayoutDashboard },
-    ],
+    items: [{ title: "Dashboard", href: "/admin", icon: LayoutDashboard }],
   },
   {
     label: "Platform",
@@ -63,22 +76,24 @@ const navGroups = [
     label: "Konten & Media",
     items: [
       { title: "Kelola Blog", href: "/admin/blogs", icon: PenTool },
-      { title: "Media Galeri", href: "/admin/media", icon: Image },
+      { title: "Media Galeri", href: "/admin/media", icon: ImageIcon },
     ],
   },
   {
     label: "Support",
-    items: [
-      { title: "Ticketing", href: "/admin/tickets", icon: BookOpen },
-    ],
+    items: [{ title: "Ticketing", href: "/admin/tickets", icon: BookOpen }],
+  },
+  {
+    label: "Dokumentasi",
+    items: [{ title: "Dokumentasi Project", href: "/admin/project-docs", icon: FileText }],
   },
   {
     label: "Pengaturan",
     items: [
       { title: "General", href: "/admin/settings", icon: Settings },
-      { 
-        title: "Marketing", 
-        href: "/admin/settings/marketing", 
+      {
+        title: "Marketing",
+        href: "/admin/settings/marketing",
         icon: Palette,
         subItems: [
           { title: "Landing", href: "/admin/settings/marketing/landing" },
@@ -88,7 +103,7 @@ const navGroups = [
           { title: "Bantuan", href: "/admin/settings/marketing/bantuan" },
           { title: "Privasi", href: "/admin/settings/marketing/privasi" },
           { title: "Syarat", href: "/admin/settings/marketing/syarat" },
-        ]
+        ],
       },
       { title: "Email", href: "/admin/email", icon: Mail },
       { title: "SEO", href: "/admin/settings/seo", icon: Search },
@@ -101,7 +116,6 @@ const navGroups = [
 
 export function AdminSidebar() {
   const pathname = usePathname();
-  const { user } = useAuthStore();
 
   const { data: platformSettings } = useQuery({
     queryKey: ["platform-settings"],
@@ -119,7 +133,7 @@ export function AdminSidebar() {
     <Sidebar className="border-r-0">
       <SidebarHeader className="pb-0">
         <div className="flex flex-col items-center px-3 pt-4 pb-2">
-          <img src={logoUrl} alt={siteName} width="48" height="48" className="w-12 h-12 object-contain mb-2" />
+          <Image src={logoUrl} alt={siteName} width={48} height={48} className="w-12 h-12 object-contain mb-2" />
           <span className="font-bold text-lg tracking-tight mb-1">{siteName}</span>
           <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-medium">Super Admin</p>
         </div>
@@ -167,23 +181,19 @@ export function AdminSidebar() {
                             <item.icon className={`h-4 w-4 ${isActive ? "text-primary" : ""}`} />
                             <span>{item.title}</span>
                             {isActive && (
-                              <div className="absolute left-0 top-1/2 h-4 w-[3px] -translate-y-1/2 rounded-r-full bg-primary" />
+                              <div className="absolute left-0 top-1/2 h-4 w-0.75 -translate-y-1/2 rounded-r-full bg-primary" />
                             )}
                           </SidebarMenuButton>
                           {item.subItems && pathname.startsWith(item.href) && (
                             <SidebarMenuSub>
-                              {item.subItems.map((sub) => {
+                              {item.subItems.map((sub: AdminNavSubItem) => {
                                 const isSubActive = pathname === sub.href;
                                 return (
                                   <SidebarMenuSubItem key={sub.href}>
                                     <SidebarMenuSubButton
                                       isActive={isSubActive}
                                       render={<Link href={sub.href} />}
-                                      className={
-                                        isSubActive 
-                                          ? "font-medium text-primary" 
-                                          : "text-muted-foreground"
-                                      }
+                                      className={isSubActive ? "font-medium text-primary" : "text-muted-foreground"}
                                     >
                                       {sub.title}
                                     </SidebarMenuSubButton>
@@ -204,14 +214,14 @@ export function AdminSidebar() {
       </SidebarContent>
       <SidebarFooter className="px-3 pb-3">
         <div className="h-px bg-border/50 mb-2" />
-        <a 
-          href="https://docs.teamvora.web.id" 
-          target="_blank" 
+        <a
+          href="https://docs.teamvora.web.id"
+          target="_blank"
           rel="noopener noreferrer"
           className="flex items-center gap-2 px-2 py-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors group-data-[collapsible=icon]:justify-center"
         >
           <BookOpen className="h-3.5 w-3.5" />
-          <span className="group-data-[collapsible=icon]:hidden">Dokumentasi</span>
+          <span className="group-data-[collapsible=icon]:hidden">Docs Pengguna</span>
         </a>
         <p className="text-[10px] text-muted-foreground/40 mt-1 px-2 group-data-[collapsible=icon]:hidden">
           {siteName} SaaS v1.0 — Admin

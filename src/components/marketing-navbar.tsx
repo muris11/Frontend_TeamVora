@@ -23,7 +23,6 @@ export function MarketingNavbar() {
     : [
         { label: "Tentang", href: "/tentang" },
         { label: "Fitur", href: "/fitur" },
-        { label: "Harga", href: "/harga" },
         { label: "Blog", href: "/blog" },
         { label: "Dokumentasi", href: "https://docs.teamvora.web.id" },
       ];

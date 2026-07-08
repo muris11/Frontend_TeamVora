@@ -56,7 +56,6 @@ export function MarketingFooter() {
             <h4 className="font-bold text-[#111111] mb-6 text-[14px] uppercase tracking-wider">Produk</h4>
             <div className="flex flex-col gap-4 text-[16px] text-[#666666]">
               <Link href="/fitur" className="hover:text-[#111111] transition-colors">Fitur</Link>
-              <Link href="/harga" className="hover:text-[#111111] transition-colors">Harga</Link>
               <Link href="/changelog" className="hover:text-[#111111] transition-colors">Changelog</Link>
               <Link href="/integrasi" className="hover:text-[#111111] transition-colors">Integrasi</Link>
             </div>

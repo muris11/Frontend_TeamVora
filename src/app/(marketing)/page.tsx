@@ -8,7 +8,6 @@ import { WorkflowTimeline } from "@/components/marketing/workflow-timeline";
 import { PlatformIntegrations } from "@/components/marketing/platform-integrations";
 import { StatisticsSection } from "@/components/marketing/statistics-section";
 import { DeepDiveSections } from "@/components/marketing/deep-dive-sections";
-import { PricingPreview } from "@/components/marketing/pricing-preview";
 import { Testimonials } from "@/components/marketing/testimonials";
 import { FAQSection } from "@/components/marketing/faq-section";
 import { CTASection } from "@/components/marketing/cta-section";
@@ -32,7 +31,6 @@ export default function MarketingPage() {
         <PlatformIntegrations />
         <StatisticsSection />
         <DeepDiveSections />
-        <PricingPreview />
         <Testimonials />
         <FAQSection />
         <CTASection />
