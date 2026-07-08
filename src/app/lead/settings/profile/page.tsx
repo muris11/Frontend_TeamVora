@@ -6,7 +6,8 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
-import { Save, Lock, User as UserIcon, Camera, Loader2, ShieldCheck, Mail, Phone, Calendar } from "lucide-react";
+import { Save, Lock, User as UserIcon, Camera, Loader2, ShieldCheck, Mail, Phone, Calendar, Database, CheckCircle, XCircle } from "lucide-react";
+import { signIn, signOut, useSession } from "next-auth/react";
 import api from "@/lib/api";
 import { useAuthStore } from "@/stores/auth-store";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
@@ -20,6 +21,8 @@ import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { id } from "date-fns/locale";
 import { MediaPicker } from "@/components/shared/media-picker";
+import { formatBytes } from "@/lib/utils";
+import { getGoogleDriveStorageInfo } from "@/lib/google-drive";
 
 const profileSchema = z.object({
   name: z.string().min(2, "Nama minimal 2 karakter"),
@@ -42,8 +45,31 @@ type PasswordForm = z.infer<typeof passwordSchema>;
 
 export default function ProfilePage() {
   const { user, setAuth, token } = useAuthStore();
+  const { data: session, status } = useSession();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [showMediaPicker, setShowMediaPicker] = useState(false);
+  
+  const isDriveConnected = status === "authenticated" && (session as any)?.accessToken && (session as any)?.error !== "RefreshAccessTokenError";
+  const driveEmail = session?.user?.email;
+
+  const { data: driveQuota, isLoading: quotaLoading } = useQuery({
+    queryKey: ['drive-quota', (session as any)?.accessToken],
+    queryFn: async () => {
+      if (!(session as any)?.accessToken) return null;
+      return await getGoogleDriveStorageInfo((session as any).accessToken);
+    },
+    enabled: !!isDriveConnected,
+    retry: false,
+  });
+
+  const handleConnectDrive = async () => {
+    await signIn("google");
+  };
+
+  const handleDisconnectDrive = async () => {
+    await signOut({ redirect: false });
+    toast.success("Koneksi Google Drive diputus");
+  };
 
   const profileForm = useForm<ProfileForm>({
     resolver: zodResolver(profileSchema),
@@ -248,6 +274,51 @@ export default function ProfilePage() {
                 </CardFooter>
               </form>
             </Form>
+          </Card>
+          
+          {/* Google Drive Integration */}
+          <Card className="border-border/50 shadow-sm">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Database className="w-5 h-5 text-blue-500" />
+                Integrasi Google Drive
+              </CardTitle>
+              <CardDescription>Hubungkan akun Google Drive untuk menyimpan media tim langsung ke Drive Anda.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border rounded-xl bg-muted/30">
+                <div className="flex flex-col mb-4 sm:mb-0">
+                  <span className="font-medium flex items-center gap-2">
+                    Status: 
+                    {isDriveConnected ? (
+                      <span className="text-green-600 flex items-center gap-1"><CheckCircle className="w-4 h-4" /> Terhubung</span>
+                    ) : (
+                      <span className="text-muted-foreground flex items-center gap-1"><XCircle className="w-4 h-4" /> Belum terhubung</span>
+                    )}
+                  </span>
+                  {isDriveConnected && driveEmail && (
+                    <span className="text-sm text-muted-foreground mt-1">Akun: {driveEmail}</span>
+                  )}
+                  <span className="text-xs text-muted-foreground mt-2">
+                    {isDriveConnected ? (
+                      quotaLoading ? "Memuat kapasitas media..." :
+                      driveQuota ? `Kapasitas media ditingkatkan hingga ${formatBytes(driveQuota.limit)}.` : "Kapasitas media bergantung pada batas akun Google Anda."
+                    ) : "Kapasitas media saat ini terbatas 10 MB."}
+                  </span>
+                </div>
+                <div>
+                  {isDriveConnected ? (
+                    <Button variant="outline" className="text-destructive hover:text-destructive hover:bg-destructive/10" onClick={handleDisconnectDrive}>
+                      Putuskan Koneksi
+                    </Button>
+                  ) : (
+                    <Button onClick={handleConnectDrive} className="bg-blue-600 hover:bg-blue-700 text-white border-blue-600">
+                      Hubungkan Google Drive
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </CardContent>
           </Card>
 
           {/* Password Form */}

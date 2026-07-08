@@ -1,44 +1,22 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { 
-  connectGoogleDrive, 
-  disconnectGoogleDrive, 
-  isGoogleDriveConnected, 
-  getConnectedEmail 
-} from "@/lib/google-drive";
+import { signIn, signOut, useSession } from "next-auth/react";
 import { toast } from "sonner";
-import { Loader2, HardDrive, Unplug } from "lucide-react";
+import { HardDrive, Unplug, Loader2 } from "lucide-react";
 
 export function GoogleDriveConnector() {
-  const [isConnected, setIsConnected] = useState(false);
-  const [email, setEmail] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    setIsConnected(isGoogleDriveConnected());
-    setEmail(getConnectedEmail());
-  }, []);
+  const { data: session, status } = useSession();
+  
+  const isConnected = status === "authenticated" && (session as any)?.accessToken;
+  const email = session?.user?.email;
 
   const handleConnect = async () => {
-    setLoading(true);
-    try {
-      await connectGoogleDrive();
-      setIsConnected(true);
-      setEmail(getConnectedEmail());
-      toast.success("Berhasil terhubung ke Google Drive");
-    } catch (e) {
-      toast.error("Gagal terhubung ke Google Drive");
-    } finally {
-      setLoading(false);
-    }
+    await signIn("google");
   };
 
-  const handleDisconnect = () => {
-    disconnectGoogleDrive();
-    setIsConnected(false);
-    setEmail(null);
+  const handleDisconnect = async () => {
+    await signOut({ redirect: false });
     toast.info("Terputus dari Google Drive");
   };
 
@@ -68,8 +46,8 @@ export function GoogleDriveConnector() {
             Putuskan
           </Button>
         ) : (
-          <Button onClick={handleConnect} disabled={loading} size="sm">
-            {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <HardDrive className="w-4 h-4 mr-2" />}
+          <Button onClick={handleConnect} disabled={status === "loading"} size="sm">
+            {status === "loading" ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <HardDrive className="w-4 h-4 mr-2" />}
             Hubungkan Drive
           </Button>
         )}

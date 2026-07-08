@@ -24,16 +24,20 @@ export function useSSE(options: UseSSEOptions = {}) {
   const reconnectAttempts = useRef(0);
   const maxReconnectAttempts = 10;
   const isManualClose = useRef(false);
+  const optionsRef = useRef(options);
+
+  useEffect(() => {
+    optionsRef.current = options;
+  }, [options]);
 
   const getApiBase = useCallback(() => {
-    const base = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
+    const base = process.env.NEXT_PUBLIC_API_URL || "";
     return base.replace(/\/api\/?$/, "");
   }, []);
 
   const connect = useCallback(() => {
     if (typeof window === "undefined" || !token) return;
 
-    // Close existing connection
     if (eventSourceRef.current) {
       eventSourceRef.current.close();
     }
@@ -47,39 +51,38 @@ export function useSSE(options: UseSSEOptions = {}) {
       reconnectAttempts.current = 0;
     };
 
-    // Listen for specific event types
     eventSource.addEventListener("connected", (e) => {
       try {
         const data = JSON.parse(e.data);
-        options.onConnected?.(data);
+        optionsRef.current.onConnected?.(data);
       } catch {}
     });
 
     eventSource.addEventListener("notification", (e) => {
       try {
         const data = JSON.parse(e.data);
-        options.onNotification?.(data);
+        optionsRef.current.onNotification?.(data);
       } catch {}
     });
 
     eventSource.addEventListener("team_updated", (e) => {
       try {
         const data = JSON.parse(e.data);
-        options.onTeamUpdated?.(data);
+        optionsRef.current.onTeamUpdated?.(data);
       } catch {}
     });
 
     eventSource.addEventListener("heartbeat", (e) => {
       try {
         const data = JSON.parse(e.data);
-        options.onHeartbeat?.(data);
+        optionsRef.current.onHeartbeat?.(data);
       } catch {}
     });
 
     eventSource.addEventListener("admin_stats", (e) => {
       try {
         const data = JSON.parse(e.data);
-        options.onAdminStats?.(data);
+        optionsRef.current.onAdminStats?.(data);
       } catch {}
     });
 
@@ -87,12 +90,12 @@ export function useSSE(options: UseSSEOptions = {}) {
     eventSource.onmessage = (e) => {
       try {
         const data = JSON.parse(e.data);
-        options.onNotification?.(data);
+        optionsRef.current.onNotification?.(data);
       } catch {}
     };
 
     eventSource.onerror = (e) => {
-      options.onError?.(e);
+      optionsRef.current.onError?.(e);
 
       if (isManualClose.current) return;
 
@@ -111,7 +114,7 @@ export function useSSE(options: UseSSEOptions = {}) {
     };
 
     eventSourceRef.current = eventSource;
-  }, [token, options, getApiBase]);
+  }, [token, getApiBase]); // Removed options from deps
 
   const disconnect = useCallback(() => {
     isManualClose.current = true;

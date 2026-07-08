@@ -212,7 +212,7 @@ export function AdminSidebar() {
           </Collapsible>
         ))}
       </SidebarContent>
-      <SidebarFooter className="px-3 pb-3">
+      <SidebarFooter className="px-3 pb-16">
         <div className="h-px bg-border/50 mb-2" />
         <a
           href="https://docs.teamvora.web.id"

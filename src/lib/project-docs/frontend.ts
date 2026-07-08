@@ -250,7 +250,7 @@ export const frontendPages: ProjectDocPage[] = [
     facts: [
       { label: "Global Query Client", value: "staleTime 60s, retry 1" },
       { label: "Auth State", value: "Zustand + localStorage token" },
-      { label: "API Base", value: "NEXT_PUBLIC_API_URL || http://localhost:8000/api" },
+      { label: "API Base", value: "NEXT_PUBLIC_API_URL" },
       { label: "401 Handling", value: "clear token + redirect /login" },
     ],
     responsibilities: [

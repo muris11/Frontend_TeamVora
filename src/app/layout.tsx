@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { QueryProvider } from "@/providers/query-provider";
 import { AppToaster } from "@/providers/toaster";
+import { NextAuthSessionProvider } from "@/providers/session-provider";
 
 const geist = Geist({
   variable: "--font-sans",
@@ -35,11 +36,13 @@ export default function RootLayout({
       <head>
         <link rel="icon" href="/icon.png" sizes="any" />
       </head>
-      <body className={`${geist.variable} ${geistMono.variable} font-sans`}>
-        <QueryProvider>
-          {children}
-          <AppToaster />
-        </QueryProvider>
+      <body suppressHydrationWarning className={`${geist.variable} ${geistMono.variable} font-sans`}>
+        <NextAuthSessionProvider>
+          <QueryProvider>
+            {children}
+            <AppToaster />
+          </QueryProvider>
+        </NextAuthSessionProvider>
       </body>
     </html>
   );

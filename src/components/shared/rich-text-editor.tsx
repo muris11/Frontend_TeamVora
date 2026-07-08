@@ -150,10 +150,8 @@ export function RichTextEditor({ value, onChange, placeholder = "Tulis sesuatu d
           </Toggle>
           
           <Popover>
-            <PopoverTrigger asChild>
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                <PaintBucket className="h-4 w-4" />
-              </Button>
+            <PopoverTrigger render={<Button variant="ghost" size="sm" className="h-8 w-8 p-0" />}>
+              <PaintBucket className="h-4 w-4" />
             </PopoverTrigger>
             <PopoverContent className="w-auto p-3" align="start">
               <div className="flex flex-col gap-2">
@@ -191,8 +189,7 @@ export function RichTextEditor({ value, onChange, placeholder = "Tulis sesuatu d
       <MediaPicker 
         open={showMediaPicker} 
         onOpenChange={setShowMediaPicker} 
-        onSelect={(media) => insertImage(media.url)}
-        role={user?.role || "lead"}
+        onSelect={(url) => insertImage(url)}
       />
     </div>
   );
