@@ -35,6 +35,7 @@ export const projectDocCategories: ProjectDocCategory[] = [
       "frontend/providers-stores-api",
       "frontend/theme-design-system",
       "frontend/motion-interactions",
+      "frontend/cms-and-media",
     ],
   },
   {

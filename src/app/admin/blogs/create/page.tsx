@@ -23,6 +23,8 @@ import { MediaPicker } from "@/components/shared/media-picker";
 import { SeoAnalyzerCard } from "@/components/shared/seo-analyzer";
 import type { SeoInput } from "@/lib/seo";
 import { slugify } from "@/lib/format";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { BlogPreview } from "@/components/blog/blog-preview";
 import { useQuery } from "@tanstack/react-query";
 
 const blogSchema = z.object({
@@ -125,22 +127,31 @@ export default function AdminBlogCreatePage() {
   };
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6">
+    <div className="max-w-6xl mx-auto space-y-6 pb-20">
       <PageTitle title="Buat Blog" />
-      <div className="flex items-center gap-4">
-        <Link href="/admin/blogs">
-          <Button variant="ghost" size="icon">
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
-        </Link>
-        <h1 className="text-2xl font-bold">Buat Blog Baru</h1>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <Link href="/admin/blogs">
+            <Button variant="ghost" size="icon">
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+          </Link>
+          <h1 className="text-2xl font-bold">Buat Blog Baru</h1>
+        </div>
       </div>
 
-      <Form {...form}>
-        <form
-          onSubmit={form.handleSubmit((d) => createMutation.mutate(d))}
-          className="grid gap-6 lg:grid-cols-3"
-        >
+      <Tabs defaultValue="editor" className="space-y-6">
+        <TabsList>
+          <TabsTrigger value="editor">Editor</TabsTrigger>
+          <TabsTrigger value="preview">Preview</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="editor">
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit((d) => createMutation.mutate(d))}
+              className="grid gap-6 lg:grid-cols-3"
+            >
           <div className="lg:col-span-2 space-y-6">
             <Card>
               <CardHeader>
@@ -359,7 +370,19 @@ export default function AdminBlogCreatePage() {
             />
           </div>
         </form>
-      </Form>
+        </Form>
+        </TabsContent>
+
+        <TabsContent value="preview">
+          <BlogPreview
+            title={form.watch("title")}
+            category={categories?.find((c: any) => String(c.id) === form.watch("category_id"))?.name || ""}
+            content={form.watch("content")}
+            coverUrl={typeof featuredRaw === "string" ? featuredRaw : featuredRaw instanceof File ? URL.createObjectURL(featuredRaw) : ""}
+            authorName="Admin TeamVora"
+          />
+        </TabsContent>
+      </Tabs>
 
       <MediaPicker
         open={isMediaPickerOpen}

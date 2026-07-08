@@ -203,7 +203,17 @@ export default function AdminRBACPage() {
         <div className="space-y-3">
           <p className="text-sm font-semibold text-muted-foreground uppercase tracking-wider px-2">Role Pengguna</p>
           <div className="flex flex-col gap-2">
-            {roles.filter(role => ['super_admin', 'admin', 'team_leader', 'lead', 'member'].includes(role.name.toLowerCase())).map((role) => {
+            {Array.from(
+              roles
+                .filter(role => ['super_admin', 'admin', 'team_leader', 'lead', 'member'].includes(role.name.toLowerCase()))
+                .reduce((map, role) => {
+                  const key = role.name.toLowerCase();
+                  const canonical = key === 'admin' ? 'super_admin' : key === 'lead' ? 'team_leader' : key;
+                  if (!map.has(canonical)) map.set(canonical, role);
+                  return map;
+                }, new Map<string, typeof roles[0]>())
+                .values()
+            ).map((role) => {
               const info = roleLabels[role.name.toLowerCase()] || { label: role.name, icon: Shield, color: "text-gray-500" };
               const Icon = info.icon;
               const isSelected = role.name === selectedRoleName;

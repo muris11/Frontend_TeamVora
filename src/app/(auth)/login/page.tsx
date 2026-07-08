@@ -14,6 +14,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { PageTitle } from "@/components/shared/page-title";
+import { GoogleLoginButton } from "@/components/shared/google-login-button";
 
 const loginSchema = z.object({
   email: z.string().email("Email tidak valid"),
@@ -128,7 +129,18 @@ export default function LoginPage() {
         </form>
       </Form>
 
-      <div className="text-center text-sm text-muted-foreground">
+      <div className="relative my-4">
+        <div className="absolute inset-0 flex items-center">
+          <span className="w-full border-t border-border" />
+        </div>
+        <div className="relative flex justify-center text-xs uppercase">
+          <span className="bg-background px-2 text-muted-foreground">Atau lanjutkan dengan</span>
+        </div>
+      </div>
+
+      <GoogleLoginButton />
+
+      <div className="text-center text-sm text-muted-foreground mt-6">
         Belum punya akun?{" "}
         <Link href="/register" className="font-medium text-primary hover:underline underline-offset-4">
           Daftar sekarang

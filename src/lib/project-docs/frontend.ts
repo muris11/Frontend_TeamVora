@@ -593,5 +593,76 @@ export const frontendPages: ProjectDocPage[] = [
       "architecture/system-landscape",
       "reference/architecture-decisions",
     ],
+  },
+  {
+    id: "frontend/cms-and-media",
+    slug: ["frontend", "cms-and-media"],
+    category: "frontend",
+    title: "CMS, Media, & Integrations",
+    summary:
+      "Dokumentasi implementasi Full CMS (Zustand + LocalStorage), integrasi Google Drive OAuth, Blog RTE dengan TipTap, serta pengaturan SEO dinamis per halaman.",
+    audience: ["Frontend Developer", "Content Manager", "Admin"],
+    overallStatus: "Verified",
+    statusNote:
+      "Semua fitur diimplementasikan di frontend menggunakan local state dan mocked OAuth flows karena batasan current sprint.",
+    facts: [
+      { label: "Storage CMS", value: "Zustand (localStorage)" },
+      { label: "Blog RTE", value: "TipTap + Extensions" },
+      { label: "Google Drive", value: "Mocked OAuth (Frontend Only)" },
+      { label: "SEO", value: "Per-page metadata" },
+    ],
+    responsibilities: [
+      "Menyimpan dan merender data halaman marketing (hero, features, text, seo) secara dinamis.",
+      "Menyediakan editor teks kaya (RTE) dengan ekstensi kustom dan MediaPicker.",
+      "Mensimulasikan flow otentikasi Google Drive untuk Lead.",
+    ],
+    keyFiles: [
+      { path: "Frontend/src/stores/marketing-store.ts", note: "Zustand store untuk CMS marketing.", status: "Verified" },
+      { path: "Frontend/src/lib/marketing-defaults.ts", note: "Default konten & SEO CMS.", status: "Verified" },
+      { path: "Frontend/src/app/admin/settings/marketing/[pageSlug]/page.tsx", note: "Editor dinamis CMS.", status: "Verified" },
+      { path: "Frontend/src/components/shared/rich-text-editor.tsx", note: "TipTap editor.", status: "Verified" },
+      { path: "Frontend/src/components/shared/media-picker.tsx", note: "Media picker terintegrasi.", status: "Verified" },
+    ],
+    flows: [
+      {
+        title: "CMS Marketing Editor Flow",
+        status: "Verified",
+        steps: [
+          "Admin masuk ke /admin/settings/marketing/[slug].",
+          "Admin mengubah sections (hero, features) atau metadata SEO.",
+          "Data disimpan via useMarketingStore (localStorage).",
+          "Halaman /marketing/[slug] merender data tersebut (SEO fallback ke defaultMarketingPages untuk SSR).",
+        ],
+      },
+    ],
+    dependencies: [
+      "Zustand + persist",
+      "@tiptap/react",
+      "lucide-react",
+    ],
+    sensitiveAreas: [
+      {
+        title: "Ketergantungan LocalStorage",
+        detail: "Karena menggunakan localStorage, data CMS tidak akan tersinkronisasi antar device admin.",
+        status: "Verified",
+      },
+    ],
+    safeChangeGuide: [
+      "Pastikan menambahkan halaman baru di defaultMarketingPages.",
+      "Bila butuh integrasi backend, ganti middleware persist Zustand dengan API calls.",
+    ],
+    validationChecklist: [
+      "Edit landing page lalu pastikan berubah di route '/'.",
+      "Upload/pilih media dalam blog editor.",
+      "Simulasikan sinkronisasi Google Drive di profil Lead.",
+    ],
+    affectedSurfaces: [
+      "Frontend/src/stores/marketing-store.ts",
+      "Frontend/src/app/admin/settings/marketing/**/*",
+      "Frontend/src/app/(marketing)/**/*",
+    ],
+    relatedPageIds: [
+      "frontend/overview",
+    ],
   }
 ];

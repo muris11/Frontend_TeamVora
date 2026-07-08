@@ -23,6 +23,8 @@ import { MediaPicker } from "@/components/shared/media-picker";
 import { SeoAnalyzerCard } from "@/components/shared/seo-analyzer";
 import type { SeoInput } from "@/lib/seo";
 import { slugify } from "@/lib/format";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { BlogPreview } from "@/components/blog/blog-preview";
 
 const blogSchema = z.object({
   title: z.string().min(2, "Judul minimal 2 karakter"),
@@ -186,7 +188,14 @@ export default function AdminBlogEditPage() {
         <h1 className="text-2xl font-bold">Edit Blog</h1>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <Tabs defaultValue="editor" className="space-y-6">
+        <TabsList>
+          <TabsTrigger value="editor">Editor</TabsTrigger>
+          <TabsTrigger value="preview">Preview</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="editor">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
           <Card>
             <CardHeader>
@@ -403,7 +412,7 @@ export default function AdminBlogEditPage() {
                       </Button>
                     </Link>
                   </div>
-                </div>
+                </form>
               </Form>
             </CardContent>
           </Card>
@@ -418,6 +427,18 @@ export default function AdminBlogEditPage() {
           />
         </div>
       </div>
+      </TabsContent>
+
+      <TabsContent value="preview">
+        <BlogPreview
+          title={form.watch("title")}
+          category={categories?.find((c: any) => String(c.id) === form.watch("category_id"))?.name || ""}
+          content={form.watch("content")}
+          coverUrl={typeof featuredRaw === "string" ? featuredRaw : featuredRaw instanceof File ? URL.createObjectURL(featuredRaw) : ""}
+          authorName="Admin TeamVora"
+        />
+      </TabsContent>
+    </Tabs>
       
       <MediaPicker
         open={isMediaPickerOpen}

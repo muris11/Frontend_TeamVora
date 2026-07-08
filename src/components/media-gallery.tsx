@@ -122,18 +122,21 @@ export function MediaGallery({ title, description, role, combined }: { title: st
               </Button>
             </div>
           )}
-          <div className="relative">
-            <input 
-              type="file" 
-              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-              onChange={handleFileUpload}
-              disabled={isUploading}
-              accept={combined ? 'image/*,.pdf,.doc,.docx,.xls,.xlsx' : (activeTab === 'gallery' ? 'image/*' : '.pdf,.doc,.docx,.xls,.xlsx')}
-            />
-            <Button disabled={isUploading}>
-              {isUploading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <UploadCloud className="w-4 h-4 mr-2" />}
-              Upload File
-            </Button>
+          <div className="flex flex-col items-end gap-1">
+            <div className="relative">
+              <input 
+                type="file" 
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                onChange={handleFileUpload}
+                disabled={isUploading}
+                accept={combined ? 'image/*,.pdf,.doc,.docx,.xls,.xlsx' : (activeTab === 'gallery' ? 'image/*' : '.pdf,.doc,.docx,.xls,.xlsx')}
+              />
+              <Button disabled={isUploading}>
+                {isUploading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <UploadCloud className="w-4 h-4 mr-2" />}
+                Upload File
+              </Button>
+            </div>
+            <span className="text-[10px] text-muted-foreground mr-1">Maks. 10MB</span>
           </div>
         </div>
       </div>
